@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="在不到十人的軟體公司當 CTO，AI 是最好的虛擬同事。分享我的 AI 工具箱、具體省下的時間，以及小團隊導入 AI 的實戰建議。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小團隊 CTO 的 AI 工具箱：用 AI 補足十人團隊的人力缺口">
+<meta property="og:url" content="https://maplecheng.com/page/2026020514/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="在不到十人的軟體公司當 CTO，AI 是最好的虛擬同事。分享我的 AI 工具箱、具體省下的時間，以及小團隊導入 AI 的實戰建議。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-05T04:45:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="CTO">
+<meta property="article:tag" content="小團隊">
+<meta property="article:tag" content="工具">
+<meta property="article:tag" content="生產力">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020514/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>小團隊 CTO 的 AI 工具箱：用 AI 補足十人團隊的人力缺口 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020514/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          小團隊 CTO 的 AI 工具箱：用 AI 補足十人團隊的人力缺口
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-05 12:45:00" itemprop="dateCreated datePublished" datetime="2026-02-05T12:45:00+08:00">2026-02-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">在不到十人的軟體公司當 CTO，AI 是最好的虛擬同事。分享我的 AI 工具箱、具體省下的時間，以及小團隊導入 AI 的實戰建議。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在一個不到 10 人的軟體公司當 CTO，你的日常大概是這樣的：早上寫 code，下午 review 別人的 code，中間穿插技術決策會議，偶爾還要幫忙 debug 客戶的奇妙問題。噢對了，DevOps 也是你、DBA 也是你、偶爾連 PM 都是你。聽起來很慘？其實還好，因為我找到了一個不會抱怨、不會請假、不會在週五下午突然說「我明天要 WFH」的虛擬同事 — AI。</p>
+<span id="more"></span>
+
+<h2 id="小團隊的殘酷現實"><a href="#小團隊的殘酷現實" class="headerlink" title="小團隊的殘酷現實"></a>小團隊的殘酷現實</h2><p>大公司的技術團隊長什麼樣？有專職的 DevOps 工程師管 CI&#x2F;CD pipeline，有 DBA 顧資料庫效能，有 SA 做系統架構，有 PM 管專案進度，有 QA 寫測試案例。每個人各司其職，分工明確。</p>
+<p>小團隊呢？以上全部壓在三到五個人身上。</p>
+<p>這不是因為老闆摳門不請人。說實話，台灣的軟體人才市場就是這樣 — 好的工程師大家搶，開出去的職缺三個月沒人來投是家常便飯。好不容易找到一個看起來不錯的，聊完之後發現對方期望薪資比你整個團隊的平均還高（然後你還不確定他到底行不行）。</p>
+<p>所以小團隊的生存之道，一直都是「一個人當三個人用」。而 AI 的出現，讓這件事從「燃燒生命」變成「合理的工作方式」。</p>
+<p>我不會跟你說 AI 能取代工程師，那是在騙人。但 AI 確實能把一個人變成 1.5 個人，甚至在某些場景下是 2 個人。而對一個 10 人團隊來說，憑空多出 5 個人力的效果，那是非常有感的。</p>
+<h2 id="我的-AI-工具箱"><a href="#我的-AI-工具箱" class="headerlink" title="我的 AI 工具箱"></a>我的 AI 工具箱</h2><p>經過大半年的摸索和踩坑，我目前的 AI 工具箱大概長這樣：</p>
+<h3 id="1-AI-個人助理（7×24-全天候運行）"><a href="#1-AI-個人助理（7×24-全天候運行）" class="headerlink" title="1. AI 個人助理（7×24 全天候運行）"></a>1. AI 個人助理（7×24 全天候運行）</h3><p>這是最早導入、也是效果最好的一塊。我的 AI 助理 24 小時在線，負責幫我：</p>
+<ul>
+<li><strong>管理行事曆</strong>：自動安排會議、提醒我即將到來的 deadline、甚至在早上推送「今天你有這些事要做」的摘要</li>
+<li><strong>發通知</strong>：每天早上自動發站會日報，彙整昨天的進度和今天的待辦</li>
+<li><strong>回覆例行問題</strong>：團隊成員問「那個 API 文件在哪」之類的問題，AI 直接從知識庫找答案回覆</li>
+<li><strong>整理筆記</strong>：開會的時候我隨手打的重點，AI 會自動整理成格式化的會議記錄</li>
+</ul>
+<p>聽起來很像在講科幻片？但這些其實都是現有工具就能做到的事。關鍵在於你願不願意花時間把流程設定好。</p>
+<h3 id="2-AI-Coding-Agent"><a href="#2-AI-Coding-Agent" class="headerlink" title="2. AI Coding Agent"></a>2. AI Coding Agent</h3><p>這是工程師最有感的部分。AI Coding Agent 能做的事包括：</p>
+<ul>
+<li><strong>寫 boilerplate</strong>：新增一個 API endpoint？從 route、controller、service、model 到測試，骨架幾乎全自動</li>
+<li><strong>重構程式碼</strong>：「把這個 class 拆成三個 service」，你描述需求，它動手重構</li>
+<li><strong>Bug fix</strong>：丟 error log 給它，它能定位問題、提出修復方案，甚至直接改 code</li>
+<li><strong>Code review</strong>：PR 提交後 AI 先做第一輪 review，標記潛在問題，人工再做最後確認</li>
+</ul>
+<p>一開始我對 AI 寫的 code 是不太信任的。畢竟它有時候會寫出一些「看起來對但其實有 bug」的程式碼。但後來我發現，與其不信任它、什麼都自己來，不如建立一套 review 機制 — 讓 AI 負責初稿，人負責審核。這樣效率反而最高。</p>
+<h3 id="3-AI-資料分析"><a href="#3-AI-資料分析" class="headerlink" title="3. AI 資料分析"></a>3. AI 資料分析</h3><p>這塊比較偏我個人使用。我讓 AI 串接金融 API 做投資分析，每天自動跑技術指標、三大法人動態，推送摘要給我。另外也串了 Notion API 做任務追蹤，自動統計每週的工時分佈、任務完成率。</p>
+<p>以前這些事情要手動拉數據、開 Excel 做圖表，現在全部自動排程執行，我只要看最後的結論就好。</p>
+<h3 id="4-AI-文件撰寫"><a href="#4-AI-文件撰寫" class="headerlink" title="4. AI 文件撰寫"></a>4. AI 文件撰寫</h3><p>工程師最討厭寫文件，我也不例外。但文件又不能不寫 — 技術文件、流程文件、API 文件、會議記錄…</p>
+<p>現在我的做法是：開會時快速記幾個 bullet point，然後丟給 AI 擴寫成完整的文件。技術文件也是，我描述架構和設計決策，AI 負責填充細節和格式化。寫出來的東西我再花幾分鐘修改就好。</p>
+<p>效率大概提升了 3-4 倍。而且 AI 寫的文件格式通常比我自己寫的整齊（是的，我承認）。</p>
+<h3 id="5-AI-Email-處理"><a href="#5-AI-Email-處理" class="headerlink" title="5. AI Email 處理"></a>5. AI Email 處理</h3><p>Email 是另一個吃時間的黑洞。每天幾十封信，八成是不需要我親自處理的。AI 幫我做的事情是：先掃描所有來信，分類重要程度，不重要的直接歸檔。需要回覆的，AI 先草擬一版回覆，我確認後送出。</p>
+<p>光是「不用一封一封打開看是不是重要的」這件事，每天就省下十幾分鐘。</p>
+<h2 id="具體省下了多少時間？"><a href="#具體省下了多少時間？" class="headerlink" title="具體省下了多少時間？"></a>具體省下了多少時間？</h2><p>講了這麼多，到底實際省了多少時間？以下是我粗略的估算：</p>
+<table>
+<thead>
+<tr>
+<th>任務</th>
+<th>導入前</th>
+<th>導入後</th>
+<th>節省</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>每日站會日報</td>
+<td>手動整理 15 分鐘</td>
+<td>自動推送 0 分鐘</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>Code Review</td>
+<td>完整人工 review</td>
+<td>AI 先 review + 人工確認</td>
+<td>~60%</td>
+</tr>
+<tr>
+<td>例行報告</td>
+<td>手動拉數據 30 分鐘</td>
+<td>自動排程推送</td>
+<td>~90%</td>
+</tr>
+<tr>
+<td>Email 處理</td>
+<td>逐封閱讀 20 分鐘</td>
+<td>AI 篩選 + 草擬回覆</td>
+<td>~70%</td>
+</tr>
+<tr>
+<td>文件撰寫</td>
+<td>2 小時寫完一份</td>
+<td>30 分鐘修改 AI 初稿</td>
+<td>~75%</td>
+</tr>
+</tbody></table>
+<p>粗算下來，每天大概省下 1.5-2 小時。一個月就是 30-40 小時。這幾乎等於一個 part-time 員工的工時了。</p>
+<h2 id="心態的轉變"><a href="#心態的轉變" class="headerlink" title="心態的轉變"></a>心態的轉變</h2><p>導入 AI 這半年多，我最大的收穫其實不是省了多少時間，而是心態的轉變。</p>
+<p><strong>從「AI 會不會搶我工作」到「AI 幫我做不想做的事」</strong></p>
+<p>剛開始看到 AI 能寫 code 的時候，說不焦慮是騙人的。但用了幾個月之後發現，AI 搶走的都是我本來就不想做的事 — 寫 boilerplate、格式化文件、處理例行信件。而真正需要人腦的部分 — 技術決策、架構設計、和客戶溝通需求 — AI 目前還差得遠。</p>
+<p><strong>從「自己來比較快」到「教 AI 做一次，以後都不用自己來」</strong></p>
+<p>這是最難克服的心魔。第一次讓 AI 做某件事的時候，你確實會覺得「我自己做比較快」。但重點不是這一次，而是以後的每一次。你花 30 分鐘設定好 prompt 和流程，以後這件事就永遠不用再做了。</p>
+<p><strong>從「怕 AI 寫錯」到「建立 review 機制」</strong></p>
+<p>AI 一定會犯錯，就像新人也會犯錯一樣。你不會因為新人會犯錯就不請人，你會建立 code review 機制。對 AI 也是一樣的道理。</p>
+<h2 id="給小團隊-CTO-的建議"><a href="#給小團隊-CTO-的建議" class="headerlink" title="給小團隊 CTO 的建議"></a>給小團隊 CTO 的建議</h2><p>如果你也在小團隊，想開始導入 AI，以下是我的建議：</p>
+<p><strong>先從最痛的重複性工作開始。</strong> 不要一開始就想「用 AI 取代工程師」，先找出團隊裡最浪費時間的重複性任務，用 AI 自動化。這樣見效最快，團隊也最容易接受。</p>
+<p><strong>不要一次全面導入，先挑一個場景做 POC。</strong> 例如先讓 AI 做 code review，跑兩週看效果。有效再擴展到其他場景。一次改太多，團隊會很混亂。</p>
+<p><strong>AI 的成本比你想像的低。</strong> 目前我每個月在 AI 工具上的花費大概是幾百到幾千台幣。跟一個工程師的薪水比起來，這幾乎可以忽略不計。但效益是真實的。</p>
+<p><strong>但 AI 需要「管理」。</strong> AI 不是裝了就會自己跑的東西。你需要設計好 prompt、建立流程、定期檢查品質。把它當成一個需要 onboarding 的新同事，花時間教它，它才能幫到你。</p>
+<h2 id="風險和限制"><a href="#風險和限制" class="headerlink" title="風險和限制"></a>風險和限制</h2><p>當然，AI 不是萬靈丹，還是有一些要注意的地方：</p>
+<ul>
+<li><strong>AI 會犯錯。</strong> 重要的產出一定要人工 double check。我遇過 AI 自信滿滿地寫出一個 race condition，code review 沒看出來，上線後才爆的。從那之後我學到了 — 越是 AI 寫的 code，越要認真 review。</li>
+<li><strong>AI 沒有 domain knowledge。</strong> 你的客戶有一些奇特的業務邏輯？那還是要人來處理。AI 能幫你寫 code，但它不知道「為什麼這個欄位在某些條件下要用不同的計算方式」。</li>
+<li><strong>API 費用會累積。</strong> 一開始覺得便宜，但當你把越來越多東西串上 AI 之後，帳單會慢慢長大。要監控用量，設定預算上限。</li>
+<li><strong>團隊成員的接受度。</strong> 有些人會擔心被取代，有些人會覺得 AI 寫的東西不可靠。最好的方式是先讓他們看到好處 — 當他們發現不用再寫那些無聊的 boilerplate 時，通常就會自己開始擁抱了。</li>
+</ul>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>小團隊最大的優勢是靈活。大公司還在開會評估 AI policy、討論 compliance、走簽核流程的時候，我們已經用 AI 跑了大半年了。</p>
+<p>這不是在炫耀，而是想說 — 小團隊不要覺得自己資源少就什麼都做不了。AI 是一個真正的力量倍增器（force multiplier），而且進入門檻比你想像的低得多。</p>
+<p>最壞的情況是你花了幾天設定好一套 AI 工作流，發現效果不好，那就關掉，損失的只是幾天的時間和幾百塊的 API 費用。最好的情況是你的團隊效率直接翻倍，而你終於有時間去做那些「一直想做但沒空做」的技術改善。</p>
+<p>我覺得挺划算的。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%94%9F%E7%94%A2%E5%8A%9B/" rel="tag"># 生產力</a>
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/CTO/" rel="tag"># CTO</a>
+              <a href="/tags/%E5%B0%8F%E5%9C%98%E9%9A%8A/" rel="tag"># 小團隊</a>
+              <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"># 工具</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020513/" rel="prev" title="AI 時代的個人知識管理：Obsidian + AI 整合實踐">
+      <i class="fa fa-chevron-left"></i> AI 時代的個人知識管理：Obsidian + AI 整合實踐
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020515/" rel="next" title="Side Project 週末開發心法：EmberBooks 記帳系統的誕生">
+      Side Project 週末開發心法：EmberBooks 記帳系統的誕生 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E5%9C%98%E9%9A%8A%E7%9A%84%E6%AE%98%E9%85%B7%E7%8F%BE%E5%AF%A6"><span class="nav-number">1.</span> <span class="nav-text">小團隊的殘酷現實</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E7%9A%84-AI-%E5%B7%A5%E5%85%B7%E7%AE%B1"><span class="nav-number">2.</span> <span class="nav-text">我的 AI 工具箱</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-AI-%E5%80%8B%E4%BA%BA%E5%8A%A9%E7%90%86%EF%BC%887%C3%9724-%E5%85%A8%E5%A4%A9%E5%80%99%E9%81%8B%E8%A1%8C%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">1. AI 個人助理（7×24 全天候運行）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-AI-Coding-Agent"><span class="nav-number">2.2.</span> <span class="nav-text">2. AI Coding Agent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-AI-%E8%B3%87%E6%96%99%E5%88%86%E6%9E%90"><span class="nav-number">2.3.</span> <span class="nav-text">3. AI 資料分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-AI-%E6%96%87%E4%BB%B6%E6%92%B0%E5%AF%AB"><span class="nav-number">2.4.</span> <span class="nav-text">4. AI 文件撰寫</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-AI-Email-%E8%99%95%E7%90%86"><span class="nav-number">2.5.</span> <span class="nav-text">5. AI Email 處理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E9%AB%94%E7%9C%81%E4%B8%8B%E4%BA%86%E5%A4%9A%E5%B0%91%E6%99%82%E9%96%93%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">具體省下了多少時間？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%83%E6%85%8B%E7%9A%84%E8%BD%89%E8%AE%8A"><span class="nav-number">4.</span> <span class="nav-text">心態的轉變</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B5%A6%E5%B0%8F%E5%9C%98%E9%9A%8A-CTO-%E7%9A%84%E5%BB%BA%E8%AD%B0"><span class="nav-number">5.</span> <span class="nav-text">給小團隊 CTO 的建議</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%A8%E9%9A%AA%E5%92%8C%E9%99%90%E5%88%B6"><span class="nav-number">6.</span> <span class="nav-text">風險和限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">7.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

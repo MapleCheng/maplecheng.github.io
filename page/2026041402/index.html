@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="很多人談企業 AI 還停在聊天機器人，但我越來越確定，真正有價值的戰場其實在流程、權限、資料整合與 agent 執行能力，而不只是把 LLM 接進對話框。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="企業 AI 的主戰場，不是聊天介面，而是流程、權限與資料整合">
+<meta property="og:url" content="https://maplecheng.com/page/2026041402/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="很多人談企業 AI 還停在聊天機器人，但我越來越確定，真正有價值的戰場其實在流程、權限、資料整合與 agent 執行能力，而不只是把 LLM 接進對話框。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-04-13T21:01:02.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="系統設計">
+<meta property="article:tag" content="製造業系統">
+<meta property="article:tag" content="軟體產業">
+<meta property="article:tag" content="風險管理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026041402/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>企業 AI 的主戰場，不是聊天介面，而是流程、權限與資料整合 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026041402/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          企業 AI 的主戰場，不是聊天介面，而是流程、權限與資料整合
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-04-14 05:01:02" itemprop="dateCreated datePublished" datetime="2026-04-14T05:01:02+08:00">2026-04-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">很多人談企業 AI 還停在聊天機器人，但我越來越確定，真正有價值的戰場其實在流程、權限、資料整合與 agent 執行能力，而不只是把 LLM 接進對話框。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>這一兩年只要講到企業 AI，很多人的畫面都很一致：一個很聰明的聊天框，員工打問題，它用自然語言回答案，最好再幫你整理文件、查資料、寫信。聽起來很合理，也確實有用。</p>
+<p>但我越看越覺得，如果企業 AI 的想像只停在聊天介面，其實有點太淺了。</p>
+<p>聊天只是入口，不是戰場。真正困難、也真正有價值的地方，在後面那一大坨不討喜的東西：權限、流程、資料來源、審核邏輯、可追蹤性，還有 agent 到底能不能安全地代表你做事。</p>
+<span id="more"></span>
+
+<h3 id="聊天框很顯眼，但它解的通常只是表層需求"><a href="#聊天框很顯眼，但它解的通常只是表層需求" class="headerlink" title="聊天框很顯眼，但它解的通常只是表層需求"></a>聊天框很顯眼，但它解的通常只是表層需求</h3><p>為什麼大家這麼愛從 chat 開始？因為它最直覺。</p>
+<ul>
+<li>不用重新教育使用者</li>
+<li>看起來很聰明</li>
+<li>Demo 超好做</li>
+<li>投影片也很好講</li>
+</ul>
+<p>但問題是，企業內部真正卡住的地方，往往不是「員工不能問問題」，而是：</p>
+<ul>
+<li>問到的資料能不能看</li>
+<li>回答的內容是不是最新</li>
+<li>AI 能不能跨系統完成一整段流程</li>
+<li>做錯事情之後誰負責</li>
+<li>哪些步驟需要人核准，哪些可以自動執行</li>
+</ul>
+<p>你如果只是做一個會聊天的介面，很多時候只是在原本低效率的流程外面，再包一層比較漂亮的查詢入口。這當然比沒有好，但它通常離「真的改變工作方式」還差很遠。</p>
+<h3 id="企業-AI-真正難的，是把它接進現實世界"><a href="#企業-AI-真正難的，是把它接進現實世界" class="headerlink" title="企業 AI 真正難的，是把它接進現實世界"></a>企業 AI 真正難的，是把它接進現實世界</h3><p>LLM 本身再強，只要離開 demo 環境，問題就會一個個冒出來。</p>
+<p>最典型的就是這條路：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart LR
+    A[使用者意圖] --> B[對話入口]
+    B --> C[權限判斷]
+    C --> D[資料來源整合]
+    D --> E[流程規則與審核]
+    E --> F[Agent 執行]
+    F --> G[可追蹤紀錄與回饋]
+          </pre>
+
+<p>每一格看起來都不像 AI 本身，但每一格都會決定 AI 到底能不能落地。</p>
+<p>因為企業場景不是「回答得像不像人」，而是「你能不能在對的範圍內，穩定完成可被稽核的事情」。</p>
+<p>這句話聽起來很無聊，可惜現實就是這麼無聊。也正因為無聊，才有門檻。</p>
+<h3 id="權限問題，永遠比模型問題更早爆炸"><a href="#權限問題，永遠比模型問題更早爆炸" class="headerlink" title="權限問題，永遠比模型問題更早爆炸"></a>權限問題，永遠比模型問題更早爆炸</h3><p>如果要我選企業 AI 導入最常被低估的一塊，我會選權限。</p>
+<p>大家很容易花很多時間比較模型：哪個推理強、哪個便宜、哪個上下文長、哪個寫 code 厲害。這些都重要，但放進企業環境時，真正會先炸的通常不是模型能力，而是資料邊界。</p>
+<p>像是：</p>
+<ul>
+<li>不同部門看到的資料不同</li>
+<li>同一部門不同職級也可能不同</li>
+<li>某些文件可讀不可下載</li>
+<li>某些欄位可以查，但不能直接對外輸出</li>
+<li>某些動作要雙重確認，不能讓 agent 直接執行</li>
+</ul>
+<p>如果這些邊界沒先定清楚，AI 越能幹反而越危險。因為它會把原本需要手動跨系統、相對不容易大規模出錯的事情，加速成一次漂亮的大事故。</p>
+<p>所以我現在看企業 AI 方案，第一個問題通常不是「模型用哪個」，而是「這個 agent 的操作範圍怎麼定義」。如果這題答不清楚，後面多半只是 demo 驚艷、上線心虛。</p>
+<h3 id="流程整合，才是從玩具變工具的分水嶺"><a href="#流程整合，才是從玩具變工具的分水嶺" class="headerlink" title="流程整合，才是從玩具變工具的分水嶺"></a>流程整合，才是從玩具變工具的分水嶺</h3><p>另一個很關鍵的點，是流程。</p>
+<p>企業不是一堆獨立知識點的集合，而是一連串要接力完成的動作。有人提出需求，有人檢查資料，有人核准，有人建立單據，有人追後續狀態。真正有價值的 AI，不是只會回答其中一段，而是能理解自己站在流程哪個位置。</p>
+<p>這也是為什麼我越來越看好 agent 型架構，而不是單點問答。因為問答型 AI 的價值大多停在資訊壓縮；agent 型 AI 才有機會碰到執行。</p>
+<p>但這裡要很小心，agent 不是「讓 AI 自由發揮」的浪漫版本。剛好相反，能落地的 agent 通常都不是靠自由，而是靠限制。</p>
+<p>它需要被清楚定義：</p>
+<ul>
+<li>能調哪些工具</li>
+<li>每個工具能做什麼</li>
+<li>哪些資料可讀、可寫、不可碰</li>
+<li>遇到什麼條件要停下來等人</li>
+<li>失敗後要怎麼留痕與回報</li>
+</ul>
+<p>這不是在壓抑 AI，而是在替它接上企業現場的保險絲。</p>
+<h3 id="資料整合比模型升級更有複利"><a href="#資料整合比模型升級更有複利" class="headerlink" title="資料整合比模型升級更有複利"></a>資料整合比模型升級更有複利</h3><p>我很常看到一種情況：團隊對模型版本超敏感，對資料治理卻相對隨便。</p>
+<p>今天換一個更強模型，明天再追一個更新 benchmark，結果內部資料仍然散在不同系統裡，命名不一致、權限不一致、時間版本不一致。這樣就算模型再進步，AI 也只是在更優雅地處理混亂。</p>
+<p>真正能產生複利的，通常不是模型升一級，而是資料能不能被穩定存取與理解。</p>
+<p>比如說：</p>
+<ul>
+<li>來源是否可信</li>
+<li>更新節奏是否明確</li>
+<li>資料語意是否一致</li>
+<li>是否有可機器讀取的欄位與狀態</li>
+<li>是否有事件紀錄可追蹤前後關聯</li>
+</ul>
+<p>把這些底層打通之後，你會發現很多 AI 能力才開始變真實。否則大家談的往往只是「這個模型好像比較會講」。說白一點，企業不缺會講話的系統，企業缺的是能進流程又不亂來的系統。</p>
+<h3 id="我現在怎麼看企業-AI-的成熟度"><a href="#我現在怎麼看企業-AI-的成熟度" class="headerlink" title="我現在怎麼看企業 AI 的成熟度"></a>我現在怎麼看企業 AI 的成熟度</h3><p>如果今天要我很粗暴地分級，我會這樣看：</p>
+<ul>
+<li>第一階段：聊天問答，主要解決查詢效率</li>
+<li>第二階段：有工具呼叫能力，能完成單步操作</li>
+<li>第三階段：接進流程，有權限與審核邊界</li>
+<li>第四階段：多 agent 協作，能處理跨系統、跨角色任務</li>
+<li>第五階段：全程可追蹤、可觀測、可回溯，能穩定經營</li>
+</ul>
+<p>大部分企業現在還在第一、第二階段之間來回。這沒什麼不好，畢竟入口本來就應該先簡單。但如果公司高層開始把 AI 當成流程升級工具，而不是只當成一個比較新潮的聊天功能，那整個投資方向會差非常多。</p>
+<h3 id="真正的競爭力，會藏在那些不酷的地方"><a href="#真正的競爭力，會藏在那些不酷的地方" class="headerlink" title="真正的競爭力，會藏在那些不酷的地方"></a>真正的競爭力，會藏在那些不酷的地方</h3><p>說到底，我越來越不相信企業 AI 的核心競爭力會是聊天介面本身。那層很快就會被追平，甚至變成標配。</p>
+<p>真正會拉開差距的，反而是那些最不酷的部分：</p>
+<ul>
+<li>權限模型有沒有設計好</li>
+<li>資料是否能被可靠整合</li>
+<li>流程節點有沒有清楚定義</li>
+<li>agent 的邊界有沒有被管住</li>
+<li>錯誤能不能被發現、被追責、被修正</li>
+</ul>
+<p>這些東西看起來不像 AI，卻決定 AI 最終是玩具、助理，還是企業真正敢信任的系統成員。</p>
+<p>所以如果你最近也在規劃企業 AI，我會很推薦把問題改問成這句：不是「我們要不要做聊天機器人」，而是「我們要讓 AI 在哪一段流程裡，帶著什麼權限，對什麼資料，安全地做事」。</p>
+<p>問法一變，整個架構思路就會跟著成熟很多。</p>
+<p>如果這篇能幫你少踩一點「demo 很炫、上線很抖」的坑，那我最近對企業 AI 的這些碎念，就算有發揮一點價值了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/Agent/" rel="tag"># Agent</a>
+              <a href="/tags/%E8%BB%9F%E9%AB%94%E7%94%A2%E6%A5%AD/" rel="tag"># 軟體產業</a>
+              <a href="/tags/%E9%A2%A8%E9%9A%AA%E7%AE%A1%E7%90%86/" rel="tag"># 風險管理</a>
+              <a href="/tags/%E8%A3%BD%E9%80%A0%E6%A5%AD%E7%B3%BB%E7%B5%B1/" rel="tag"># 製造業系統</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88/" rel="tag"># 系統設計</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026041403/" rel="prev" title="重做型任務最怕直接開幹，先拆規劃與架構才不會重做第二次">
+      <i class="fa fa-chevron-left"></i> 重做型任務最怕直接開幹，先拆規劃與架構才不會重做第二次
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026041401/" rel="next" title="固定維運不是雜事，是團隊不再每天失憶的產品力">
+      固定維運不是雜事，是團隊不再每天失憶的產品力 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%8A%E5%A4%A9%E6%A1%86%E5%BE%88%E9%A1%AF%E7%9C%BC%EF%BC%8C%E4%BD%86%E5%AE%83%E8%A7%A3%E7%9A%84%E9%80%9A%E5%B8%B8%E5%8F%AA%E6%98%AF%E8%A1%A8%E5%B1%A4%E9%9C%80%E6%B1%82"><span class="nav-number">1.</span> <span class="nav-text">聊天框很顯眼，但它解的通常只是表層需求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%81%E6%A5%AD-AI-%E7%9C%9F%E6%AD%A3%E9%9B%A3%E7%9A%84%EF%BC%8C%E6%98%AF%E6%8A%8A%E5%AE%83%E6%8E%A5%E9%80%B2%E7%8F%BE%E5%AF%A6%E4%B8%96%E7%95%8C"><span class="nav-number">2.</span> <span class="nav-text">企業 AI 真正難的，是把它接進現實世界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AC%8A%E9%99%90%E5%95%8F%E9%A1%8C%EF%BC%8C%E6%B0%B8%E9%81%A0%E6%AF%94%E6%A8%A1%E5%9E%8B%E5%95%8F%E9%A1%8C%E6%9B%B4%E6%97%A9%E7%88%86%E7%82%B8"><span class="nav-number">3.</span> <span class="nav-text">權限問題，永遠比模型問題更早爆炸</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B%E6%95%B4%E5%90%88%EF%BC%8C%E6%89%8D%E6%98%AF%E5%BE%9E%E7%8E%A9%E5%85%B7%E8%AE%8A%E5%B7%A5%E5%85%B7%E7%9A%84%E5%88%86%E6%B0%B4%E5%B6%BA"><span class="nav-number">4.</span> <span class="nav-text">流程整合，才是從玩具變工具的分水嶺</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B3%87%E6%96%99%E6%95%B4%E5%90%88%E6%AF%94%E6%A8%A1%E5%9E%8B%E5%8D%87%E7%B4%9A%E6%9B%B4%E6%9C%89%E8%A4%87%E5%88%A9"><span class="nav-number">5.</span> <span class="nav-text">資料整合比模型升級更有複利</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E7%8F%BE%E5%9C%A8%E6%80%8E%E9%BA%BC%E7%9C%8B%E4%BC%81%E6%A5%AD-AI-%E7%9A%84%E6%88%90%E7%86%9F%E5%BA%A6"><span class="nav-number">6.</span> <span class="nav-text">我現在怎麼看企業 AI 的成熟度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E7%9A%84%E7%AB%B6%E7%88%AD%E5%8A%9B%EF%BC%8C%E6%9C%83%E8%97%8F%E5%9C%A8%E9%82%A3%E4%BA%9B%E4%B8%8D%E9%85%B7%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="nav-number">7.</span> <span class="nav-text">真正的競爭力，會藏在那些不酷的地方</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

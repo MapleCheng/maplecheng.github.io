@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="試算表正從資料整理工具變成可讀寫、可協作的小型應用程式。從技術主管視角，談如何保留現場改善速度，同時設計資料邊界、寫入控制與升級路徑。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="當試算表開始像應用程式，IT 不該急著把它收回去">
+<meta property="og:url" content="https://maplecheng.com/page/2026081701/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="試算表正從資料整理工具變成可讀寫、可協作的小型應用程式。從技術主管視角，談如何保留現場改善速度，同時設計資料邊界、寫入控制與升級路徑。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-08-16T21:00:52.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.346Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="企業系統">
+<meta property="article:tag" content="低程式碼">
+<meta property="article:tag" content="工作流程">
+<meta property="article:tag" content="試算表">
+<meta property="article:tag" content="資料治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026081701/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>當試算表開始像應用程式，IT 不該急著把它收回去 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026081701/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          當試算表開始像應用程式，IT 不該急著把它收回去
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-08-17 05:00:52" itemprop="dateCreated datePublished" datetime="2026-08-17T05:00:52+08:00">2026-08-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">試算表正從資料整理工具變成可讀寫、可協作的小型應用程式。從技術主管視角，談如何保留現場改善速度，同時設計資料邊界、寫入控制與升級路徑。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看到試算表工具繼續往即時同步、表單、流程、自動化，甚至 AI 輔助操作前進，我腦中冒出的不是「試算表要取代企業系統了」，而是另一個更實際的問題：當一張表開始可以查資料、改狀態、呼叫服務並通知下一個人，它到底還是一份文件，還是一個沒被正式承認的應用程式？</p>
+<p>這條界線一旦跨過去，技術主管就不能只把它當成辦公軟體管理。但我也不認為正確答案是立刻禁止，或急著把每一張表都收回 IT 重寫。</p>
+<span id="more"></span>
+
+<h2 id="試算表會變成系統，通常不是因為大家不守規矩"><a href="#試算表會變成系統，通常不是因為大家不守規矩" class="headerlink" title="試算表會變成系統，通常不是因為大家不守規矩"></a>試算表會變成系統，通常不是因為大家不守規矩</h2><p>企業裡很多重要流程，最早都是從一張表開始的。某個同仁想少抄一次資料，先加公式；接著需要多人協作，便加上權限與通知；後來資料量變多，再接表單、腳本或外部服務。等到技術團隊注意到時，它可能已經負責追蹤案件、安排工作、彙整進度，甚至成為每天開會時唯一有人相信的畫面。</p>
+<p>這種東西常被歸類為「影子 IT」，語氣彷彿問題都來自使用者繞過制度。但從管理角度看，我更願意把它視為需求雷達。它代表現有系統沒有跟上現場的變化，而最接近問題的人，先用手邊成本最低、回饋最快的工具做出了解法。</p>
+<p>如果 IT 的第一反應只是禁止，需求不會消失，只會搬到更看不見的地方。相反地，如果完全放任，又會慢慢累積資料外洩、邏輯錯誤、離職斷層與無法追溯等風險。真正的課題不是要不要讓試算表存在，而是如何承認它已經具有系統性影響，再用相稱的方式管理。</p>
+<h2 id="先分辨它在「整理資料」還是「驅動流程」"><a href="#先分辨它在「整理資料」還是「驅動流程」" class="headerlink" title="先分辨它在「整理資料」還是「驅動流程」"></a>先分辨它在「整理資料」還是「驅動流程」</h2><p>我會先看一張表後面有沒有人或系統依賴它做決定。</p>
+<p>單純整理個人資料、做暫時分析，錯了可以重新計算，通常仍屬文件工具。但只要它開始具備幾種特徵，就已經接近應用程式：多人把它當成共同真相、欄位會觸發後續工作、它能寫回正式系統、包含權限差異、需要長期保存，或中斷後會讓業務停下來。</p>
+<p>這個分類很重要，因為治理不該只看工具名稱。相同的試算表，一張可能只是會議中的臨時計算紙，另一張卻可能是沒有測試、沒有監控、沒有負責人的排程系統。把兩者用同一套禁令管理，結果通常不是過度管制，就是嚴重低估風險。</p>
+<p>我比較傾向按影響分級：個人分析可以自由；團隊協作需要擁有者、欄位說明與存取範圍；跨部門流程要有版本、備份與異常處理；只要牽涉正式資料寫入，就必須進入更明確的身份、審批、稽核與回復機制。</p>
+<h2 id="真正危險的不是公式，而是看不見的寫入"><a href="#真正危險的不是公式，而是看不見的寫入" class="headerlink" title="真正危險的不是公式，而是看不見的寫入"></a>真正危險的不是公式，而是看不見的寫入</h2><p>過去談試算表風險，大家常想到公式被改壞、欄位被誤刪。現在更需要注意的是，它已經能成為操作介面。</p>
+<p>當使用者在表格裡改一個狀態，背後可能更新案件、建立任務、發出通知，甚至呼叫另一段自動化。畫面仍然像熟悉的儲存格，動作的影響範圍卻早已不是改一份文件。這時候，「誰能打開這張表」不等於「誰應該能執行所有寫入」。</p>
+<p>我會要求把讀取、草稿、送審與正式執行拆開。高影響動作不能只靠一個可編輯欄位觸發；寫入要使用可識別的服務身分，保留來源、操作者、時間與實際參數；批次動作要能預覽影響範圍；失敗時不能只在某個儲存格留下紅字，而要有可重試、可補償、可通知負責人的機制。</p>
+<p>這不是要把試算表做成另一套 ERP，而是把真正有風險的部分移到受控的服務層。試算表可以繼續當低摩擦介面，但權限、規則與交易一致性不應藏在某位同仁維護的腳本裡。</p>
+<h2 id="不要重寫所有表，要設計「畢業條件」"><a href="#不要重寫所有表，要設計「畢業條件」" class="headerlink" title="不要重寫所有表，要設計「畢業條件」"></a>不要重寫所有表，要設計「畢業條件」</h2><p>技術團隊很容易看到一張複雜的表，就想排進開發計畫重寫。可是重寫本身不等於改善。有些表的價值正是能快速調整；需求每週都在變時，太早做成固定系統，只會把現場的彈性換成 IT backlog。</p>
+<p>比較實際的做法，是替這類工具設計升級路徑，而不是二選一。</p>
+<p>早期可以先登記擁有者、用途、資料來源與使用者，保留快速實驗。當使用人數、資料敏感度、寫入頻率或中斷影響提高，就逐步補上權限分級、版本管理、測試、監控與服務層。等到流程已經穩定、介面需要更嚴格控制，或維護成本超過試算表的速度優勢，再升級成正式應用程式。</p>
+<p>我心中的「畢業條件」通常包括：它已成為唯一資料來源、多人同時操作造成衝突、必須符合稽核要求、需要細緻角色權限、交易不能部分成功、資料量或效能超過工具邊界，以及原始作者離開後沒人敢改。這些都是該投資產品化的訊號，而不是單純因為畫面看起來不夠正式。</p>
+<h2 id="IT-的角色，是把成功的土法煉鋼變成組織能力"><a href="#IT-的角色，是把成功的土法煉鋼變成組織能力" class="headerlink" title="IT 的角色，是把成功的土法煉鋼變成組織能力"></a>IT 的角色，是把成功的土法煉鋼變成組織能力</h2><p>試算表型應用真正值得保留的，不是某個複雜公式，而是它揭露了現場如何工作。欄位怎麼命名、大家先篩什麼、哪些例外最常被手動標記、什麼狀態一改就要通知誰，這些都是正式需求文件常常寫不出來的流程知識。</p>
+<p>因此，IT 不該只在出事後接管，也不該站在入口審核每一個小實驗。更好的做法是提供一條可被採用的安全道路：核准的資料連線、標準寫入 API、可重用的審批元件、執行紀錄、範本、風險分級，以及清楚的升級門檻。讓現場可以快，關鍵動作仍然受控；讓好用的做法能被看見，也能逐步變成共用能力。</p>
+<p>當試算表開始像應用程式，我不會急著問怎麼把它消滅。我會先問：它補上了哪個正式系統沒有處理好的缺口？哪些彈性應該留下？哪些責任必須移到平台？又到了什麼時候，這個實驗應該正式畢業？</p>
+<p>企業真正需要治理的從來不是檔案格式，而是影響力。工具越容易被使用，越應該讓升級路徑清楚，而不是等一張表默默長成關鍵系統之後，才驚訝它為什麼這麼難以取代。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B/" rel="tag"># 工作流程</a>
+              <a href="/tags/%E8%B3%87%E6%96%99%E6%B2%BB%E7%90%86/" rel="tag"># 資料治理</a>
+              <a href="/tags/%E4%BC%81%E6%A5%AD%E7%B3%BB%E7%B5%B1/" rel="tag"># 企業系統</a>
+              <a href="/tags/%E8%A9%A6%E7%AE%97%E8%A1%A8/" rel="tag"># 試算表</a>
+              <a href="/tags/%E4%BD%8E%E7%A8%8B%E5%BC%8F%E7%A2%BC/" rel="tag"># 低程式碼</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026081401/" rel="prev" title="Agent 安全不能只審單次工具呼叫，要看完整的資料流">
+      <i class="fa fa-chevron-left"></i> Agent 安全不能只審單次工具呼叫，要看完整的資料流
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026082001/" rel="next" title="企業系統升級最缺的，通常不是 Release Notes，而是自己的依賴圖">
+      企業系統升級最缺的，通常不是 Release Notes，而是自己的依賴圖 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A9%A6%E7%AE%97%E8%A1%A8%E6%9C%83%E8%AE%8A%E6%88%90%E7%B3%BB%E7%B5%B1%EF%BC%8C%E9%80%9A%E5%B8%B8%E4%B8%8D%E6%98%AF%E5%9B%A0%E7%82%BA%E5%A4%A7%E5%AE%B6%E4%B8%8D%E5%AE%88%E8%A6%8F%E7%9F%A9"><span class="nav-number">1.</span> <span class="nav-text">試算表會變成系統，通常不是因為大家不守規矩</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E5%88%86%E8%BE%A8%E5%AE%83%E5%9C%A8%E3%80%8C%E6%95%B4%E7%90%86%E8%B3%87%E6%96%99%E3%80%8D%E9%82%84%E6%98%AF%E3%80%8C%E9%A9%85%E5%8B%95%E6%B5%81%E7%A8%8B%E3%80%8D"><span class="nav-number">2.</span> <span class="nav-text">先分辨它在「整理資料」還是「驅動流程」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E5%8D%B1%E9%9A%AA%E7%9A%84%E4%B8%8D%E6%98%AF%E5%85%AC%E5%BC%8F%EF%BC%8C%E8%80%8C%E6%98%AF%E7%9C%8B%E4%B8%8D%E8%A6%8B%E7%9A%84%E5%AF%AB%E5%85%A5"><span class="nav-number">3.</span> <span class="nav-text">真正危險的不是公式，而是看不見的寫入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E8%A6%81%E9%87%8D%E5%AF%AB%E6%89%80%E6%9C%89%E8%A1%A8%EF%BC%8C%E8%A6%81%E8%A8%AD%E8%A8%88%E3%80%8C%E7%95%A2%E6%A5%AD%E6%A2%9D%E4%BB%B6%E3%80%8D"><span class="nav-number">4.</span> <span class="nav-text">不要重寫所有表，要設計「畢業條件」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IT-%E7%9A%84%E8%A7%92%E8%89%B2%EF%BC%8C%E6%98%AF%E6%8A%8A%E6%88%90%E5%8A%9F%E7%9A%84%E5%9C%9F%E6%B3%95%E7%85%89%E9%8B%BC%E8%AE%8A%E6%88%90%E7%B5%84%E7%B9%94%E8%83%BD%E5%8A%9B"><span class="nav-number">5.</span> <span class="nav-text">IT 的角色，是把成功的土法煉鋼變成組織能力</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

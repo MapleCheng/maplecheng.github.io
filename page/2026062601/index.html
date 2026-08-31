@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="當 AI Agent 開始承接長時間工作流，真正的成熟度不只是能背景執行、能呼叫工具，而是能被暫停、取消、回復與追蹤。從 CTO 視角談長任務 Agent 的狀態管理、停止語意與生產環境治理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI Agent 的長任務成熟指標：不是會跑，而是停得下來">
+<meta property="og:url" content="https://maplecheng.com/page/2026062601/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="當 AI Agent 開始承接長時間工作流，真正的成熟度不只是能背景執行、能呼叫工具，而是能被暫停、取消、回復與追蹤。從 CTO 視角談長任務 Agent 的狀態管理、停止語意與生產環境治理。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-06-25T21:05:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.344Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="工作流設計">
+<meta property="article:tag" content="技術管理">
+<meta property="article:tag" content="系統治理">
+<meta property="article:tag" content="自動化">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026062601/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI Agent 的長任務成熟指標：不是會跑，而是停得下來 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026062601/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI Agent 的長任務成熟指標：不是會跑，而是停得下來
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-06-26 05:05:00" itemprop="dateCreated datePublished" datetime="2026-06-26T05:05:00+08:00">2026-06-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">當 AI Agent 開始承接長時間工作流，真正的成熟度不只是能背景執行、能呼叫工具，而是能被暫停、取消、回復與追蹤。從 CTO 視角談長任務 Agent 的狀態管理、停止語意與生產環境治理。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看幾個 AI coding tool 和企業 Agent 平台的演進，我越來越有一個感覺：Agent 的長任務能力已經不只是「能不能丟到背景跑」了。真正的分水嶺，是它能不能在跑到一半時，被安全地停下來、倒回去、接著做，或者乾脆承認這個任務不該再繼續。</p>
+<span id="more"></span>
+
+<p>這聽起來很像系統工程裡的老問題，沒錯，確實是老問題。只是以前我們把它放在 batch job、workflow engine、message queue、CI pipeline 裡談；現在輪到 AI Agent 進來面對同一件事。</p>
+<p>很多展示影片裡的 Agent 都很順：你給它一個目標，它開檔案、查資料、跑測試、改程式、寫報告，最後交付一個漂亮結果。這種 demo 看起來很有未來感，但從技術主管角度，我其實會先問另一組比較掃興的問題：如果它做到一半方向錯了怎麼辦？如果上游資料後來被修正怎麼辦？如果它停了又自己復活怎麼辦？如果使用者按下取消，它到底取消了什麼？</p>
+<p>這些問題沒有 demo 友善，卻決定 Agent 能不能進正式流程。</p>
+<h3 id="背景執行不是成熟，只是第一步"><a href="#背景執行不是成熟，只是第一步" class="headerlink" title="背景執行不是成熟，只是第一步"></a>背景執行不是成熟，只是第一步</h3><p>早期我們談長任務 Agent，常常把焦點放在「不要阻塞主對話」。這當然重要。使用者丟一個要跑二十分鐘的分析、重構或報表任務，不可能要求他盯著同一個 session 等。把任務交給背景 worker、sub-agent 或 queue，是很自然的架構。</p>
+<p>但背景執行只解決了互動體驗，沒有解決任務治理。</p>
+<p>一個任務跑在前景或背景，對系統來說只是 execution placement 的差異；真正麻煩的是它有沒有清楚的狀態。它現在是 queued、running、waiting approval、blocked、cancelling、cancelled、failed、completed，還是「看起來還活著但其實沒在做事」？如果狀態講不清楚，背景執行反而會讓問題更難發現，因為使用者看不到中間過程，只能等最後結果。</p>
+<p>我現在會把長任務 Agent 當成一個狀態型服務看，而不是一段比較長的 prompt。它需要任務 ID、執行紀錄、輸入快照、工具呼叫歷史、成本紀錄、可重試邊界，以及最重要的：停止語意。</p>
+<h3 id="停止語意比開始語意更難"><a href="#停止語意比開始語意更難" class="headerlink" title="停止語意比開始語意更難"></a>停止語意比開始語意更難</h3><p>「開始一個任務」通常很簡單。收到需求、建立 task、分配 worker、開始執行。真正難的是「停止一個任務」。</p>
+<p>停止不是把 process kill 掉就好。Agent 可能已經改了檔案、送出 API 請求、建立草稿、寫入資料庫、排了下一個子任務，甚至正在等待某個外部工具回應。這時候使用者按下取消，系統要回答幾個問題：哪些動作已經完成？哪些動作尚未開始？哪些動作可以 rollback？哪些需要人工確認？哪些只是停止後續，不回復既有變更？</p>
+<p>如果這些沒有定義清楚，「取消」就只是一種心理安慰。畫面上顯示任務停了，底層可能還有 worker 在跑；主任務標成 cancelled，子任務卻繼續寫檔；甚至更糟，系統把停止當成失敗，自動重試，結果使用者明明按了停，Agent 過幾分鐘又從某個角落醒來繼續動手。</p>
+<p>這種狀況在人類工作裡也很荒謬。你叫同事先不要寄那封信，他點頭說好，結果五分鐘後因為「待辦事項還在」又把信寄出去了。你不會說這個同事很自動化，你會覺得他很可怕。</p>
+<p>Agent 也是一樣。</p>
+<h3 id="Rewind-不是魔法，是承認過程需要被治理"><a href="#Rewind-不是魔法，是承認過程需要被治理" class="headerlink" title="Rewind 不是魔法，是承認過程需要被治理"></a>Rewind 不是魔法，是承認過程需要被治理</h3><p>最近一些工具開始強調 rewind、resume、checkpoint 之類的能力，我覺得方向是對的。這些功能表面上看是使用者體驗：做錯了可以倒回去，中斷了可以接著做。但在更深一層，它其實是在承認一件事：Agent 的工作過程本身需要被建模。</p>
+<p>如果系統只保存最後輸出，就沒有真正的 rewind。你頂多要求模型「再產生一次比較好的版本」。但如果系統保存了中間決策、檔案差異、工具呼叫、測試結果、人工指示與狀態轉移，才有機會回到某個可信的檢查點，而不是靠語氣很堅定地說「我會修正」。</p>
+<p>對 CTO 來說，這個差異很大。前者是聊天體驗，後者才像工程系統。</p>
+<p>尤其當 Agent 開始處理多步驟任務，錯誤常常不是最後一步才發生。可能是一開始理解需求時就偏了，可能是選錯工具，可能是中途讀到過期資料，也可能是某次測試失敗後做了錯誤假設。若沒有中間狀態，最後只能整包丟掉重跑；有中間狀態，才有機會從錯誤前一刻分岔修正。</p>
+<h3 id="長任務要有租約，而不是無限生命"><a href="#長任務要有租約，而不是無限生命" class="headerlink" title="長任務要有租約，而不是無限生命"></a>長任務要有租約，而不是無限生命</h3><p>我也越來越覺得，長任務 Agent 不該被設計成「一旦開始就永遠有權繼續」。它應該有某種租約概念。</p>
+<p>任務開始時，系統給它一段有效執行權限：可以讀哪些資料、可以用哪些工具、可以花多少成本、可以跑多久、可以產生哪些副作用。時間到了、條件變了、上游資料失效了、使用者取消了，租約就要到期。到期後 Agent 不能假裝自己還在原本的授權範圍內。</p>
+<p>這跟傳統企業系統的 session、token、lock 很像。差別在於 Agent 的動作更開放，執行路徑更不固定，所以租約要描述的不只是登入狀態，而是任務邊界。</p>
+<p>例如一個分析任務可以持續查詢資料、整理結論，但不能自動送出正式文件；一個開發任務可以改本地分支、跑測試，但不能自己 merge；一個營運任務可以草擬通知，但發送前需要人確認。這些都不只是權限設定，也是長任務生命週期的一部分。</p>
+<h3 id="生產環境需要的是可預期，不是永不失敗"><a href="#生產環境需要的是可預期，不是永不失敗" class="headerlink" title="生產環境需要的是可預期，不是永不失敗"></a>生產環境需要的是可預期，不是永不失敗</h3><p>我不期待 AI Agent 永遠不犯錯。說真的，人類也做不到。真正該追求的是：犯錯時能不能看得見、停得住、回得去、說得清楚。</p>
+<p>這也是我看長任務 Agent 成熟度時最在意的地方。它不一定要一次把所有事做完，也不一定要每次都產出完美答案。但它要讓我知道現在跑到哪裡、為什麼卡住、接下來打算做什麼、哪些變更已經落地、哪些只是暫存，以及我按下停止後會發生什麼事。</p>
+<p>企業導入 AI 時，大家很容易被「它可以自己完成一整串工作」吸引。這當然迷人，尤其對小團隊來說，長任務 Agent 真的可能補上很多人力缺口。但越是讓它跑得遠，越不能只靠信任模型本身。模型能力會進步，工具也會變多；最後真正決定能不能放心使用的，會是這套工作流有沒有把狀態、權限、停止、回復與稽核設計進去。</p>
+<p>對我來說，AI Agent 進 production 的成熟指標不是「它可以背景跑三小時」。那只是開始。</p>
+<p>更成熟的指標是：它跑到一半被叫停時，不會裝死，也不會偷偷復活；它做錯時，可以回到可理解的檢查點；它重試時，知道哪些事不能重做；它交付時，不只給結果，也交代過程。</p>
+<p>會跑的 Agent 很酷。停得下來的 Agent，才比較像可以交付給真實世界的系統。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81%E8%A8%AD%E8%A8%88/" rel="tag"># 工作流設計</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E6%B2%BB%E7%90%86/" rel="tag"># 系統治理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026062501/" rel="prev" title="品質不是報表，是流程裡的閘門">
+      <i class="fa fa-chevron-left"></i> 品質不是報表，是流程裡的閘門
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026062801/" rel="next" title="當 AI Agent 開始按結果收費，先問什麼叫完成">
+      當 AI Agent 開始按結果收費，先問什麼叫完成 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF%E5%9F%B7%E8%A1%8C%E4%B8%8D%E6%98%AF%E6%88%90%E7%86%9F%EF%BC%8C%E5%8F%AA%E6%98%AF%E7%AC%AC%E4%B8%80%E6%AD%A5"><span class="nav-number">1.</span> <span class="nav-text">背景執行不是成熟，只是第一步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%9C%E6%AD%A2%E8%AA%9E%E6%84%8F%E6%AF%94%E9%96%8B%E5%A7%8B%E8%AA%9E%E6%84%8F%E6%9B%B4%E9%9B%A3"><span class="nav-number">2.</span> <span class="nav-text">停止語意比開始語意更難</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rewind-%E4%B8%8D%E6%98%AF%E9%AD%94%E6%B3%95%EF%BC%8C%E6%98%AF%E6%89%BF%E8%AA%8D%E9%81%8E%E7%A8%8B%E9%9C%80%E8%A6%81%E8%A2%AB%E6%B2%BB%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">Rewind 不是魔法，是承認過程需要被治理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%95%B7%E4%BB%BB%E5%8B%99%E8%A6%81%E6%9C%89%E7%A7%9F%E7%B4%84%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E7%84%A1%E9%99%90%E7%94%9F%E5%91%BD"><span class="nav-number">4.</span> <span class="nav-text">長任務要有租約，而不是無限生命</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E7%94%A2%E7%92%B0%E5%A2%83%E9%9C%80%E8%A6%81%E7%9A%84%E6%98%AF%E5%8F%AF%E9%A0%90%E6%9C%9F%EF%BC%8C%E4%B8%8D%E6%98%AF%E6%B0%B8%E4%B8%8D%E5%A4%B1%E6%95%97"><span class="nav-number">5.</span> <span class="nav-text">生產環境需要的是可預期，不是永不失敗</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近把一個內部決策系統從靜態報表改成即時 dashboard，我重新想清楚一件事：dashboard 應該是觀測層，不該偷偷變成另一個資料源。資料來源越多，畫面越漂亮，系統反而越不可信。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dashboard 不是資料源：我後來才想清楚的觀測層邊界">
+<meta property="og:url" content="https://maplecheng.com/page/2026052701/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近把一個內部決策系統從靜態報表改成即時 dashboard，我重新想清楚一件事：dashboard 應該是觀測層，不該偷偷變成另一個資料源。資料來源越多，畫面越漂亮，系統反而越不可信。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-05-26T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.343Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI工作流">
+<meta property="article:tag" content="dashboard">
+<meta property="article:tag" content="observability">
+<meta property="article:tag" content="系統設計">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026052701/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Dashboard 不是資料源：我後來才想清楚的觀測層邊界 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026052701/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Dashboard 不是資料源：我後來才想清楚的觀測層邊界
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-05-27 05:00:00" itemprop="dateCreated datePublished" datetime="2026-05-27T05:00:00+08:00">2026-05-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近把一個內部決策系統從靜態報表改成即時 dashboard，我重新想清楚一件事：dashboard 應該是觀測層，不該偷偷變成另一個資料源。資料來源越多，畫面越漂亮，系統反而越不可信。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在整理一個內部決策系統的 dashboard，做到一半突然發現自己差點走回老路：畫面越做越完整，資料 fallback 越接越多，看起來好像越穩，實際上卻是在把系統弄得更不可信。</p>
+<p>這件事讓我重新想清楚一個很重要的邊界：<strong>dashboard 不是資料源，它只是觀測層。</strong></p>
+<span id="more"></span>
+
+<p>聽起來很像廢話對吧？Dashboard 本來就是拿來看的，不是拿來存資料的。但實務上最容易出事的地方，往往就是這種「大家都知道」的原則。因為當你真的在趕一個可用畫面時，誘惑會一直出現：這個欄位資料庫還沒寫好，先讀昨天輸出的 JSON；那個狀態 API 偶爾沒有值，先從 report 裡撈；某個指標缺資料，先用記憶檔補一下。每一個決定單獨看都合理，合在一起就變成災難。</p>
+<h3 id="最危險的是「看起來正常」"><a href="#最危險的是「看起來正常」" class="headerlink" title="最危險的是「看起來正常」"></a>最危險的是「看起來正常」</h3><p>Dashboard 壞掉不可怕。畫面紅紅的、API 回 500、資料庫連不上，至少你知道它壞了。真正可怕的是它沒壞，還很努力地顯示一個「看似合理」的世界。</p>
+<p>例如主要資料庫沒有今天的資料，但 dashboard 自動退回昨天的報表快照；候選清單沒有同步成功，但畫面從某個中間檔案補了一份舊資料；決策紀錄其實沒落盤，但 UI 因為還留著前一次生成的 JSON，所以看起來一切正常。</p>
+<p>這種狀況對技術主管來說很毒。因為 dashboard 的目的不是裝飾，它通常是拿來做判斷的：系統有沒有跑、資料有沒有到、風險在哪裡、下一步要不要介入。如果它把錯誤包裝成正常，那就不是 observability，而是迷魂湯。</p>
+<p>我後來給自己的規則很簡單：<strong>寧可明確顯示「沒有資料」，也不要偷偷拿別的地方補出一個假正常。</strong></p>
+<h3 id="Fallback-不是不能用，但不能污染事實層"><a href="#Fallback-不是不能用，但不能污染事實層" class="headerlink" title="Fallback 不是不能用，但不能污染事實層"></a>Fallback 不是不能用，但不能污染事實層</h3><p>這裡要先講清楚，我不是反對 fallback。做系統的人都知道，完全沒有 fallback 的服務很脆弱。外部 API 會掛，排程會延遲，資料庫會有 maintenance window，模型也可能突然變笨。問題不在 fallback 本身，而在 fallback 被放到哪一層。</p>
+<p>我現在會把資料分成三層：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[主要事實來源] --> B[資料服務 / API]
+    B --> C[Dashboard 觀測層]
+    D[報表快照 / 匯出檔] --> E[人工查核 / 歷史追溯]
+    F[警告與空狀態] --> C
+          </pre>
+
+<p>主要事實來源只能有一個。它可以是資料庫、event log、ledger，或任何你明確定義的 source of truth。報表快照和匯出檔可以存在，但它們的角色是追溯、稽核、下載，不是用來在主畫面上假裝今天的狀態還活著。</p>
+<p>如果主資料源沒有資料，dashboard 應該顯示 warning：「目前沒有讀到資料」、「最後更新時間過舊」、「某個資料集未同步」。這種訊息看起來很醜，但它誠實。相反地，自動退回舊檔案很漂亮，但它會讓使用者在錯誤的現實裡做決策。</p>
+<h3 id="靜態報表和即時畫面的責任不一樣"><a href="#靜態報表和即時畫面的責任不一樣" class="headerlink" title="靜態報表和即時畫面的責任不一樣"></a>靜態報表和即時畫面的責任不一樣</h3><p>我以前很喜歡先做靜態報表。產一份 HTML、一份 JSON，丟到固定位置，打開就能看。這個做法有很多優點：容易 debug、容易保存、容易比較版本，也不需要維護長駐服務。對早期探索來說，靜態報表非常好用。</p>
+<p>但當需求從「看一次結果」變成「持續監控狀態」，它的性質就變了。</p>
+<p>靜態報表回答的是：「那次執行產生了什麼？」即時 dashboard 回答的是：「現在系統相信什麼？」這兩個問題不能混在一起。前者可以是 artifact，後者必須綁定目前的事實來源。</p>
+<p>如果 dashboard 一邊讀即時 API，一邊讀前一次靜態輸出，一邊再讀某個排程留下的中間 JSON，你就很難回答一個基本問題：畫面上的這個數字，到底從哪裡來？更慘的是，當數字錯了，你也不知道該修誰。</p>
+<p>這就是為什麼後來我會傾向把靜態產物降級成「資料層副產品」或「除錯附件」，而不是人看的主要入口。主入口只讀正式資料源；正式資料源沒有，就讓它紅。不要怕紅，紅至少代表系統還有羞恥心。</p>
+<h3 id="Dashboard-應該幫你發現問題，不是幫問題化妝"><a href="#Dashboard-應該幫你發現問題，不是幫問題化妝" class="headerlink" title="Dashboard 應該幫你發現問題，不是幫問題化妝"></a>Dashboard 應該幫你發現問題，不是幫問題化妝</h3><p>一個好的 dashboard，不只是把資料畫出來而已。它應該幫你回答三件事：</p>
+<ul>
+<li>這份資料從哪裡來？</li>
+<li>它是什麼時候更新的？</li>
+<li>如果它不可信，我要怎麼知道？</li>
+</ul>
+<p>很多 dashboard 做到第一點就停了。資料有顯示，圖有畫出來，顏色也漂亮。但真正決定可信度的是後兩點。最後更新時間、資料來源名稱、同步狀態、warning、空狀態，這些看起來很無聊的東西，才是 dashboard 從「展示頁」變成「操作介面」的關鍵。</p>
+<p>尤其現在很多 AI 工作流會產生大量中間結果：模型輸出、候選清單、摘要、評分、trace、usage、快照、人工修正版本。每一份檔案都很像資料源，每一份都可以被 UI 拿來補洞。但越是這樣，越要嚴格定義：哪些是事實，哪些是解釋，哪些只是 debug artifact。</p>
+<p>AI 系統已經夠容易讓人產生「它看起來很懂」的錯覺了，dashboard 不能再加一層「畫面看起來很正常」的錯覺。</p>
+<h3 id="我現在會先寫資料契約，再寫漂亮畫面"><a href="#我現在會先寫資料契約，再寫漂亮畫面" class="headerlink" title="我現在會先寫資料契約，再寫漂亮畫面"></a>我現在會先寫資料契約，再寫漂亮畫面</h3><p>這次調整後，我對 dashboard 的開發順序也變保守了。以前會先想畫面：上面放總覽，中間放清單，右邊放指標，底下放 log。現在我會先問資料契約：</p>
+<ul>
+<li>這個畫面唯一允許讀哪個 source of truth？</li>
+<li>哪些欄位必須有，哪些可以為空？</li>
+<li>資料過期多久要警告？</li>
+<li>缺資料時要顯示空狀態，還是直接擋住？</li>
+<li>匯出檔、快照、trace 的角色是什麼？</li>
+</ul>
+<p>這些問題很不性感，但它們決定系統能不能被信任。畫面可以醜一點，資料契約不能糊。因為 dashboard 一旦被團隊拿來做日常判斷，它就不只是 UI，而是決策介面。</p>
+<p>對，決策介面最重要的不是好看，是誠實。</p>
+<h3 id="結語：讓系統誠實地壞掉"><a href="#結語：讓系統誠實地壞掉" class="headerlink" title="結語：讓系統誠實地壞掉"></a>結語：讓系統誠實地壞掉</h3><p>我越來越覺得，工程成熟度的一個指標，是你願不願意讓系統誠實地壞掉。</p>
+<p>初期我們常常會想把錯誤藏起來，讓畫面盡量保持完整；後來才會發現，藏錯誤不是韌性，是債務。真正可靠的系統不是永遠綠燈，而是紅燈亮的時候你知道為什麼、知道影響範圍、知道下一步怎麼處理。</p>
+<p>所以現在我對 dashboard 的要求變得很樸素：只讀被承認的資料源；資料沒有就說沒有；資料舊了就標出來；中間產物不要偷渡成事實。這幾條規則看起來不炫，但踩過一次「畫面正常、現實錯誤」的坑之後，就會知道它們有多重要。</p>
+<p>如果這篇能少讓一個 dashboard 變成漂亮的謊言，那我的血淚就沒有白流。😂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88/" rel="tag"># 系統設計</a>
+              <a href="/tags/dashboard/" rel="tag"># dashboard</a>
+              <a href="/tags/observability/" rel="tag"># observability</a>
+              <a href="/tags/AI%E5%B7%A5%E4%BD%9C%E6%B5%81/" rel="tag"># AI工作流</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026052601/" rel="prev" title="別把 runtime state 放進雲端同步資料夾">
+      <i class="fa fa-chevron-left"></i> 別把 runtime state 放進雲端同步資料夾
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026052801/" rel="next" title="AI Agent 掛掉時，我現在會先找共同依賴">
+      AI Agent 掛掉時，我現在會先找共同依賴 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%8D%B1%E9%9A%AA%E7%9A%84%E6%98%AF%E3%80%8C%E7%9C%8B%E8%B5%B7%E4%BE%86%E6%AD%A3%E5%B8%B8%E3%80%8D"><span class="nav-number">1.</span> <span class="nav-text">最危險的是「看起來正常」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fallback-%E4%B8%8D%E6%98%AF%E4%B8%8D%E8%83%BD%E7%94%A8%EF%BC%8C%E4%BD%86%E4%B8%8D%E8%83%BD%E6%B1%A1%E6%9F%93%E4%BA%8B%E5%AF%A6%E5%B1%A4"><span class="nav-number">2.</span> <span class="nav-text">Fallback 不是不能用，但不能污染事實層</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9C%E6%85%8B%E5%A0%B1%E8%A1%A8%E5%92%8C%E5%8D%B3%E6%99%82%E7%95%AB%E9%9D%A2%E7%9A%84%E8%B2%AC%E4%BB%BB%E4%B8%8D%E4%B8%80%E6%A8%A3"><span class="nav-number">3.</span> <span class="nav-text">靜態報表和即時畫面的責任不一樣</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dashboard-%E6%87%89%E8%A9%B2%E5%B9%AB%E4%BD%A0%E7%99%BC%E7%8F%BE%E5%95%8F%E9%A1%8C%EF%BC%8C%E4%B8%8D%E6%98%AF%E5%B9%AB%E5%95%8F%E9%A1%8C%E5%8C%96%E5%A6%9D"><span class="nav-number">4.</span> <span class="nav-text">Dashboard 應該幫你發現問題，不是幫問題化妝</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E7%8F%BE%E5%9C%A8%E6%9C%83%E5%85%88%E5%AF%AB%E8%B3%87%E6%96%99%E5%A5%91%E7%B4%84%EF%BC%8C%E5%86%8D%E5%AF%AB%E6%BC%82%E4%BA%AE%E7%95%AB%E9%9D%A2"><span class="nav-number">5.</span> <span class="nav-text">我現在會先寫資料契約，再寫漂亮畫面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E%EF%BC%9A%E8%AE%93%E7%B3%BB%E7%B5%B1%E8%AA%A0%E5%AF%A6%E5%9C%B0%E5%A3%9E%E6%8E%89"><span class="nav-number">6.</span> <span class="nav-text">結語：讓系統誠實地壞掉</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

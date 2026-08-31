@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="Production Agent 不能把「已登入」當成整段任務的通行證。從技術主管視角，談工作區信任、能力路由、動作確認與執行證據如何形成逐步縮小的信任鏈。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent 的信任，不該在登入成功後一路沿用到底">
+<meta property="og:url" content="https://maplecheng.com/page/2026081101/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="Production Agent 不能把「已登入」當成整段任務的通行證。從技術主管視角，談工作區信任、能力路由、動作確認與執行證據如何形成逐步縮小的信任鏈。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-08-10T21:00:14.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.346Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="工具安全">
+<meta property="article:tag" content="技術管理">
+<meta property="article:tag" content="權限治理">
+<meta property="article:tag" content="零信任">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026081101/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Agent 的信任，不該在登入成功後一路沿用到底 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026081101/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Agent 的信任，不該在登入成功後一路沿用到底
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-08-11 05:00:14" itemprop="dateCreated datePublished" datetime="2026-08-11T05:00:14+08:00">2026-08-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI-%E8%88%87%E4%BC%81%E6%A5%AD%E7%B3%BB%E7%B5%B1/" itemprop="url" rel="index"><span itemprop="name">AI 與企業系統
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Production Agent 不能把「已登入」當成整段任務的通行證。從技術主管視角，談工作區信任、能力路由、動作確認與執行證據如何形成逐步縮小的信任鏈。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看幾個 Production Agent 的安全改進，我注意到它們表面上在處理不同問題：有的要求先確認工作區是否可信，有的會依任務路由可用能力，有的則在工具真正執行前再次確認。把這些變化放在一起看，其實指向同一件事：Agent 的信任不能在登入成功後一路沿用到底。</p>
+<p>傳統系統很容易把登入視為一道明確的門。人進來了，後面就依角色開放功能。但 Agent 不是只會點選固定選單的使用者。它會閱讀不可信內容、組合工具、改變計畫，還可能在長任務途中取得新的上下文。若只在入口驗證一次，後面的每一步都會悄悄繼承一張範圍過大的通行證。</p>
+<span id="more"></span>
+
+<h2 id="登入只證明「你是誰」，沒有證明「這次可以做什麼」"><a href="#登入只證明「你是誰」，沒有證明「這次可以做什麼」" class="headerlink" title="登入只證明「你是誰」，沒有證明「這次可以做什麼」"></a>登入只證明「你是誰」，沒有證明「這次可以做什麼」</h2><p>身分驗證當然重要，但它只能回答呼叫者是誰。它無法單獨回答：這個工作區可不可信、目前資料能不能送給指定模型、這項任務需要哪些工具，以及最後組出的動作是否仍在原本授權範圍內。</p>
+<p>這些問題在人類操作傳統系統時，常被固定畫面與後端 API 隱性限制。Agent 卻能把自然語言、檔案、網頁、MCP 工具與命令列串成新的執行路徑。也就是說，權限不只存在於帳號或功能表，而是存在於每一次上下文與能力的組合裡。</p>
+<p>因此，我比較傾向把 Agent 的信任設計成一條逐步縮小的鏈，而不是一個布林值。前一關通過，只代表可以進入下一次判斷，不代表後續全部放行。</p>
+<h2 id="第一關：先判斷工作區值不值得相信"><a href="#第一關：先判斷工作區值不值得相信" class="headerlink" title="第一關：先判斷工作區值不值得相信"></a>第一關：先判斷工作區值不值得相信</h2><p>Coding Agent 最典型。開啟一個 repository，看起來只是讀程式碼，但裡面可能包含專案指令、hook、外掛設定、符號連結，甚至刻意寫給 Agent 看的誘導內容。使用者信任 Agent，不等於也信任 Agent 剛打開的每一份內容。</p>
+<p>工作區信任的目的，不該只是多跳一個「是否信任此資料夾」的視窗。平台至少要知道解析後的實際路徑、來源、擁有者、是否跨出專案邊界，以及哪些專案設定會因此生效。陌生工作區預設應停用自動執行、限制專案外讀寫，必要時放進 sandbox。</p>
+<p>這一關確認的是環境，不是動作。它回答：「可以開始理解這裡的內容嗎？」而不是：「這裡要求做的事都可以照辦嗎？」</p>
+<h2 id="第二關：能力要依任務重新路由"><a href="#第二關：能力要依任務重新路由" class="headerlink" title="第二關：能力要依任務重新路由"></a>第二關：能力要依任務重新路由</h2><p>工作區可信，也不代表 Agent 應拿到所有工具。整理文件可能只需要讀取與產生草稿；修正程式需要檔案寫入與測試；部署正式環境則涉及憑證、網路與不可逆變更。若三種任務都掛著同一套能力，風險就由最強的那組工具決定。</p>
+<p>能力路由不能只看哪個模型最會做，也要先套用政策：資料能去哪裡、呼叫者代表誰、任務處於哪個階段、工具作用範圍多大，以及是否需要人工審批。先排除不合格的路徑，再在剩下的選項中比較品質、速度與成本。</p>
+<p>我會把這層當成執行期的最小權限。權限不是 Agent 建立時一次配完，而是每個任務、每個階段重新取得。規劃階段不需要部署權限，產生 diff 不需要正式資料庫憑證；真的走到核准執行時，再發一張短效、限用途的能力票券。</p>
+<h2 id="第三關：工具執行前要確認「實際會發生什麼」"><a href="#第三關：工具執行前要確認「實際會發生什麼」" class="headerlink" title="第三關：工具執行前要確認「實際會發生什麼」"></a>第三關：工具執行前要確認「實際會發生什麼」</h2><p>即使環境與能力都通過，最後組出的參數仍可能有問題。Agent 可能選對工具卻填錯目標，也可能因為不可信內容而把動作導向專案外路徑。這時只顯示「Agent 想使用 Terminal」幾乎沒有意義。</p>
+<p>可靠的確認應由工具層根據實際參數產生，而不是請模型自己描述。要送出請求，就呈現目標、資料範圍與副作用；要改檔案，就顯示解析後路徑與 diff；要執行指令，就顯示工作目錄、環境與不可逆部分。畫面上看到的內容，必須和真正執行的內容使用同一份 canonical representation，避免預覽與執行之間出現縫隙。</p>
+<p>確認也不一定都要找人。低風險讀取可以由政策自動核准，可回復的本地修改可採一般確認，高風險外部動作才要求人工或雙人審批。重點不是彈窗數量，而是確認強度要和影響範圍對齊。</p>
+<h2 id="三關之後，還要留下可查證的執行證據"><a href="#三關之後，還要留下可查證的執行證據" class="headerlink" title="三關之後，還要留下可查證的執行證據"></a>三關之後，還要留下可查證的執行證據</h2><p>如果事故發生後只能看到「某位使用者登入，Agent 呼叫了一個工具」，資訊還是不夠。稽核紀錄應能串起：當時信任哪個工作區、載入哪些專案規則、能力路由排除了什麼、最後取得哪張短效權限、工具的 canonical 參數是什麼，以及由誰或哪條政策核准。</p>
+<p>這不是為了把每次執行做成厚重的簽核公文，而是讓團隊有辦法重建決策。Agent 的行為會受到模型、上下文、工具描述與執行環境共同影響；沒有這條證據鏈，出了問題只會剩下「模型怎麼會這樣做」的猜測。</p>
+<p>從 CTO 的角度，我現在不太相信「這個 Agent 是安全的」這種整體描述。我比較想問：它在哪個工作區被信任？這次任務拿到哪些能力？哪個動作在執行前被誰確認？信任在哪一刻到期？</p>
+<p>Production Agent 的安全，不是登入頁後面再加一層權限表就完成。它比較像零信任架構在工作流裡的延伸：每跨過一個邊界，就重新驗證一次；每靠近真實副作用一步，就把範圍縮小一點。</p>
+<p>登入證明身分，工作區信任判斷環境，能力路由限制手段，工具確認核對實際動作，稽核紀錄負責還原整條鏈。只有當這些關卡彼此銜接，Agent 才不是拿著一張萬用通行證，在系統裡一路走到底。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+              <a href="/tags/%E6%AC%8A%E9%99%90%E6%B2%BB%E7%90%86/" rel="tag"># 權限治理</a>
+              <a href="/tags/%E9%9B%B6%E4%BF%A1%E4%BB%BB/" rel="tag"># 零信任</a>
+              <a href="/tags/%E5%B7%A5%E5%85%B7%E5%AE%89%E5%85%A8/" rel="tag"># 工具安全</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026081001/" rel="prev" title="排程只負責叫醒 Agent，不要偷偷養一套業務規則">
+      <i class="fa fa-chevron-left"></i> 排程只負責叫醒 Agent，不要偷偷養一套業務規則
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026081201/" rel="next" title="Agent 會讀日誌之後，Telemetry 就不再只是觀測資料">
+      Agent 會讀日誌之後，Telemetry 就不再只是觀測資料 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%99%BB%E5%85%A5%E5%8F%AA%E8%AD%89%E6%98%8E%E3%80%8C%E4%BD%A0%E6%98%AF%E8%AA%B0%E3%80%8D%EF%BC%8C%E6%B2%92%E6%9C%89%E8%AD%89%E6%98%8E%E3%80%8C%E9%80%99%E6%AC%A1%E5%8F%AF%E4%BB%A5%E5%81%9A%E4%BB%80%E9%BA%BC%E3%80%8D"><span class="nav-number">1.</span> <span class="nav-text">登入只證明「你是誰」，沒有證明「這次可以做什麼」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%97%9C%EF%BC%9A%E5%85%88%E5%88%A4%E6%96%B7%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%80%BC%E4%B8%8D%E5%80%BC%E5%BE%97%E7%9B%B8%E4%BF%A1"><span class="nav-number">2.</span> <span class="nav-text">第一關：先判斷工作區值不值得相信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E9%97%9C%EF%BC%9A%E8%83%BD%E5%8A%9B%E8%A6%81%E4%BE%9D%E4%BB%BB%E5%8B%99%E9%87%8D%E6%96%B0%E8%B7%AF%E7%94%B1"><span class="nav-number">3.</span> <span class="nav-text">第二關：能力要依任務重新路由</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E9%97%9C%EF%BC%9A%E5%B7%A5%E5%85%B7%E5%9F%B7%E8%A1%8C%E5%89%8D%E8%A6%81%E7%A2%BA%E8%AA%8D%E3%80%8C%E5%AF%A6%E9%9A%9B%E6%9C%83%E7%99%BC%E7%94%9F%E4%BB%80%E9%BA%BC%E3%80%8D"><span class="nav-number">4.</span> <span class="nav-text">第三關：工具執行前要確認「實際會發生什麼」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E9%97%9C%E4%B9%8B%E5%BE%8C%EF%BC%8C%E9%82%84%E8%A6%81%E7%95%99%E4%B8%8B%E5%8F%AF%E6%9F%A5%E8%AD%89%E7%9A%84%E5%9F%B7%E8%A1%8C%E8%AD%89%E6%93%9A"><span class="nav-number">5.</span> <span class="nav-text">三關之後，還要留下可查證的執行證據</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

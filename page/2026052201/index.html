@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近準備一場 AI Agent 內部分享時，我改用 HTML 做互動簡報。這篇整理我從 PPT 轉向網頁式簡報的理由：遠端展示、流程圖、demo、即時修改與可驗證內容，對技術分享其實更貼近真實工作方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="為什麼我開始用 HTML 做技術分享，而不是 PPT">
+<meta property="og:url" content="https://maplecheng.com/page/2026052201/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近準備一場 AI Agent 內部分享時，我改用 HTML 做互動簡報。這篇整理我從 PPT 轉向網頁式簡報的理由：遠端展示、流程圖、demo、即時修改與可驗證內容，對技術分享其實更貼近真實工作方式。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-05-21T21:00:43.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.343Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="HTML">
+<meta property="article:tag" content="工程管理">
+<meta property="article:tag" content="技術分享">
+<meta property="article:tag" content="簡報">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026052201/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>為什麼我開始用 HTML 做技術分享，而不是 PPT | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026052201/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          為什麼我開始用 HTML 做技術分享，而不是 PPT
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-05-22 05:00:43" itemprop="dateCreated datePublished" datetime="2026-05-22T05:00:43+08:00">2026-05-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近準備一場 AI Agent 內部分享時，我改用 HTML 做互動簡報。這篇整理我從 PPT 轉向網頁式簡報的理由：遠端展示、流程圖、demo、即時修改與可驗證內容，對技術分享其實更貼近真實工作方式。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近準備一場技術分享時，我做了一個有點任性的決定：不用 PPT，改用 HTML 做整份簡報。</p>
+<p>不是因為我突然想當前端藝術家，也不是覺得投影片已經過時。單純是我發現，當分享主題從「講一個概念」變成「展示一套正在運作的 AI Agent 工作流」時，傳統簡報很快就會開始卡手。你想放流程圖、想跳 demo、想補一段架構說明、想現場修正某個順序，PPT 當然都做得到，但每一步都像在隔靴搔癢。</p>
+<span id="more"></span>
+
+<h3 id="技術分享最怕變成漂亮截圖展"><a href="#技術分享最怕變成漂亮截圖展" class="headerlink" title="技術分享最怕變成漂亮截圖展"></a>技術分享最怕變成漂亮截圖展</h3><p>很多技術分享最後會變成一堆截圖。系統畫面截圖、終端機輸出截圖、流程圖截圖、文件截圖，然後講者在每張圖旁邊補充：「這邊實際上會呼叫某個服務」、「這裡背後有一個排程」、「這張圖只是示意」。</p>
+<p>我不是說截圖不好。截圖很穩，離線可用，不會現場炸掉。但它也有一個問題：截圖會把一個動態系統壓扁成靜態證據。</p>
+<p>尤其 AI Agent 這種東西，真正有價值的不是某個單點畫面，而是整個鏈路：資料怎麼進來、模型拿到什麼上下文、工具怎麼被呼叫、結果如何驗證、錯誤怎麼回報、人在哪些節點介入。這些東西用一張張截圖切開之後，觀眾很容易只看到「哇，好像很酷」，但看不清楚它到底怎麼被治理。</p>
+<p>這也是我後來越來越在意的事：技術分享不只是展示成果，而是讓別人理解你的判斷。你為什麼這樣切邊界？為什麼這一步不自動化？為什麼這個工具要先查證來源？如果簡報工具本身讓你很難呈現這些脈絡，那它就不只是排版問題，而是溝通品質問題。</p>
+<h3 id="HTML-的優勢：它本來就是互動介面"><a href="#HTML-的優勢：它本來就是互動介面" class="headerlink" title="HTML 的優勢：它本來就是互動介面"></a>HTML 的優勢：它本來就是互動介面</h3><p>HTML 做簡報最直覺的好處，是它不是「投影片格式」，而是一個小型互動介面。</p>
+<p>我可以做固定側邊目錄，分享時快速跳章節；我可以把 demo 連結、流程圖、程式碼片段、注意事項放在同一頁，不用一直切視窗；我也可以把某些內容設計成可展開區塊，講到再打開，沒講就收起來。這些在 PPT 裡不是不能做，但做起來通常很笨重。</p>
+<p>更重要的是，HTML 很適合技術人的修改節奏。分享前一小時突然想到某個段落順序怪怪的？直接改檔案。有人指出流程圖 actor 順序不對？改完存檔，重新整理瀏覽器。需要補一個章節？複製一段 section，加上 anchor，目錄連結就能跳。</p>
+<p>這種「即時修正」對技術分享很重要，因為真正的技術內容常常不是一次寫對。尤其當你在整理一套複雜工作流時，最常發生的不是視覺設計問題，而是語意順序問題：到底是排程先 poll，還是 API 先觸發？到底是 agent 主動查知識庫，還是技能規範要求它先查？這種錯誤如果被包成一張漂亮投影片，反而更難修。</p>
+<h3 id="我想呈現的是鏈路，不是工具清單"><a href="#我想呈現的是鏈路，不是工具清單" class="headerlink" title="我想呈現的是鏈路，不是工具清單"></a>我想呈現的是鏈路，不是工具清單</h3><p>這次準備分享時，我一開始也差點掉進一個坑：把內容做成工具 demo。</p>
+<p>技術人很容易這樣。看到一套 runtime、一堆 skills、一個排程系統、一個郵件處理器、一個知識庫查詢流程，就會想逐項介紹：「這個可以做什麼，那個可以怎麼設定。」但對公司內部分享來說，這其實不是最重要的。</p>
+<p>真正重要的是 implementation story：我們怎麼把零散工具變成可運作的流程？怎麼讓 AI 不只是聊天，而是能依照來源查證後回答？怎麼把人類的審核、回饋、修正，變成下一輪系統改善的一部分？</p>
+<p>所以我後來把分享重心從「工具有多厲害」調整成「一個工作流如何被設計、治理與迭代」。這件事用 HTML 表達起來特別順，因為頁面可以像文件，也可以像產品介面；可以先給整體地圖，再讓觀眾跳進某個節點看細節。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart LR
+  A[需求與真實情境] --> B[資料來源與權限邊界]
+  B --> C[Agent 工作流]
+  C --> D[工具呼叫與查證]
+  D --> E[人類審核與回饋]
+  E --> F[知識與流程迭代]
+  F --> C
+          </pre>
+
+<p>這張圖其實就是我現在看企業 AI 導入的基本模型。不要只問「模型能不能回答」，要問「它回答之前看了什麼、能動什麼、誰負責驗證、錯了怎麼修」。</p>
+<h3 id="遠端會議裡，簡報也是一個產品"><a href="#遠端會議裡，簡報也是一個產品" class="headerlink" title="遠端會議裡，簡報也是一個產品"></a>遠端會議裡，簡報也是一個產品</h3><p>以前實體分享時，PPT 的限制比較不明顯。講者站在台上，投影機播出來，觀眾主要看大畫面。可是遠端會議不一樣。有人用筆電，有人用手機，有人網路卡，有人晚進會議，有人想回頭看某段。</p>
+<p>這時候簡報就不只是「畫面」，它更像一個臨時產品。</p>
+<p>HTML 的好處是可以直接給 URL。會議中有人跟不上，可以自己打開；講完後有人想複習，也不用等我匯出 PDF。甚至我可以在頁面裡保留章節 anchor，讓人直接跳到「安全性」、「工作流」、「需求表達」這種段落。</p>
+<p>當然，這也代表你要承擔一些工程責任。字級要夠大，版面不能太花，連結要能點，頁面要在常見瀏覽器上正常跑。不要把它做成炫技網站，最後投影出來什麼都看不到。這一點跟寫內部工具很像：使用者不是來欣賞你的 CSS，他們是要理解事情。</p>
+<h3 id="HTML-不是取代-PPT，而是換一種思考方式"><a href="#HTML-不是取代-PPT，而是換一種思考方式" class="headerlink" title="HTML 不是取代 PPT，而是換一種思考方式"></a>HTML 不是取代 PPT，而是換一種思考方式</h3><p>我不會說以後所有簡報都該用 HTML。商務簡報、提案、需要嚴格版型控管的場合，PPT 還是很方便。它成熟、穩定、協作門檻低，也比較不會現場出現「CSS 怎麼跑版了」這種讓人想找洞鑽的事情。</p>
+<p>但如果主題本身就是系統、流程、agent、資料治理、工程實作，我現在會優先考慮 HTML。因為它逼我用「使用者怎麼走過這份內容」來思考，而不是用「下一張投影片要放什麼」來思考。</p>
+<p>這兩者差很多。</p>
+<p>PPT 的單位是 slide，HTML 的單位是 experience。前者適合線性敘事，後者適合呈現網狀關係。技術系統偏偏常常是後者：一個需求會連到資料來源，一個資料來源會連到權限，一個權限會連到 agent 行為，一個 agent 行為又會連到監控與回饋。</p>
+<p>用 HTML 做簡報，對我來說不是為了看起來比較潮，而是讓簡報形式更接近我想講的東西。</p>
+<h3 id="最後：工具選擇會影響你怎麼講故事"><a href="#最後：工具選擇會影響你怎麼講故事" class="headerlink" title="最後：工具選擇會影響你怎麼講故事"></a>最後：工具選擇會影響你怎麼講故事</h3><p>這次的收穫不是「HTML 比 PPT 強」。這樣講太粗暴，也不公平。</p>
+<p>真正的收穫是：工具選擇會影響敘事方式。當我用 PPT，我會自然地把內容切成一張一張；當我用 HTML，我會開始想路徑、層次、互動、連結，以及觀眾如何在分享後繼續使用這份材料。</p>
+<p>這剛好也呼應我最近對 AI Agent 的看法。很多導入失敗不是模型不夠強，而是團隊把它當成單點工具，沒有把流程、知識、權限、驗證和回饋一起設計進去。簡報也是一樣。如果我只是丟一堆截圖，那我其實也在用單點工具思維溝通一個系統問題。</p>
+<p>所以，下次如果你要分享的是一套真的會跑的工作流，而不是一個靜態結論，可以試著問自己：我需要的是投影片，還是一個可以被走讀的小介面？</p>
+<p>答案不一定永遠是 HTML。但光是這樣問，通常就會讓整份分享更清楚。這大概就是我這次踩完簡報工具選擇後，最想留下來的教訓。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E5%B7%A5%E7%A8%8B%E7%AE%A1%E7%90%86/" rel="tag"># 工程管理</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E5%88%86%E4%BA%AB/" rel="tag"># 技術分享</a>
+              <a href="/tags/HTML/" rel="tag"># HTML</a>
+              <a href="/tags/%E7%B0%A1%E5%A0%B1/" rel="tag"># 簡報</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026052101/" rel="prev" title="狀態機要記成功，不要記意圖：一次 Slash Command 同步踩坑">
+      <i class="fa fa-chevron-left"></i> 狀態機要記成功，不要記意圖：一次 Slash Command 同步踩坑
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026052301/" rel="next" title="月營收 API 的日期陷阱：不是所有資料都適合用「最近幾天」查">
+      月營收 API 的日期陷阱：不是所有資料都適合用「最近幾天」查 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E5%88%86%E4%BA%AB%E6%9C%80%E6%80%95%E8%AE%8A%E6%88%90%E6%BC%82%E4%BA%AE%E6%88%AA%E5%9C%96%E5%B1%95"><span class="nav-number">1.</span> <span class="nav-text">技術分享最怕變成漂亮截圖展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTML-%E7%9A%84%E5%84%AA%E5%8B%A2%EF%BC%9A%E5%AE%83%E6%9C%AC%E4%BE%86%E5%B0%B1%E6%98%AF%E4%BA%92%E5%8B%95%E4%BB%8B%E9%9D%A2"><span class="nav-number">2.</span> <span class="nav-text">HTML 的優勢：它本來就是互動介面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E6%83%B3%E5%91%88%E7%8F%BE%E7%9A%84%E6%98%AF%E9%8F%88%E8%B7%AF%EF%BC%8C%E4%B8%8D%E6%98%AF%E5%B7%A5%E5%85%B7%E6%B8%85%E5%96%AE"><span class="nav-number">3.</span> <span class="nav-text">我想呈現的是鏈路，不是工具清單</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%A0%E7%AB%AF%E6%9C%83%E8%AD%B0%E8%A3%A1%EF%BC%8C%E7%B0%A1%E5%A0%B1%E4%B9%9F%E6%98%AF%E4%B8%80%E5%80%8B%E7%94%A2%E5%93%81"><span class="nav-number">4.</span> <span class="nav-text">遠端會議裡，簡報也是一個產品</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTML-%E4%B8%8D%E6%98%AF%E5%8F%96%E4%BB%A3-PPT%EF%BC%8C%E8%80%8C%E6%98%AF%E6%8F%9B%E4%B8%80%E7%A8%AE%E6%80%9D%E8%80%83%E6%96%B9%E5%BC%8F"><span class="nav-number">5.</span> <span class="nav-text">HTML 不是取代 PPT，而是換一種思考方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%BE%8C%EF%BC%9A%E5%B7%A5%E5%85%B7%E9%81%B8%E6%93%87%E6%9C%83%E5%BD%B1%E9%9F%BF%E4%BD%A0%E6%80%8E%E9%BA%BC%E8%AC%9B%E6%95%85%E4%BA%8B"><span class="nav-number">6.</span> <span class="nav-text">最後：工具選擇會影響你怎麼講故事</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

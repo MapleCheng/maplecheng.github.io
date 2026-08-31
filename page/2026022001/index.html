@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="當你的 AI coding agent 設定檔需要跨多個專案共用時，複製貼上遲早會失控。分享如何用 git submodule 管理 Claude Code 的 skills、commands 和 agents，以及 skills 和 agents 的本質差異。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用 Git Submodule 管理 AI Coding Agent 的設定檔，跨專案共用不再複製貼上">
+<meta property="og:url" content="https://maplecheng.com/page/2026022001/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="當你的 AI coding agent 設定檔需要跨多個專案共用時，複製貼上遲早會失控。分享如何用 git submodule 管理 Claude Code 的 skills、commands 和 agents，以及 skills 和 agents 的本質差異。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-19T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI 開發工具">
+<meta property="article:tag" content="Claude Code">
+<meta property="article:tag" content="Git Submodule">
+<meta property="article:tag" content="Monorepo">
+<meta property="article:tag" content="開發流程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026022001/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>用 Git Submodule 管理 AI Coding Agent 的設定檔，跨專案共用不再複製貼上 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026022001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用 Git Submodule 管理 AI Coding Agent 的設定檔，跨專案共用不再複製貼上
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-20 05:00:00" itemprop="dateCreated datePublished" datetime="2026-02-20T05:00:00+08:00">2026-02-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">當你的 AI coding agent 設定檔需要跨多個專案共用時，複製貼上遲早會失控。分享如何用 git submodule 管理 Claude Code 的 skills、commands 和 agents，以及 skills 和 agents 的本質差異。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在整理公司 monorepo 裡 AI coding agent 的設定結構，一個看似簡單的「搬檔案」動作，結果搞了快兩天才定案。但搞完之後回頭看，覺得這個架構值得記錄下來——因為我相信很多團隊正在、或即將遇到一樣的問題。</p>
+<span id="more"></span>
+
+<h3 id="問題的起點：設定檔開始失控"><a href="#問題的起點：設定檔開始失控" class="headerlink" title="問題的起點：設定檔開始失控"></a>問題的起點：設定檔開始失控</h3><p>如果你在用 Claude Code 之類的 AI coding agent，你一定知道專案根目錄下會有一個 <code>.claude/</code> 資料夾，裡面放著各種設定：</p>
+<ul>
+<li><code>skills/</code>：技能定義，告訴 agent 怎麼做特定事情（像是 commit 格式、code review 規範）</li>
+<li><code>commands/</code>：自訂指令，讓你在 CLI 裡直接呼叫特定流程</li>
+<li><code>agents/</code>：獨立角色 agent，每個有自己的系統提示和行為邊界</li>
+</ul>
+<p>一開始一切美好。你在一個專案寫好 skill，agent 就乖乖照做。</p>
+<p>但問題來了——當你有五個、十個專案，而且它們共用同一套開發規範的時候怎麼辦？</p>
+<p>你開始複製貼上。</p>
+<p>第一次複製，沒問題。第二次，小改一下也還行。到第五次的時候，你已經忘了哪個版本是最新的。然後某天你在 A 專案改了 commit 規範，B 專案還是舊的，C 專案改了一半⋯⋯</p>
+<p>對，這就是經典的「config drift」問題，只是這次的主角不是 Kubernetes YAML，而是 AI agent 的設定檔。</p>
+<h3 id="解法：Git-Submodule"><a href="#解法：Git-Submodule" class="headerlink" title="解法：Git Submodule"></a>解法：Git Submodule</h3><p>想了幾個方案之後，最後選了 git submodule。原因很直覺：</p>
+<ul>
+<li>這些設定檔本身就是純文字 + markdown，適合 git 管理</li>
+<li>每個「技能包」可以是獨立 repo，有自己的版本歷史</li>
+<li>主專案只記錄「我要用哪個版本」，不用管內容</li>
+<li>更新的時候 <code>git submodule update</code> 一行搞定</li>
+</ul>
+<p>具體做法是把原本直接放在 <code>.claude/skills/</code> 和 <code>.claude/commands/</code> 裡的內容，拆成獨立的 git repo，然後在主專案裡用 submodule 引入。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 把 common commands 加為 submodule</span></span><br><span class="line">git submodule add git@gitea.example.com:Library/commands-common.git .claude/commands/common</span><br><span class="line"></span><br><span class="line"><span class="comment"># 把 team workflow agents 加為 submodule</span></span><br><span class="line">git submodule add git@gitea.example.com:Library/agents-team-workflow.git .claude/agents/team-workflow</span><br></pre></td></tr></table></figure>
+
+<p>其他專案要用？一樣加 submodule 就好：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/Projects/另一個專案</span><br><span class="line">git submodule add git@gitea.example.com:Library/commands-common.git .claude/commands/common</span><br></pre></td></tr></table></figure>
+
+<p>從此只有一個 source of truth。改了 commands-common，所有專案 <code>git submodule update --remote</code> 就同步了。</p>
+<h3 id="Skills-vs-Agents：搞清楚本質差異"><a href="#Skills-vs-Agents：搞清楚本質差異" class="headerlink" title="Skills vs Agents：搞清楚本質差異"></a>Skills vs Agents：搞清楚本質差異</h3><p>搬的過程中遇到一個有趣的問題：原本有一組「團隊開發流程」的設定，一開始放在 <code>skills/</code> 裡。但搬的時候越看越不對——它的內容不是在教 agent「怎麼做某件事」，而是在定義「你是誰、你的職責是什麼」。</p>
+<p>這兩者的差別很關鍵：</p>
+<p><strong>Skill（技能）</strong>是知識導向的。它告訴 agent：</p>
+<ul>
+<li>commit message 的格式規範是什麼</li>
+<li>code review 要檢查哪些項目</li>
+<li>特定框架的 API 怎麼用</li>
+</ul>
+<p><strong>Agent（角色）</strong>是身份導向的。它定義：</p>
+<ul>
+<li>你是 BA、架構師、開發者、還是 QA？</li>
+<li>你的決策權限到哪裡？</li>
+<li>你應該產出什麼交付物？</li>
+<li>你跟其他角色怎麼協作？</li>
+</ul>
+<p>舉個例子，我們的團隊開發流程定義了五個角色：</p>
+<ul>
+<li><strong>BA（業務分析師）</strong>：負責需求分析，產出功能規格</li>
+<li><strong>Architect（架構師）</strong>：負責技術設計，產出架構決策</li>
+<li><strong>Developer（開發者）</strong>：負責實作，遵守 coding standard</li>
+<li><strong>Reviewer（審查者）</strong>：負責 code review，確保品質</li>
+<li><strong>QA（測試工程師）</strong>：負責測試策略，驗收結果</li>
+</ul>
+<p>這些東西放在 <code>skills/</code> 裡語意不對。它們不是「技能」，是「人格」。所以最後搬到了 <code>.claude/agents/</code> 下面，每個角色一個 <code>.md</code> 檔案，用 YAML frontmatter 定義角色的基本屬性。</p>
+<figure class="highlight dos"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.claude/agents/team-workflow/</span><br><span class="line">├── ba.<span class="built_in">md</span></span><br><span class="line">├── architect.<span class="built_in">md</span></span><br><span class="line">├── developer.<span class="built_in">md</span></span><br><span class="line">├── reviewer.<span class="built_in">md</span></span><br><span class="line">└── qa.<span class="built_in">md</span></span><br></pre></td></tr></table></figure>
+
+<p>這樣做的好處是，在 Claude Code 裡你可以直接指定要用哪個「角色」來處理當前任務。不同角色有不同的關注點和決策框架，比起一個萬能 agent 來得精準。</p>
+<h3 id="最終結構"><a href="#最終結構" class="headerlink" title="最終結構"></a>最終結構</h3><p>折騰完之後，<code>.claude/</code> 目錄長這樣：</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.claude/</span><br><span class="line">├── commands/</span><br><span class="line">│   └── <span class="keyword">common</span>/        ← submodule：共用指令（commit, <span class="keyword">format</span>, review）</span><br><span class="line">├── agents/</span><br><span class="line">│   └── <span class="built_in">team</span>-workflow/ ← submodule：團隊角色（ba, architect, developer, reviewer, qa）</span><br><span class="line">├── skills/</span><br><span class="line">│   └── (專案特有的技能放這裡)</span><br><span class="line">└── settings.json</span><br></pre></td></tr></table></figure>
+
+<p>三層分類的邏輯：</p>
+<ul>
+<li>**commands&#x2F;**：觸發動作（「做這件事」）</li>
+<li>**agents&#x2F;**：角色定義（「當這個人」）</li>
+<li>**skills&#x2F;**：領域知識（「知道這些事」）</li>
+</ul>
+<p>其中 commands 和 agents 是 submodule（跨專案共用），skills 裡放的是專案特有的知識（像是特定 DB schema、業務邏輯說明），不需要共用。</p>
+<h3 id="實際踩到的坑"><a href="#實際踩到的坑" class="headerlink" title="實際踩到的坑"></a>實際踩到的坑</h3><p><strong>1. Submodule 路徑要對</strong></p>
+<p>Claude Code 認的是相對路徑。如果你的 submodule 路徑不在 <code>.claude/</code> 底下，agent 可能找不到。確保 <code>git submodule add</code> 的目標路徑是正確的相對位置。</p>
+<p><strong>2. 刪除舊 submodule 不是刪目錄就好</strong></p>
+<p>Git submodule 的刪除步驟永遠比你想的多：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git submodule deinit -f .claude/skills/舊的</span><br><span class="line">git <span class="built_in">rm</span> -f .claude/skills/舊的</span><br><span class="line"><span class="built_in">rm</span> -rf .git/modules/.claude/skills/舊的</span><br></pre></td></tr></table></figure>
+
+<p>少做任何一步都會留下幽靈紀錄，下次 <code>git submodule update</code> 就會鬧你。</p>
+<p><strong>3. Commit message 格式要統一</strong></p>
+<p>我們的專案規範是 <code>&lt;type&gt;: &lt;subject&gt;</code>（繁體中文主題），但 submodule 搬遷的 commit 一開始寫成了帶 scope 的格式（<code>build(agents): ...</code>）。這種小事通常不重要，但在團隊裡格式不一致會慢慢累積成技術債。</p>
+<p><strong>4. 測試 agent 能不能認到</strong></p>
+<p>搬完之後一定要測。在 Claude Code 裡確認每個 agent 都能被正確載入。我們五個角色搬完後全部測試通過，但如果你的 frontmatter 格式不對（少了必要欄位），agent 會安靜地消失——不會報錯，就是不見了。</p>
+<h3 id="什麼時候該用這個架構？"><a href="#什麼時候該用這個架構？" class="headerlink" title="什麼時候該用這個架構？"></a>什麼時候該用這個架構？</h3><p>老實說，如果你只有一兩個專案，直接把設定檔放在 <code>.claude/</code> 裡就好，不需要搞 submodule。過度工程化是另一種病。</p>
+<p>但如果你符合以下任何一條，就值得認真考慮：</p>
+<ul>
+<li>超過三個專案共用同一套開發規範</li>
+<li>團隊裡有多人在調整 agent 設定</li>
+<li>你已經在複製貼上 skill 檔案，而且開始搞不清楚哪個是最新版</li>
+<li>你想要版本控制 agent 的行為變更（誰改了什麼、什麼時候改的）</li>
+</ul>
+<h3 id="寫在最後"><a href="#寫在最後" class="headerlink" title="寫在最後"></a>寫在最後</h3><p>AI coding agent 的設定管理是一個很新的問題。現在大多數人還在「一個專案一份設定」的階段，但隨著 agent 能力越來越強、使用場景越來越多，設定檔的管理複雜度會指數成長。</p>
+<p>用 git submodule 不是唯一解——你也可以用 npm package、symlink、甚至寫個腳本去同步。但 submodule 的好處是零依賴、零額外工具，純 git 操作就搞定。</p>
+<p>如果你也在煩惱 AI agent 設定怎麼跨專案管理，希望這篇能給你一些靈感。至少你知道，你不是唯一一個在搞這種事的人 😂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Monorepo/" rel="tag"># Monorepo</a>
+              <a href="/tags/Claude-Code/" rel="tag"># Claude Code</a>
+              <a href="/tags/AI-%E9%96%8B%E7%99%BC%E5%B7%A5%E5%85%B7/" rel="tag"># AI 開發工具</a>
+              <a href="/tags/Git-Submodule/" rel="tag"># Git Submodule</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E6%B5%81%E7%A8%8B/" rel="tag"># 開發流程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026021301/" rel="prev" title="我的資料庫不用 Foreign Key——一個技術主管的實戰心得">
+      <i class="fa fa-chevron-left"></i> 我的資料庫不用 Foreign Key——一個技術主管的實戰心得
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026022101/" rel="next" title="用 OpenClaw 打造 AI 信箱自動回覆系統：從收信到回信全自動">
+      用 OpenClaw 打造 AI 信箱自動回覆系統：從收信到回信全自動 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%95%8F%E9%A1%8C%E7%9A%84%E8%B5%B7%E9%BB%9E%EF%BC%9A%E8%A8%AD%E5%AE%9A%E6%AA%94%E9%96%8B%E5%A7%8B%E5%A4%B1%E6%8E%A7"><span class="nav-number">1.</span> <span class="nav-text">問題的起點：設定檔開始失控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%B3%95%EF%BC%9AGit-Submodule"><span class="nav-number">2.</span> <span class="nav-text">解法：Git Submodule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Skills-vs-Agents%EF%BC%9A%E6%90%9E%E6%B8%85%E6%A5%9A%E6%9C%AC%E8%B3%AA%E5%B7%AE%E7%95%B0"><span class="nav-number">3.</span> <span class="nav-text">Skills vs Agents：搞清楚本質差異</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%B5%82%E7%B5%90%E6%A7%8B"><span class="nav-number">4.</span> <span class="nav-text">最終結構</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%A6%E9%9A%9B%E8%B8%A9%E5%88%B0%E7%9A%84%E5%9D%91"><span class="nav-number">5.</span> <span class="nav-text">實際踩到的坑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%99%82%E5%80%99%E8%A9%B2%E7%94%A8%E9%80%99%E5%80%8B%E6%9E%B6%E6%A7%8B%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">什麼時候該用這個架構？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%AB%E5%9C%A8%E6%9C%80%E5%BE%8C"><span class="nav-number">7.</span> <span class="nav-text">寫在最後</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

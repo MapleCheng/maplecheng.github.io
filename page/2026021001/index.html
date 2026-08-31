@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="把 AI Agent 的專案上下文從 system prompt 搬到 Discord channel topic，讓非技術人員也能維護，同時減少 config 膨脹。一個小改動帶來的架構啟發。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用 Channel Topic 當 AI Agent 的上下文注入點，比 System Prompt 更優雅">
+<meta property="og:url" content="https://maplecheng.com/page/2026021001/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="把 AI Agent 的專案上下文從 system prompt 搬到 Discord channel topic，讓非技術人員也能維護，同時減少 config 膨脹。一個小改動帶來的架構啟發。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-09T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Context Engineering">
+<meta property="article:tag" content="Discord">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="架構設計">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026021001/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>用 Channel Topic 當 AI Agent 的上下文注入點，比 System Prompt 更優雅 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026021001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用 Channel Topic 當 AI Agent 的上下文注入點，比 System Prompt 更優雅
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-10 05:00:00" itemprop="dateCreated datePublished" datetime="2026-02-10T05:00:00+08:00">2026-02-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">把 AI Agent 的專案上下文從 system prompt 搬到 Discord channel topic，讓非技術人員也能維護，同時減少 config 膨脹。一個小改動帶來的架構啟發。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近做了一個小重構，把 AI Agent 在不同頻道的上下文資訊，從寫死在 config 裡的 system prompt，搬到 Discord 的 channel topic。聽起來微不足道，但改完之後覺得這個 pattern 值得聊聊。</p>
+<span id="more"></span>
+
+<h3 id="問題：System-Prompt-正在失控"><a href="#問題：System-Prompt-正在失控" class="headerlink" title="問題：System Prompt 正在失控"></a>問題：System Prompt 正在失控</h3><p>我用 AI Agent 管理多個客戶專案的溝通頻道。每個頻道需要不同的上下文——客戶名稱、產品線、Git Repo 位置、任務看板在哪。</p>
+<p>最初的做法很直覺：每個頻道在 Agent 的 config 裡塞一段 <code>systemPrompt</code>。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">channels:</span></span><br><span class="line">  <span class="attr">customer-a:</span></span><br><span class="line">    <span class="attr">systemPrompt:</span> <span class="string">|</span></span><br><span class="line"><span class="string">      這是客戶 A 的頻道。</span></span><br><span class="line"><span class="string">      產品：ERP 模組 X</span></span><br><span class="line"><span class="string">      Git Repo：https://gitea.example.com/org/repo-a</span></span><br><span class="line"><span class="string">      任務看板：Notion DB xxx-xxx</span></span><br></pre></td></tr></table></figure>
+
+<p>一開始還行，三四個頻道而已。但隨著專案增加到十幾個，問題開始浮現：</p>
+<ul>
+<li><strong>Config 檔爆炸</strong>：每個頻道一段 prompt，config 越來越長</li>
+<li><strong>改動成本高</strong>：改一個 Repo URL 要去改 config、重啟服務</li>
+<li><strong>非技術人員改不動</strong>：想讓 PM 自己維護？他得學 YAML</li>
+<li><strong>容易出錯</strong>：複製貼上改漏、縮排錯誤，classic YAML 地獄</li>
+</ul>
+<h3 id="轉念：Topic-本來就是「頻道的自我介紹」"><a href="#轉念：Topic-本來就是「頻道的自我介紹」" class="headerlink" title="轉念：Topic 本來就是「頻道的自我介紹」"></a>轉念：Topic 本來就是「頻道的自我介紹」</h3><p>Discord 每個頻道都有 topic 欄位，原本設計就是讓人一眼知道這個頻道在幹嘛。</p>
+<p>如果 AI Agent 能自動讀取 channel topic 作為上下文，那不就完美了嗎？</p>
+<ul>
+<li>維護者只要在 Discord UI 裡編輯 topic</li>
+<li>不需要動 config、不需要重啟</li>
+<li>任何有頻道管理權限的人都能改</li>
+<li>資訊放在最該放的地方——頻道本身</li>
+</ul>
+<h3 id="實作方式"><a href="#實作方式" class="headerlink" title="實作方式"></a>實作方式</h3><p>概念很簡單。Agent 進入頻道對話時，自動把 channel topic 注入為 untrusted context（注意，是 untrusted，不是 system prompt 等級的信任）。</p>
+<p>Topic 的內容格式大概長這樣：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">客戶：某某食品 <span class="regexp">/ 產品：ERP T830 /</span> Repo：gitea.example.com<span class="regexp">/org/</span>repo / 任務：Notion 任務清單</span><br></pre></td></tr></table></figure>
+
+<p>一行搞定。Agent 看到這些就知道自己在哪個專案的頻道裡，回答問題時自然會帶入對應的上下文。</p>
+<h3 id="幾個設計決策"><a href="#幾個設計決策" class="headerlink" title="幾個設計決策"></a>幾個設計決策</h3><p><strong>只放定位資訊，不放會過時的東西。</strong></p>
+<p>Topic 裡不該出現「目前開發到 v2.3」「負責人是小明」「這個模組有 bug」這種會變的內容。只放相對穩定的定位資訊：客戶是誰、用什麼產品、程式碼在哪、任務追蹤在哪。</p>
+<p>會變的資訊讓 Agent 自己去查。Agent 知道 Repo 在哪，自然能去看最新的 branch 和 issue。知道任務看板在哪，自然能去查目前的進度。</p>
+<p><strong>用 untrusted context，不是 system prompt。</strong></p>
+<p>這很重要。Channel topic 任何有權限的人都能改，所以不能當作完全可信的指令來源。把它當成「參考資訊」而非「執行命令」，安全性好很多。</p>
+<p>Agent 會參考這些資訊來理解對話情境，但不會盲目執行 topic 裡寫的任何指令。</p>
+<p><strong>精簡原則。</strong></p>
+<p>每個 topic 控制在一兩行。不是在寫文件，是在給 Agent 一個快速定位的錨點。就像你走進辦公室，門口的名牌告訴你這是哪個部門，不需要貼一整份組織章程。</p>
+<h3 id="遷移過程"><a href="#遷移過程" class="headerlink" title="遷移過程"></a>遷移過程</h3><p>把十幾個頻道的 systemPrompt 全部移除，改成設定 channel topic。整個過程大概花了半小時：</p>
+<ol>
+<li>整理每個頻道需要的核心資訊（客戶、產品、Repo、任務看板）</li>
+<li>寫成精簡的 topic 格式</li>
+<li>逐一設定 Discord channel topic</li>
+<li>從 config 刪掉所有 systemPrompt</li>
+<li>重啟一次，搞定</li>
+</ol>
+<p>Config 檔瞬間瘦了一大截。而且以後新增客戶頻道，只要建頻道、填 topic，不用碰 config。</p>
+<h3 id="這個-Pattern-的啟發"><a href="#這個-Pattern-的啟發" class="headerlink" title="這個 Pattern 的啟發"></a>這個 Pattern 的啟發</h3><p>退一步看，這其實是一個更通用的設計原則：<strong>把上下文放在離使用者最近的地方</strong>。</p>
+<p>System prompt 是開發者的領地。Channel topic 是使用者的領地。當上下文資訊本質上是「這個空間在幹嘛」的描述時，它就該由管理這個空間的人來維護，而不是由寫 config 的工程師。</p>
+<p>這跟微服務架構裡「服務自描述」的概念異曲同工。每個服務（頻道）自己宣告自己是什麼，消費者（Agent）讀取後自行適配。比起中央控管一份大的路由表，更靈活、更不容易出錯。</p>
+<p>同樣的思路可以延伸到其他場景：</p>
+<ul>
+<li>Slack channel 的 description</li>
+<li>GitHub repo 的 README 或 about</li>
+<li>Notion database 的 description</li>
+<li>甚至檔案系統裡的 <code>.context</code> 檔案</li>
+</ul>
+<p>任何「空間」都有某種形式的「自我描述」欄位，都能成為 AI Agent 的上下文注入點。</p>
+<h3 id="小結"><a href="#小結" class="headerlink" title="小結"></a>小結</h3><p>有時候最好的架構改進不是引入新技術，而是把東西放到對的位置。Channel topic 本來就在那裡，只是之前沒想到讓 AI 去讀它。</p>
+<p>一行 topic，省掉一堆 config。有時候就是這麼簡單。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/Discord/" rel="tag"># Discord</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88/" rel="tag"># 架構設計</a>
+              <a href="/tags/Context-Engineering/" rel="tag"># Context Engineering</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026021002/" rel="prev" title="用 AI 自動產生每日站會報告，從日曆和任務清單組裝「昨天做了什麼」">
+      <i class="fa fa-chevron-left"></i> 用 AI 自動產生每日站會報告，從日曆和任務清單組裝「昨天做了什麼」
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026021101/" rel="next" title="AI Coding Agent 的幻覺問題：當它無中生有了不存在的資料庫欄位">
+      AI Coding Agent 的幻覺問題：當它無中生有了不存在的資料庫欄位 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%95%8F%E9%A1%8C%EF%BC%9ASystem-Prompt-%E6%AD%A3%E5%9C%A8%E5%A4%B1%E6%8E%A7"><span class="nav-number">1.</span> <span class="nav-text">問題：System Prompt 正在失控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%89%E5%BF%B5%EF%BC%9ATopic-%E6%9C%AC%E4%BE%86%E5%B0%B1%E6%98%AF%E3%80%8C%E9%A0%BB%E9%81%93%E7%9A%84%E8%87%AA%E6%88%91%E4%BB%8B%E7%B4%B9%E3%80%8D"><span class="nav-number">2.</span> <span class="nav-text">轉念：Topic 本來就是「頻道的自我介紹」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%A6%E4%BD%9C%E6%96%B9%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">實作方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%BE%E5%80%8B%E8%A8%AD%E8%A8%88%E6%B1%BA%E7%AD%96"><span class="nav-number">4.</span> <span class="nav-text">幾個設計決策</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%B7%E7%A7%BB%E9%81%8E%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">遷移過程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%99%E5%80%8B-Pattern-%E7%9A%84%E5%95%9F%E7%99%BC"><span class="nav-number">6.</span> <span class="nav-text">這個 Pattern 的啟發</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%B5%90"><span class="nav-number">7.</span> <span class="nav-text">小結</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

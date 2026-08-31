@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Stylized Maple Leaf Based on Reference Image -->
+  
+  <!-- Left Half of Maple Leaf -->
+  <path d="M32 10
+           C28 18, 25 25, 22 30
+           C18 32, 15 34, 12 32
+           C15 36, 18 38, 19 42
+           C15 46, 14 48, 12 50
+           C17 48, 21 46, 25 45
+           C27 50, 29 54, 32 58
+           L32 10" 
+        fill="#e05141" stroke="none" />
+  
+  <!-- Right Half of Maple Leaf -->
+  <path d="M32 10
+           C36 18, 39 25, 42 30
+           C46 32, 49 34, 52 32
+           C49 36, 46 38, 45 42
+           C49 46, 50 48, 52 50
+           C47 48, 43 46, 39 45
+           C37 50, 35 54, 32 58
+           L32 10" 
+        fill="#e05141" stroke="none" fill-opacity="0.3" />
+</svg>

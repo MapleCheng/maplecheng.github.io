@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="當 Cron、Skill 與參考文件各自保存一份規則，AI 自動化就會悄悄產生行為漂移。從技術主管視角談如何把排程縮成薄觸發器，讓可版本化、可測試的 Skill 成為唯一規則來源。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="排程只負責叫醒 Agent，不要偷偷養一套業務規則">
+<meta property="og:url" content="https://maplecheng.com/page/2026081001/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="當 Cron、Skill 與參考文件各自保存一份規則，AI 自動化就會悄悄產生行為漂移。從技術主管視角談如何把排程縮成薄觸發器，讓可版本化、可測試的 Skill 成為唯一規則來源。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-08-09T21:00:44.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.346Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Skill">
+<meta property="article:tag" content="技術管理">
+<meta property="article:tag" content="架構治理">
+<meta property="article:tag" content="自動化">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026081001/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>排程只負責叫醒 Agent，不要偷偷養一套業務規則 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026081001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          排程只負責叫醒 Agent，不要偷偷養一套業務規則
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-08-10 05:00:44" itemprop="dateCreated datePublished" datetime="2026-08-10T05:00:44+08:00">2026-08-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI-%E8%88%87%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">AI 與工作流程
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">當 Cron、Skill 與參考文件各自保存一份規則，AI 自動化就會悄悄產生行為漂移。從技術主管視角談如何把排程縮成薄觸發器，讓可版本化、可測試的 Skill 成為唯一規則來源。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近維護一個定時執行的 AI 工作流時，我碰到一種很典型的問題：Skill 明明已經更新，排程跑出來的結果卻還是照舊。</p>
+<p>一開始很容易懷疑 Agent 沒有讀懂新規則，或模型表現不穩。真正往下查才發現，問題根本不在模型，而在排程設定裡還藏著一份舊版邏輯。Skill 改了，Cron 的 prompt 沒改；兩邊都像正式規格，最後誰先進入上下文，誰就可能說了算。</p>
+<p>這讓我重新確認一個原則：排程應該只負責叫醒 Agent，不該偷偷養一套業務規則。</p>
+<span id="more"></span>
+
+<h2 id="重複規則，比沒有規則更難查"><a href="#重複規則，比沒有規則更難查" class="headerlink" title="重複規則，比沒有規則更難查"></a>重複規則，比沒有規則更難查</h2><p>傳統程式出現兩份相同邏輯，我們通常會立刻聞到壞味道。但 AI 工作流裡的重複不一定長得像程式碼，它可能分散在 Cron prompt、Skill、reference、系統提示與操作文件中。每一份單獨看都合理，合在一起卻沒有明確優先順序。</p>
+<p>更麻煩的是，這種錯誤通常不會讓工作流直接失敗。排程仍然準時啟動，Agent 仍然會輸出完整內容，格式甚至完全正確；只是其中某個判斷沿用了幾週前的規則。對維運來說，這比報錯更危險，因為表面上的成功會掩蓋行為漂移。</p>
+<p>我現在會把這類問題視為「規則供應鏈」故障。真正要追的不是模型為什麼這樣回答，而是：這次執行到底載入了哪些規則、各自是哪個版本、衝突時採用了哪一份？如果回答不出來，Agent 的行為就還沒有被工程化管理。</p>
+<h2 id="Cron-應該是薄觸發器"><a href="#Cron-應該是薄觸發器" class="headerlink" title="Cron 應該是薄觸發器"></a>Cron 應該是薄觸發器</h2><p>我偏好的做法，是把 Cron prompt 縮到只剩執行契約：</p>
+<ul>
+<li>這次要完成哪一類任務；</li>
+<li>必須載入哪個 Skill 與必要參考文件；</li>
+<li>輸入資料的時間範圍或位置；</li>
+<li>交付格式與傳送邊界；</li>
+<li>失敗時應回報什麼，而不是猜測補完。</li>
+</ul>
+<p>至於如何判斷、有哪些例外、數值門檻、處理順序與驗證方式，全部回到 Skill 或它管理的 reference。如此一來，排程只是穩定入口，領域邏輯則留在可版本化的知識層。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart LR
+  C[Cron：觸發時間與任務入口] --> S[載入最新版 Skill]
+  S --> R[讀取必要 Reference]
+  R --> A[Agent 執行]
+  A --> V[驗證與交付]
+  O[觀測與執行紀錄] -.追蹤版本.-> A
+          </pre>
+
+<p>這不是在追求「prompt 越短越好」。薄的重點是職責清楚，而不是字數少。排程仍然要把輸入、輸出與失敗語意交代完整，只是不再複製一份會持續演化的業務判斷。</p>
+<h2 id="規則更新必須天然生效"><a href="#規則更新必須天然生效" class="headerlink" title="規則更新必須天然生效"></a>規則更新必須天然生效</h2><p>判斷架構有沒有切乾淨，我會做一個很實際的測試：修改 Skill 裡的一條規則後，下一次排程是否不改 Cron 就能自然套用？</p>
+<p>如果答案是否定的，代表系統裡仍然存在隱藏耦合。每次更新都要同步改兩三個地方，短期看只是麻煩，長期一定會漏。更現實的是，這些地方通常由不同人維護：領域負責人更新操作規則，平台工程師管理排程，另一位同事維護輸出模板。只要缺少明確的唯一來源，版本分岔只是時間問題。</p>
+<p>我不會要求所有東西都塞進同一份巨大 Skill。比較合理的是分層：Skill 保存流程骨架與載入規則；reference 保存會成長的領域細節；Cron 保存觸發條件與交付契約。每一層都能變，但同一種判斷只能有一個權威位置。</p>
+<p>這和後端系統管理設定很像。環境變數可以指定服務位置，資料庫保存業務狀態，程式碼實作規則；如果把折扣公式同時寫進環境變數、前端與批次程式，遲早會算出三種答案。Agent 並不會讓這個老問題消失，只會讓衝突看起來更像自然語言。</p>
+<h2 id="不只要載入，還要證明載入了"><a href="#不只要載入，還要證明載入了" class="headerlink" title="不只要載入，還要證明載入了"></a>不只要載入，還要證明載入了</h2><p>把規則集中起來只是第一步。正式工作流還需要留下足夠的執行證據，例如 Skill 名稱與版本、載入了哪些 reference、規則最後更新時間、模型與工具版本，以及驗證結果。</p>
+<p>不一定每次都要把這些資訊顯示給使用者，但維運端必須查得到。出了問題時，我希望看到的是「這次執行使用規則版本 A，輸入範圍 B，驗證 C 未通過」，而不是重新閱讀一大串 prompt，猜模型當時比較相信哪一段。</p>
+<p>另外，更新規則後應該有最小回歸測試。至少挑幾個容易出錯的邊界案例，確認排程重新執行後真的採用新版判斷。對高風險流程，還要測試舊規則已經失效，而不只是新規則在某個範例中剛好通過。</p>
+<h2 id="AI-自動化的維護單位不是-Prompt"><a href="#AI-自動化的維護單位不是-Prompt" class="headerlink" title="AI 自動化的維護單位不是 Prompt"></a>AI 自動化的維護單位不是 Prompt</h2><p>很多團隊剛開始做 Agent，會把 prompt 當成最主要的維護單位。哪裡不對就補一句，下一次再不對就再加一段。久了之後，排程、入口與技能文件各自長出補丁，卻沒有人能說清楚完整行為是由哪裡定義。</p>
+<p>從 CTO 的角度看，我更願意把維護單位定義成「可版本化、可載入、可驗證的能力」。Prompt 只是其中一種載體，不是架構邊界。真正可靠的工作流，應該讓觸發器保持穩定，讓領域知識能獨立更新，並且讓每次執行都能追溯自己依據了什麼。</p>
+<p>這次踩坑後，我對排程的要求反而變簡單了：準時叫醒正確的 Agent，交給它正確的入口，確認它讀到最新版規則，最後驗證交付。不要在叫醒它的鬧鐘裡，再偷偷塞一本過期的操作手冊。</p>
+<p>Cron 做好時間，Skill 管好方法，Reference 保存細節，執行紀錄負責證明。邊界切乾淨之後，AI 工作流才不會每次更新，都像在和自己的舊版本拔河。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+              <a href="/tags/Skill/" rel="tag"># Skill</a>
+              <a href="/tags/%E6%9E%B6%E6%A7%8B%E6%B2%BB%E7%90%86/" rel="tag"># 架構治理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026080901/" rel="prev" title="Agent 不是帳號：企業需要一份非人類身分名冊">
+      <i class="fa fa-chevron-left"></i> Agent 不是帳號：企業需要一份非人類身分名冊
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026081101/" rel="next" title="Agent 的信任，不該在登入成功後一路沿用到底">
+      Agent 的信任，不該在登入成功後一路沿用到底 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E8%A4%87%E8%A6%8F%E5%89%87%EF%BC%8C%E6%AF%94%E6%B2%92%E6%9C%89%E8%A6%8F%E5%89%87%E6%9B%B4%E9%9B%A3%E6%9F%A5"><span class="nav-number">1.</span> <span class="nav-text">重複規則，比沒有規則更難查</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cron-%E6%87%89%E8%A9%B2%E6%98%AF%E8%96%84%E8%A7%B8%E7%99%BC%E5%99%A8"><span class="nav-number">2.</span> <span class="nav-text">Cron 應該是薄觸發器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A6%8F%E5%89%87%E6%9B%B4%E6%96%B0%E5%BF%85%E9%A0%88%E5%A4%A9%E7%84%B6%E7%94%9F%E6%95%88"><span class="nav-number">3.</span> <span class="nav-text">規則更新必須天然生效</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%8F%AA%E8%A6%81%E8%BC%89%E5%85%A5%EF%BC%8C%E9%82%84%E8%A6%81%E8%AD%89%E6%98%8E%E8%BC%89%E5%85%A5%E4%BA%86"><span class="nav-number">4.</span> <span class="nav-text">不只要載入，還要證明載入了</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AI-%E8%87%AA%E5%8B%95%E5%8C%96%E7%9A%84%E7%B6%AD%E8%AD%B7%E5%96%AE%E4%BD%8D%E4%B8%8D%E6%98%AF-Prompt"><span class="nav-number">5.</span> <span class="nav-text">AI 自動化的維護單位不是 Prompt</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="AI agent 工具越來越多，但外掛能不能共用，關鍵不在 repo 長什麼樣子，而在 host contract、manifest、runtime 與權限模型是否相容。這篇從技術主管視角聊聊跨 agent 整合時該怎麼拆層。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="外掛不是資料夾：AI Agent 生態整合時，真正要看的是 Host Contract">
+<meta property="og:url" content="https://maplecheng.com/page/2026061401/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="AI agent 工具越來越多，但外掛能不能共用，關鍵不在 repo 長什麼樣子，而在 host contract、manifest、runtime 與權限模型是否相容。這篇從技術主管視角聊聊跨 agent 整合時該怎麼拆層。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-06-13T21:05:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.344Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="CTO筆記">
+<meta property="article:tag" content="MCP">
+<meta property="article:tag" content="Plugin">
+<meta property="article:tag" content="架構設計">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026061401/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>外掛不是資料夾：AI Agent 生態整合時，真正要看的是 Host Contract | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026061401/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          外掛不是資料夾：AI Agent 生態整合時，真正要看的是 Host Contract
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-06-14 05:05:00" itemprop="dateCreated datePublished" datetime="2026-06-14T05:05:00+08:00">2026-06-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">AI agent 工具越來越多，但外掛能不能共用，關鍵不在 repo 長什麼樣子，而在 host contract、manifest、runtime 與權限模型是否相容。這篇從技術主管視角聊聊跨 agent 整合時該怎麼拆層。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看 AI agent 工具生態時，我一直有個感覺：大家很容易把「外掛」想得太像一個資料夾。看到某個 plugin 是 Git repo，就會直覺想問：那我是不是可以把它裝到另一個 agent 裡？答案通常是：檔案搬得過去，不代表能力跑得起來。</p>
+<span id="more"></span>
+
+<p>這件事乍聽有點掃興，但其實是很重要的架構觀念。外掛真正依賴的不是 repo，而是 host contract。</p>
+<p>所謂 host contract，可以把它想成外掛和宿主程式之間的契約：manifest 怎麼宣告、command 怎麼註冊、生命週期怎麼啟動、設定值放哪裡、權限怎麼控、hook 什麼時候被呼叫、執行環境提供哪些 API、錯誤怎麼回報。這些東西只要有一層對不上，外掛就不是「稍微改一下路徑」那麼簡單，而是需要 adapter、wrapper，甚至整個重新包裝。</p>
+<p>這其實不新。VS Code extension 不能直接丟進 Chrome 使用，Chrome extension 也不能拿去 Obsidian 當 plugin。它們都可能是 zip、資料夾、GitHub repo，也都可能用 JavaScript 寫，但宿主看得懂的宣告格式、提供的 runtime API、權限模型完全不同。AI agent 只是把同樣的問題搬到另一個還在快速演化的領域。</p>
+<h2 id="Repo-是載體，不是標準"><a href="#Repo-是載體，不是標準" class="headerlink" title="Repo 是載體，不是標準"></a>Repo 是載體，不是標準</h2><p>工程團隊在評估 AI agent 生態時，很容易被「它也是一個 repo」誤導。Repo 只是交付方式，不是相容性保證。</p>
+<p>一個 agent plugin repo 裡可能有 commands、agents、skills、hooks、MCP 設定、prompt 模板、甚至安裝腳本。但另一個 agent 能不能使用它，不是看它有沒有 <code>README.md</code> 或資料夾結構看起來像不像，而是看宿主是否知道：</p>
+<ol>
+<li>哪個檔案是入口？</li>
+<li>manifest schema 是否一致？</li>
+<li>command 的 input &#x2F; output contract 是什麼？</li>
+<li>執行時能不能取得同樣的環境變數與憑證？</li>
+<li>權限、確認、審計與錯誤處理由誰負責？</li>
+<li>這個外掛預期的是互動式 session，還是背景工作？</li>
+</ol>
+<p>如果這些問題沒有答案，直接安裝通常只是把未知風險搬進系統。</p>
+<p>我現在比較傾向用「三層」來看這件事。</p>
+<p>第一層是<strong>原生外掛層</strong>。這層最貼近宿主，使用體驗最好，可以直接吃到 host 提供的 UI、命令、權限、記憶與工具呼叫能力。缺點也很明顯：耦合最高，換一個 host 就不一定能用。</p>
+<p>第二層是<strong>能力封裝層</strong>。例如把一段工作流程寫成 skill、script、prompt package，讓 agent 可以讀懂並執行。這層比原生外掛鬆一點，移植性較好，但仍然會受宿主的 skill 格式、工具呼叫方式與檔案規範影響。</p>
+<p>第三層是<strong>協議服務層</strong>。像 MCP 這類做法，本質上是把能力抽到外部 server，用標準協議暴露 tool、resource 或 prompt。只要不同 host 都支援同一套協議，就比較有機會共用。代價是多了一個服務要部署、監控、除錯，也多了一層延遲與故障面。</p>
+<h2 id="跨-agent-共用，不一定要硬裝同一個外掛"><a href="#跨-agent-共用，不一定要硬裝同一個外掛" class="headerlink" title="跨 agent 共用，不一定要硬裝同一個外掛"></a>跨 agent 共用，不一定要硬裝同一個外掛</h2><p>如果目標是「同一份能力給多個 agent 用」，我不會第一時間追求「同一個 plugin 可以原生安裝到所有 host」。那通常會把 repo 搞成一團條件判斷：這邊一份 manifest、那邊一份 adapter、不同 host 各自一套 lifecycle。短期看起來很省，長期常變成維護地獄。</p>
+<p>比較乾淨的做法是先判斷能力的核心在哪裡。</p>
+<p>如果核心是某個 API、查詢、計算或資料存取，那就把它抽成 service 或 MCP server，讓不同 agent 透過協議呼叫。各自的 plugin 只做很薄的 adapter，負責把 host 的命令轉成標準呼叫。</p>
+<p>如果核心是某套工作方法、操作流程或提示策略，那它更像 skill 或 playbook。這時候不一定需要 server，重點反而是文件夠清楚、步驟可驗證、失敗情境有寫出來。不同 agent 可以各自用自己的 skill 格式承載，但內容邏輯保持一致。</p>
+<p>如果核心是 host-specific 的 UI 或互動體驗，例如某個 IDE 裡的 sidebar、特定聊天室的 slash command、某個 agent 的 hook 流程，那就老實承認它是原生外掛，不要假裝它可以無痛跨平台。跨平台可以做，但那是產品規劃，不是複製資料夾。</p>
+<h2 id="技術主管要看的不是「能不能裝」，而是責任邊界"><a href="#技術主管要看的不是「能不能裝」，而是責任邊界" class="headerlink" title="技術主管要看的不是「能不能裝」，而是責任邊界"></a>技術主管要看的不是「能不能裝」，而是責任邊界</h2><p>從 CTO 或技術主管角度，我最在意的其實不是某個工具支不支援某個 plugin，而是責任邊界有沒有畫清楚。</p>
+<p>外掛壞掉時，是 host 的問題、adapter 的問題、協議 server 的問題，還是背後 API 的問題？權限檢查在哪一層做？敏感操作要不要人類確認？log 記在哪裡？版本升級時誰負責相容性？</p>
+<p>這些問題如果在導入前沒想清楚，AI agent 工具會很快從「很聰明的助理」變成「很難控的自動化黑盒」。尤其當 agent 開始能改檔案、打 API、發訊息、觸發工作流程時，外掛不再只是功能擴充，而是生產系統的一部分。</p>
+<p>所以我現在看到新的 agent plugin 生態，會先問幾個問題：</p>
+<ul>
+<li>這個能力是要給單一 host 用，還是多個 host 共用？</li>
+<li>它依賴的是 host 的互動體驗，還是背後的通用服務？</li>
+<li>能力核心能不能抽成協議層？</li>
+<li>adapter 能不能保持很薄？</li>
+<li>權限、審計、錯誤處理在哪裡收斂？</li>
+</ul>
+<p>如果答案是「只是想先試試看」，那原生外掛或 skill 很好，快、直接、回饋短。如果答案是「未來會有多個 agent、多人、多系統共用」，我會更早把核心能力抽出來，不讓它長死在單一 host 裡。</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>AI agent 的工具生態接下來一定會越來越碎。每個平台都會有自己的 plugin、skill、command、workflow 格式，這很正常，因為大家都還在找最好的互動模型。</p>
+<p>但身為工程團隊，我們不能只看「能不能安裝」。真正該看的，是這個能力和宿主之間簽了什麼契約。</p>
+<p>外掛不是資料夾，repo 也不是標準。標準在 contract 裡，在 runtime 裡，在權限與生命週期裡。看懂這一點，跨 agent 整合就不會變成一場複製貼上的豪賭，而會變成有邊界、有抽象、有退路的架構設計。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MCP/" rel="tag"># MCP</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88/" rel="tag"># 架構設計</a>
+              <a href="/tags/Plugin/" rel="tag"># Plugin</a>
+              <a href="/tags/CTO%E7%AD%86%E8%A8%98/" rel="tag"># CTO筆記</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026061301/" rel="prev" title="當語言模型不再一個字一個字往前猜">
+      <i class="fa fa-chevron-left"></i> 當語言模型不再一個字一個字往前猜
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026061501/" rel="next" title="AI Agent 的記憶不是日記，是修正迴路">
+      AI Agent 的記憶不是日記，是修正迴路 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Repo-%E6%98%AF%E8%BC%89%E9%AB%94%EF%BC%8C%E4%B8%8D%E6%98%AF%E6%A8%99%E6%BA%96"><span class="nav-number">1.</span> <span class="nav-text">Repo 是載體，不是標準</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%A8-agent-%E5%85%B1%E7%94%A8%EF%BC%8C%E4%B8%8D%E4%B8%80%E5%AE%9A%E8%A6%81%E7%A1%AC%E8%A3%9D%E5%90%8C%E4%B8%80%E5%80%8B%E5%A4%96%E6%8E%9B"><span class="nav-number">2.</span> <span class="nav-text">跨 agent 共用，不一定要硬裝同一個外掛</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E4%B8%BB%E7%AE%A1%E8%A6%81%E7%9C%8B%E7%9A%84%E4%B8%8D%E6%98%AF%E3%80%8C%E8%83%BD%E4%B8%8D%E8%83%BD%E8%A3%9D%E3%80%8D%EF%BC%8C%E8%80%8C%E6%98%AF%E8%B2%AC%E4%BB%BB%E9%82%8A%E7%95%8C"><span class="nav-number">3.</span> <span class="nav-text">技術主管要看的不是「能不能裝」，而是責任邊界</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">4.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

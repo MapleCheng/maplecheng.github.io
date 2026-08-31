@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近整理 AI 助理的長期記憶時，我再次踩到一個容易被忽略的坑：記憶系統不是一堆 markdown 檔案，清理也不是看到像 metadata 就刪掉。真正重要的是分清楚資料來源、判讀規則與可回復邊界。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 助理的記憶清理，不是刪檔案，是設維運邊界">
+<meta property="og:url" content="https://maplecheng.com/page/2026052001/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近整理 AI 助理的長期記憶時，我再次踩到一個容易被忽略的坑：記憶系統不是一堆 markdown 檔案，清理也不是看到像 metadata 就刪掉。真正重要的是分清楚資料來源、判讀規則與可回復邊界。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-05-19T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.343Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="維運">
+<meta property="article:tag" content="自動化">
+<meta property="article:tag" content="記憶系統">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026052001/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI 助理的記憶清理，不是刪檔案，是設維運邊界 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026052001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI 助理的記憶清理，不是刪檔案，是設維運邊界
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-05-20 05:00:00" itemprop="dateCreated datePublished" datetime="2026-05-20T05:00:00+08:00">2026-05-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近整理 AI 助理的長期記憶時，我再次踩到一個容易被忽略的坑：記憶系統不是一堆 markdown 檔案，清理也不是看到像 metadata 就刪掉。真正重要的是分清楚資料來源、判讀規則與可回復邊界。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在整理 AI 助理的長期記憶時，我又被一件看起來很小的事情提醒：記憶系統最危險的地方，往往不是「忘記」，而是「太有自信地清掉不該清的東西」。</p>
+<p>聽起來很像廢話對吧？但真的開始讓 AI 自己做每日整理、歸檔、去重、摘要、更新技能庫之後，你會發現它已經不是單純的筆記工具，而是一個需要維運邊界的系統。差別只在於，它的資料長得比較像文字，不像資料庫那麼有威嚴而已。</p>
+<span id="more"></span>
+
+<h3 id="記憶不是只有一種形狀"><a href="#記憶不是只有一種形狀" class="headerlink" title="記憶不是只有一種形狀"></a>記憶不是只有一種形狀</h3><p>很多人談 AI Agent 的 memory，第一個想到的是向量資料庫。把內容 embedding 起來，查詢時 recall，聽起來很高級，也確實有用。</p>
+<p>但在實務上，我更常看到的是混合型記憶：</p>
+<ul>
+<li>有些是 file-backed memory，存在 markdown、json、yaml 裡；</li>
+<li>有些是 topic memory，像是某個領域或專案的長期摘要；</li>
+<li>有些是 daily log，保留最近發生的原始脈絡；</li>
+<li>有些才是真正的 vector DB 記憶，用語意搜尋召回。</li>
+</ul>
+<p>問題來了：當你叫 AI「整理記憶」的時候，它到底在整理哪一種？</p>
+<p>如果沒有講清楚，它很容易把「我看得到的檔案」誤認成「全部的記憶系統」。更糟的是，它可能開始用同一套標準處理完全不同生命週期的資料。日誌可以歸檔，topic memory 要合併，vector memory 需要查詢與刪除工具，skill 文件則是作業手冊。這些東西混在一起清，災難就開始了。</p>
+<h3 id="看起來像垃圾的東西，不一定是垃圾"><a href="#看起來像垃圾的東西，不一定是垃圾" class="headerlink" title="看起來像垃圾的東西，不一定是垃圾"></a>看起來像垃圾的東西，不一定是垃圾</h3><p>這次整理時，有一個細節很有意思：某些候選內容看起來很像噪音，例如 metadata、model、transcript、archive、artifact 這類字眼。</p>
+<p>如果你只用直覺判斷，很容易下結論：「這些應該是系統殘留，可以刪。」</p>
+<p>但實際上不一定。</p>
+<p>metadata 可能記錄了自動擷取規則；model 可能是某個流程指定的模型策略；transcript 可能說明為什麼某段歷史不能只看最後摘要；archive 可能是資料搬遷後的指向；artifact 則可能是某個工作流輸出物的約定。</p>
+<p>也就是說，這些字眼本身不是垃圾，必須回到上下文判斷。AI 最容易犯的錯，是把「像垃圾的格式」當成「沒有價值的內容」。</p>
+<p>這件事其實跟工程維運很像。你在一台老系統裡看到一個叫 temp 的資料表，第一反應可能是想清掉；但資深工程師會先問：「誰在寫它？誰在讀它？刪掉後有沒有 rollback？」因為我們都知道，很多 production 系統最可怕的依賴，名字都取得很隨便。</p>
+<h3 id="自動清理前，先定義操作權限"><a href="#自動清理前，先定義操作權限" class="headerlink" title="自動清理前，先定義操作權限"></a>自動清理前，先定義操作權限</h3><p>我現在越來越覺得，AI Agent 的記憶整理不能只靠 prompt 說「請小心」。這太脆弱了。</p>
+<p>比較好的做法，是把操作分層：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+  A[讀取最近記錄] --> B[分類：日誌 / 主題 / 技能 / 向量記憶]
+  B --> C[產生候選項目]
+  C --> D{是否具備操作工具與回復路徑？}
+  D -- 否 --> E[只回報限制，不執行刪除]
+  D -- 是 --> F[小批次處理]
+  F --> G[驗證：讀回 / 搜尋 / diff]
+  G --> H[寫入維運紀錄]
+          </pre>
+
+<p>這張圖的重點不是流程漂亮，而是中間那個判斷：有沒有操作工具與回復路徑？</p>
+<p>例如 file-backed memory 可以用 git diff、讀回確認、必要時 revert。可是 vector DB 如果沒有 list、delete、merge 的可靠工具，你就不應該假裝自己真的整理完了。最多只能說：「我掃描了可見檔案，向量記憶目前無法直接盤點。」</p>
+<p>這句話看起來很保守，但我喜歡這種保守。因為它誠實。</p>
+<p>技術主管最怕的不是系統有限制，而是系統不知道自己有限制。AI Agent 也是一樣。它不需要每次都無所不能，它需要在不能做的地方停下來，清楚告訴你邊界在哪裡。</p>
+<h3 id="Skill-也會腐爛"><a href="#Skill-也會腐爛" class="headerlink" title="Skill 也會腐爛"></a>Skill 也會腐爛</h3><p>另一個延伸出來的觀察是：AI 的 skill library 其實不是文件庫，而是維運手冊。</p>
+<p>文件庫可以放著不動，頂多過時；維運手冊過時就會害人。</p>
+<p>當某次整理發現「這個 skill 沒提醒要區分 file-backed memory 和 vector memory」時，正確做法不是只在當次任務裡記住，而是立刻把這個坑補回 skill。否則下次另一個 agent、另一個 session、另一個凌晨的 cron job，還是會踩同一個坑。</p>
+<p>這也是我覺得 AI 工作流真正有趣的地方：它不是一次性自動化，而是會累積操作經驗的系統。每次踩坑，如果只停留在對話紀錄裡，那叫聊天；如果能回寫到可重複使用的流程裡，那才叫工程化。</p>
+<p>當然，這裡也有反面風險。你不能什麼都寫進 skill，否則 skill 會變成另一種垃圾堆。我的做法是只記三種東西：</p>
+<ul>
+<li>曾經造成錯誤判斷的前提；</li>
+<li>下次必須先檢查的限制；</li>
+<li>可以驗證結果的具體方法。</li>
+</ul>
+<p>其他像心情、流水帳、一次性狀態，就讓它留在 daily log，不要污染作業手冊。</p>
+<h3 id="記憶系統需要的是稽核感"><a href="#記憶系統需要的是稽核感" class="headerlink" title="記憶系統需要的是稽核感"></a>記憶系統需要的是稽核感</h3><p>做久了我有一個感覺：AI Agent 的長期記憶，不該只追求「記得更多」，而是要追求「記得可稽核」。</p>
+<p>可稽核的意思是：</p>
+<ul>
+<li>我知道這段記憶從哪裡來；</li>
+<li>我知道它目前被放在哪一層；</li>
+<li>我知道誰可以修改它；</li>
+<li>我知道修改後怎麼確認沒有弄壞；</li>
+<li>我知道刪除前有沒有備份或替代來源。</li>
+</ul>
+<p>這些聽起來很傳統，甚至有點無聊。但企業系統很多年累積下來的教訓就是：無聊的稽核設計，通常是半夜少被叫醒的原因。</p>
+<p>AI Agent 也是系統。只要它開始替你整理資料、更新規則、生成報告、改寫流程，它就不再只是「一個會聊天的介面」。它變成一個會動手的操作者。操作者就需要權限、邊界、紀錄和驗證。</p>
+<h3 id="我的結論"><a href="#我的結論" class="headerlink" title="我的結論"></a>我的結論</h3><p>如果你正在做 AI 助理或內部 Agent，我會建議不要太早迷戀「記憶多強」。先問幾個比較土、但比較救命的問題：</p>
+<p>這些記憶分幾層？哪些能自動改？哪些只能建議？哪些刪了可以回復？哪些看起來像垃圾但其實是規則？當工具不足時，Agent 會不會誠實停手？</p>
+<p>記憶系統的成熟，不是它永遠不忘，而是它知道什麼可以忘、什麼不能亂忘，以及忘記之前要留下什麼證據。</p>
+<p>這大概也是我最近越來越相信的一件事：AI 自動化要變可靠，靠的不是更神的模型，而是更像工程師的維運邊界。</p>
+<p>模型負責聰明，系統負責不要太聰明過頭。這兩件事，缺一個都會出事。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/%E8%A8%98%E6%86%B6%E7%B3%BB%E7%B5%B1/" rel="tag"># 記憶系統</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E7%B6%AD%E9%81%8B/" rel="tag"># 維運</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026051901/" rel="prev" title="企業 AI Agent 想進 ERP 和 MES，第一步不是串 API，而是設安全邊界">
+      <i class="fa fa-chevron-left"></i> 企業 AI Agent 想進 ERP 和 MES，第一步不是串 API，而是設安全邊界
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026052101/" rel="next" title="狀態機要記成功，不要記意圖：一次 Slash Command 同步踩坑">
+      狀態機要記成功，不要記意圖：一次 Slash Command 同步踩坑 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%98%E6%86%B6%E4%B8%8D%E6%98%AF%E5%8F%AA%E6%9C%89%E4%B8%80%E7%A8%AE%E5%BD%A2%E7%8B%80"><span class="nav-number">1.</span> <span class="nav-text">記憶不是只有一種形狀</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%8B%E8%B5%B7%E4%BE%86%E5%83%8F%E5%9E%83%E5%9C%BE%E7%9A%84%E6%9D%B1%E8%A5%BF%EF%BC%8C%E4%B8%8D%E4%B8%80%E5%AE%9A%E6%98%AF%E5%9E%83%E5%9C%BE"><span class="nav-number">2.</span> <span class="nav-text">看起來像垃圾的東西，不一定是垃圾</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8B%95%E6%B8%85%E7%90%86%E5%89%8D%EF%BC%8C%E5%85%88%E5%AE%9A%E7%BE%A9%E6%93%8D%E4%BD%9C%E6%AC%8A%E9%99%90"><span class="nav-number">3.</span> <span class="nav-text">自動清理前，先定義操作權限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Skill-%E4%B9%9F%E6%9C%83%E8%85%90%E7%88%9B"><span class="nav-number">4.</span> <span class="nav-text">Skill 也會腐爛</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%98%E6%86%B6%E7%B3%BB%E7%B5%B1%E9%9C%80%E8%A6%81%E7%9A%84%E6%98%AF%E7%A8%BD%E6%A0%B8%E6%84%9F"><span class="nav-number">5.</span> <span class="nav-text">記憶系統需要的是稽核感</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E7%9A%84%E7%B5%90%E8%AB%96"><span class="nav-number">6.</span> <span class="nav-text">我的結論</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

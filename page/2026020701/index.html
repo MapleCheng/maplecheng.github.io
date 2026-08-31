@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="當 AI 接管了大部分 coding 工作，傳統的時間估算還有意義嗎？分享我從時間導向轉為複雜度導向的任務管理新思維。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 時代的任務估算：從「要花多久」到「有多難」">
+<meta property="og:url" content="https://maplecheng.com/page/2026020701/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="當 AI 接管了大部分 coding 工作，傳統的時間估算還有意義嗎？分享我從時間導向轉為複雜度導向的任務管理新思維。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-06T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="任務管理">
+<meta property="article:tag" content="工作流程">
+<meta property="article:tag" content="生產力">
+<meta property="article:tag" content="軟體開發">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020701/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI 時代的任務估算：從「要花多久」到「有多難」 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020701/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI 時代的任務估算：從「要花多久」到「有多難」
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-07 05:00:00" itemprop="dateCreated datePublished" datetime="2026-02-07T05:00:00+08:00">2026-02-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">當 AI 接管了大部分 coding 工作，傳統的時間估算還有意義嗎？分享我從時間導向轉為複雜度導向的任務管理新思維。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近我做了一件有點瘋狂的事——把用了好幾年的任務管理系統砍掉重練。</p>
+<p>不是因為原本的系統壞了，而是因為 AI 的崛起讓「時間」這個估算維度變得越來越不可靠。以前一個功能估 8 小時，現在可能 2 小時就搞定。以前一天能處理 3 個任務，現在可能處理 10 個。這種變化讓我開始思考：我們到底在估什麼？</p>
+<span id="more"></span>
+
+<h3 id="傳統估算的崩壞"><a href="#傳統估算的崩壞" class="headerlink" title="傳統估算的崩壞"></a>傳統估算的崩壞</h3><p>身為技術主管，我習慣用「這個要花多久」來安排工作。一個 API 2 小時，一個表單 4 小時，一個報表 6 小時。這套邏輯在過去很好用，因為 coding 時間是最大的瓶頸。</p>
+<p>但現在不一樣了。</p>
+<p>當我可以用 AI 輔助工具在 30 分鐘內生成一個完整的 CRUD 模組，「時間」這個維度就開始失真。更詭異的是，有些看起來很簡單的任務（「改個按鈕文字」），反而比複雜的開發任務更耗時——因為要釐清需求、確認設計、通知相關人員。</p>
+<p>我發現自己越來越常遇到這種情況：</p>
+<ul>
+<li>估 4 小時的功能，1 小時做完</li>
+<li>估 1 小時的改動，搞了半天還沒收尾</li>
+</ul>
+<p>這不是估算能力的問題，是估算維度錯了。</p>
+<h3 id="複雜度才是真正的成本"><a href="#複雜度才是真正的成本" class="headerlink" title="複雜度才是真正的成本"></a>複雜度才是真正的成本</h3><p>在反覆踩坑後，我決定換一個思考框架：不問「要花多久」，問「有多難」。</p>
+<p>這個轉變聽起來微妙，但實際操作起來差很多。</p>
+<p>「多久」是一個關於執行的問題——坐下來打字需要多少時間。<br>「多難」是一個關於認知的問題——這件事需要多少腦力、涉及多少不確定性、有多少外部依賴。</p>
+<p>舉個例子：</p>
+<p><strong>任務 A：新增一個資料匯出功能</strong></p>
+<ul>
+<li>時間估算：4 小時</li>
+<li>複雜度：低（明確的輸入輸出，套現有模式）</li>
+</ul>
+<p><strong>任務 B：調查某個偶發的效能問題</strong></p>
+<ul>
+<li>時間估算：2 小時（？）</li>
+<li>複雜度：高（不確定原因，需要深入分析，可能牽連多個系統）</li>
+</ul>
+<p>用時間估，任務 A 看起來比較重。但實際上任務 B 的認知負擔大得多，而且時間完全不可預測——可能 30 分鐘找到原因，也可能查了兩天還是一頭霧水。</p>
+<h3 id="我的新估算方式"><a href="#我的新估算方式" class="headerlink" title="我的新估算方式"></a>我的新估算方式</h3><p>現在我的任務估算改用類似敏捷開發的 Story Points，但做了一些個人化調整：</p>
+<p><strong>1-2 點：低複雜度</strong></p>
+<ul>
+<li>明確的需求</li>
+<li>熟悉的技術</li>
+<li>幾乎沒有外部依賴</li>
+<li>AI 可以直接生成大部分代碼</li>
+</ul>
+<p><strong>3-5 點：中複雜度</strong></p>
+<ul>
+<li>需要一些設計決策</li>
+<li>可能涉及 2-3 個系統</li>
+<li>需要釐清部分需求</li>
+<li>AI 能幫忙但需要調整</li>
+</ul>
+<p><strong>8-13 點：高複雜度</strong></p>
+<ul>
+<li>不確定性高</li>
+<li>跨多個領域</li>
+<li>需要與他人協調</li>
+<li>可能有技術探索成分</li>
+</ul>
+<p><strong>21 點：研究型任務</strong></p>
+<ul>
+<li>完全不知道會遇到什麼</li>
+<li>需要學習新技術</li>
+<li>結果難以預測</li>
+</ul>
+<p>這個分法的好處是：它承認了「不確定性」這個維度。</p>
+<h3 id="AI-時代的認知瓶頸"><a href="#AI-時代的認知瓶頸" class="headerlink" title="AI 時代的認知瓶頸"></a>AI 時代的認知瓶頸</h3><p>為什麼我要特別強調「認知負擔」？因為在 AI 時代，這才是真正的瓶頸。</p>
+<p>以前的開發流程是：思考 20%，編碼 80%。<br>現在變成：思考 60%，編碼 20%，審核 AI 輸出 20%。</p>
+<p>coding 時間被大幅壓縮了，但思考時間沒有。需求分析、架構設計、邊界條件、錯誤處理——這些還是需要人腦來處理。更甚者，因為 AI 可以快速產出大量代碼，我們反而需要花更多時間來審核、測試、整合。</p>
+<p>這就是為什麼用「時間」估算會失準。一個高複雜度的任務，可能真正的 coding 只花 1 小時，但前後的思考、溝通、驗證加起來要半天。如果只估 coding 時間，會嚴重低估任務的真實成本。</p>
+<h3 id="團隊-vs-個人的雙軌制"><a href="#團隊-vs-個人的雙軌制" class="headerlink" title="團隊 vs 個人的雙軌制"></a>團隊 vs 個人的雙軌制</h3><p>這邊要特別說明：我只對自己的任務管理做這個調整。團隊協作上，我們還是維持時間導向的估算。</p>
+<p>原因很務實：團隊需要可預測的交付時間。客戶問「這個什麼時候可以上線」，我不能回答「大概 8 個 story points」。</p>
+<p>所以我的做法是雙軌並行：</p>
+<ul>
+<li><strong>個人任務</strong>：複雜度導向，幫助我安排每日工作優先序</li>
+<li><strong>團隊任務</strong>：時間導向，維持對外承諾的可預測性</li>
+</ul>
+<p>這兩套系統服務不同目的。個人任務管理是為了優化我的認知資源分配；團隊任務估算是為了維持專案的可預測性。</p>
+<h3 id="實際操作心得"><a href="#實際操作心得" class="headerlink" title="實際操作心得"></a>實際操作心得</h3><p>跑了幾天這套新系統，有一些觀察：</p>
+<p><strong>好的地方：</strong></p>
+<ul>
+<li>更容易判斷「今天能做幾件事」。以前是加時間，現在是加複雜度——8 點以內大概是合理的一天工作量。</li>
+<li>對高複雜度任務的心理預期更準確。標了 13 點的任務，我就知道這需要一大塊專注時間，不會傻傻塞在會議空檔。</li>
+<li>減少了「這應該很快」的錯估。很多看起來簡單的任務，複雜度一評估就知道沒那麼單純。</li>
+</ul>
+<p><strong>還在適應的地方：</strong></p>
+<ul>
+<li>有時候很難區分「3 點」和「5 點」。這需要累積經驗值。</li>
+<li>回顧機制還沒建立。應該要追蹤預估 vs 實際的差異，持續校準。</li>
+</ul>
+<h3 id="給同樣在思考這問題的人"><a href="#給同樣在思考這問題的人" class="headerlink" title="給同樣在思考這問題的人"></a>給同樣在思考這問題的人</h3><p>如果你也感覺傳統的時間估算越來越不準，可以試試這個思路：</p>
+<ol>
+<li><p><strong>先觀察</strong>：記錄一週，看看哪些任務的「預估時間」和「實際時間」差最多。通常是複雜度被低估的那些。</p>
+</li>
+<li><p><strong>從個人開始</strong>：不需要改變團隊流程。先在自己的 todo list 試驗，看看複雜度思維是否有幫助。</p>
+</li>
+<li><p><strong>擁抱不確定性</strong>：承認「我不知道這要多久」是一種進步。用複雜度來標記這種不確定性，比硬擠一個時間數字更誠實。</p>
+</li>
+<li><p><strong>持續校準</strong>：任何估算系統都需要回饋迴圈。定期回顧，調整你的點數基準。</p>
+</li>
+</ol>
+<h3 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h3><p>AI 正在重塑軟體開發的每一個環節。當 coding 不再是瓶頸，我們需要重新思考：真正消耗的資源是什麼？</p>
+<p>對我來說，答案是認知負擔和不確定性。而複雜度導向的估算，正是試圖捕捉這個維度。</p>
+<p>這不是什麼革命性的發現——敏捷社群早就在討論 Story Points 的意義。但 AI 時代讓這個討論變得更迫切。當 AI 可以一秒鐘寫出一百行程式碼，「程式碼行數」或「coding 時間」已經無法代表任何東西了。</p>
+<p>如果這篇能讓你開始思考自己的估算方式，那我的這番折騰就沒白費了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%94%9F%E7%94%A2%E5%8A%9B/" rel="tag"># 生產力</a>
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/%E8%BB%9F%E9%AB%94%E9%96%8B%E7%99%BC/" rel="tag"># 軟體開發</a>
+              <a href="/tags/%E4%BB%BB%E5%8B%99%E7%AE%A1%E7%90%86/" rel="tag"># 任務管理</a>
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B/" rel="tag"># 工作流程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020601/" rel="prev" title="Microsoft Graph API 郵件回覆實戰：如何正確保持 Email Thread 連貫">
+      <i class="fa fa-chevron-left"></i> Microsoft Graph API 郵件回覆實戰：如何正確保持 Email Thread 連貫
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020801/" rel="next" title="小團隊的 Git 工作流：GitHub Flow + 日期版號的選擇">
+      小團隊的 Git 工作流：GitHub Flow + 日期版號的選擇 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%82%B3%E7%B5%B1%E4%BC%B0%E7%AE%97%E7%9A%84%E5%B4%A9%E5%A3%9E"><span class="nav-number">1.</span> <span class="nav-text">傳統估算的崩壞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A4%87%E9%9B%9C%E5%BA%A6%E6%89%8D%E6%98%AF%E7%9C%9F%E6%AD%A3%E7%9A%84%E6%88%90%E6%9C%AC"><span class="nav-number">2.</span> <span class="nav-text">複雜度才是真正的成本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E7%9A%84%E6%96%B0%E4%BC%B0%E7%AE%97%E6%96%B9%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">我的新估算方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AI-%E6%99%82%E4%BB%A3%E7%9A%84%E8%AA%8D%E7%9F%A5%E7%93%B6%E9%A0%B8"><span class="nav-number">4.</span> <span class="nav-text">AI 時代的認知瓶頸</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%98%E9%9A%8A-vs-%E5%80%8B%E4%BA%BA%E7%9A%84%E9%9B%99%E8%BB%8C%E5%88%B6"><span class="nav-number">5.</span> <span class="nav-text">團隊 vs 個人的雙軌制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%A6%E9%9A%9B%E6%93%8D%E4%BD%9C%E5%BF%83%E5%BE%97"><span class="nav-number">6.</span> <span class="nav-text">實際操作心得</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%A6%E5%90%8C%E6%A8%A3%E5%9C%A8%E6%80%9D%E8%80%83%E9%80%99%E5%95%8F%E9%A1%8C%E7%9A%84%E4%BA%BA"><span class="nav-number">7.</span> <span class="nav-text">給同樣在思考這問題的人</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">8.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

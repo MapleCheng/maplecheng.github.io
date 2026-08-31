@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="AI 服務不是永遠在線的。當 Anthropic 連續兩天大規模故障，我被迫在半天內建立一套多模型 Fallback Chain。這篇記錄從崩潰到恢復的完整過程，以及為什麼你的 AI 工作流需要一個 Plan B。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="當你的 AI 供應商連掛兩天：多模型 Fallback Chain 實戰筆記">
+<meta property="og:url" content="https://maplecheng.com/page/2026030401/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="AI 服務不是永遠在線的。當 Anthropic 連續兩天大規模故障，我被迫在半天內建立一套多模型 Fallback Chain。這篇記錄從崩潰到恢復的完整過程，以及為什麼你的 AI 工作流需要一個 Plan B。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-03-03T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Fallback">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="高可用性">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026030401/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>當你的 AI 供應商連掛兩天：多模型 Fallback Chain 實戰筆記 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026030401/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          當你的 AI 供應商連掛兩天：多模型 Fallback Chain 實戰筆記
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-03-04 05:00:00" itemprop="dateCreated datePublished" datetime="2026-03-04T05:00:00+08:00">2026-03-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">AI 服務不是永遠在線的。當 Anthropic 連續兩天大規模故障，我被迫在半天內建立一套多模型 Fallback Chain。這篇記錄從崩潰到恢復的完整過程，以及為什麼你的 AI 工作流需要一個 Plan B。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>你有沒有想過，如果你每天依賴的 AI 服務突然掛了，你的工作流會怎樣？</p>
+<p>我想過。但「想過」跟「真的遇到」是兩回事。</p>
+<span id="more"></span>
+
+<h3 id="災難的開始"><a href="#災難的開始" class="headerlink" title="災難的開始"></a>災難的開始</h3><p>那天早上我照慣例打開電腦，準備讓 AI Agent 幫我處理一些開發任務。結果迎接我的是一個冰冷的數字：<strong>529</strong>。</p>
+<p>HTTP 529，Anthropic 的 overloaded 回應。好吧，API 偶爾抖一下很正常，等等就好了。</p>
+<p>等了十分鐘。還是 529。</p>
+<p>等了三十分鐘。還是 529。</p>
+<p>打開 Anthropic 的 status page，上面寫著「Degraded Performance」。好，那就等。身為一個把大量工作流建立在 Claude 上的技術主管，我能做的就是——等。</p>
+<p>然後我等了一整天。</p>
+<h3 id="24-小時內第二次"><a href="#24-小時內第二次" class="headerlink" title="24 小時內第二次"></a>24 小時內第二次</h3><p>更慘的是，這不是第一次。前一天也掛了一次，只是時間比較短，我僥倖覺得是個案。結果隔天又來，而且這次是全天性的大規模故障。</p>
+<p>這時候我才認真面對一個事實：<strong>我的整個 AI 工作流是單點故障的。</strong></p>
+<p>我的 Agent 系統跑在 OpenClaw 上，主力模型是 Claude Opus。Sub-agent 派工、程式碼審查、郵件處理、甚至每日站會報告——全部吃 Anthropic API。一掛，全停。</p>
+<h3 id="第一個念頭：換一個備用模型"><a href="#第一個念頭：換一個備用模型" class="headerlink" title="第一個念頭：換一個備用模型"></a>第一個念頭：換一個備用模型</h3><p>想法很直覺：設一個 fallback model，Anthropic 掛了就跳到 OpenAI。</p>
+<p>但實際操作比想像中麻煩。首先，你不能隨便拿一個 ChatGPT 帳號的 OAuth token 當 API key 用——它們是兩套不同的認證系統。我一開始就在這裡卡了半小時，拿著 ChatGPT 的 token 一直打 API，一直被拒。</p>
+<p>後來搞清楚了：如果你有 OpenAI 的 Codex 訂閱（或 API 方案），需要用對應的認證流程。我最終是透過 <code>openclaw onboard --auth-choice openai-codex</code> 把 OpenAI Codex 的認證串起來的。</p>
+<h3 id="不只一個備胎：Fallback-Chain"><a href="#不只一個備胎：Fallback-Chain" class="headerlink" title="不只一個備胎：Fallback Chain"></a>不只一個備胎：Fallback Chain</h3><p>一個備用模型夠嗎？經歷了連續兩天的故障，我的答案是：不夠。</p>
+<p>原因很簡單——如果你的 Plan B 也掛了呢？雖然兩家同時故障的機率很低，但我不想再賭了。所以我建了一條完整的 <strong>Fallback Chain</strong>：</p>
+<ol>
+<li><strong>Anthropic Claude Opus</strong> — 主力，品質最好</li>
+<li><strong>OpenAI GPT-5.3 Codex</strong> — 第一備援，程式碼能力強</li>
+<li><strong>OpenAI GPT-5.2 Codex</strong> — 第二備援</li>
+<li><strong>OpenAI GPT-5.2</strong> — 第三備援</li>
+<li><strong>Anthropic Claude Sonnet</strong> — 最後保底</li>
+</ol>
+<p>你可能會問：為什麼 Sonnet 放最後？因為以我的使用場景來說，Sonnet 的推理品質跟 Opus 差距明顯，放在倒數是為了「至少還有東西能動」的情境。而 GPT-5.3 Codex 在程式碼任務上表現不錯，當 Opus 的第一替補綽綽有餘。</p>
+<h3 id="設定的眉角"><a href="#設定的眉角" class="headerlink" title="設定的眉角"></a>設定的眉角</h3><p>建立 fallback chain 的過程中，有幾個實際踩到的坑：</p>
+<p><strong>認證方式不統一。</strong> Anthropic 用 API key，OpenAI Codex 走 OAuth，每家的認證流程都不一樣。如果你的 Agent 平台不支援統一管理多個 provider 的認證，光是設定就會讓你懷疑人生。</p>
+<p><strong>Context window 差異。</strong> Claude 跟 GPT-5.3 Codex 都是 200K context（Claude 甚至可以擴到 1M extended thinking），但不同模型對長 context 的處理能力不同。我有一個 session 撞到 212K 超過 200K 上限被拒——壓縮機制來不及介入，訊息直接被擋。這在設計 fallback 時要考慮：切換模型後，context 可能需要重新壓縮。</p>
+<p><strong>模型行為差異。</strong> 這是最微妙的。同樣的 system prompt，Claude 和 GPT 的回應風格、工具呼叫習慣、甚至錯誤處理方式都不同。如果你的 Agent 有很細的行為規範（像我的有身份設定、記憶系統、多 skill 架構），換模型後可能會出現一些「微妙的不對勁」。不至於壞掉，但你會感覺到那不是同一個人在回話。</p>
+<p><strong>不是所有模型都能用。</strong> 我本來想試 GPT-5.3 Codex Spark（更快的版本），結果發現它不支援 ChatGPT 帳號認證。這種「看起來可以但實際不行」的情況，只有真正去試才會發現。</p>
+<h3 id="為什麼不早點做？"><a href="#為什麼不早點做？" class="headerlink" title="為什麼不早點做？"></a>為什麼不早點做？</h3><p>說實話，有點心虛。</p>
+<p>身為技術主管，我天天跟團隊講系統要有 redundancy、要考慮 failover、不能有 single point of failure。結果自己的 AI 工作流就是一個巨大的單點故障。</p>
+<p>原因也很典型：<strong>因為一直都沒出過事。</strong> Anthropic 的 API 在過去幾個月穩定到讓人放鬆警惕。就像你知道該做備份，但硬碟一直沒壞過，所以備份軟體裝了從來沒跑過。</p>
+<p>直到硬碟真的壞了。</p>
+<h3 id="給同樣依賴-AI-API-的你"><a href="#給同樣依賴-AI-API-的你" class="headerlink" title="給同樣依賴 AI API 的你"></a>給同樣依賴 AI API 的你</h3><p>如果你也把 AI 服務深度整合到工作流裡，幾個建議：</p>
+<p><strong>現在就設好 fallback。</strong> 不要等到出事才急。多模型的認證設定、模型間的行為差異測試，這些需要時間。在平靜的時候做，比在故障時手忙腳亂好太多。</p>
+<p><strong>定期測試備援路徑。</strong> 設好了不代表能用。每隔一段時間手動觸發 fallback，確認整條 chain 是通的。我就是因為沒測過，才在故障當天花了好幾個小時在搞認證問題。</p>
+<p><strong>接受品質會降低。</strong> Fallback 的意義不是「跟主力一樣好」，而是「至少能動」。從 Opus 切到 GPT-5.3 Codex，有些任務的品質確實會下降。但能動比不能動好。完美是進步的敵人，在災難面前更是如此。</p>
+<p><strong>記錄你的 fallback chain。</strong> 寫下來，放在團隊文件裡。包括每個模型的認證方式、已知限制、切換條件。未來不一定是你在處理故障，讓其他人也能照著做。</p>
+<h3 id="後記"><a href="#後記" class="headerlink" title="後記"></a>後記</h3><p>故障恢復後，我的 Agent 又回到 Claude Opus 運行。但現在我看著那條 fallback chain 的設定，心裡踏實多了。</p>
+<p>AI 服務不是水電，不會 99.999% 在線。特別是在這個各家 provider 都在瘋狂迭代、流量暴增的階段，故障只會越來越常見。</p>
+<p>你的 AI 工作流有 Plan B 嗎？如果這篇能讓你今天就花半小時把 fallback 設好，那我這兩天的焦慮就沒白費了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/Fallback/" rel="tag"># Fallback</a>
+              <a href="/tags/%E9%AB%98%E5%8F%AF%E7%94%A8%E6%80%A7/" rel="tag"># 高可用性</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026030301/" rel="prev" title="當 AI Agent 學會自我進化：Skill 架構設計的踩坑與頓悟">
+      <i class="fa fa-chevron-left"></i> 當 AI Agent 學會自我進化：Skill 架構設計的踩坑與頓悟
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026030601/" rel="next" title="在 Windows 上安裝 OpenClaw：從零開始到 PM2 背景運行完整教學">
+      在 Windows 上安裝 OpenClaw：從零開始到 PM2 背景運行完整教學 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%81%BD%E9%9B%A3%E7%9A%84%E9%96%8B%E5%A7%8B"><span class="nav-number">1.</span> <span class="nav-text">災難的開始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#24-%E5%B0%8F%E6%99%82%E5%85%A7%E7%AC%AC%E4%BA%8C%E6%AC%A1"><span class="nav-number">2.</span> <span class="nav-text">24 小時內第二次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%80%8B%E5%BF%B5%E9%A0%AD%EF%BC%9A%E6%8F%9B%E4%B8%80%E5%80%8B%E5%82%99%E7%94%A8%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">第一個念頭：換一個備用模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%8F%AA%E4%B8%80%E5%80%8B%E5%82%99%E8%83%8E%EF%BC%9AFallback-Chain"><span class="nav-number">4.</span> <span class="nav-text">不只一個備胎：Fallback Chain</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A%E7%9A%84%E7%9C%89%E8%A7%92"><span class="nav-number">5.</span> <span class="nav-text">設定的眉角</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E4%B8%8D%E6%97%A9%E9%BB%9E%E5%81%9A%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">為什麼不早點做？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%A6%E5%90%8C%E6%A8%A3%E4%BE%9D%E8%B3%B4-AI-API-%E7%9A%84%E4%BD%A0"><span class="nav-number">7.</span> <span class="nav-text">給同樣依賴 AI API 的你</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%8C%E8%A8%98"><span class="nav-number">8.</span> <span class="nav-text">後記</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近維護幾個 AI 自動報告流程時，我重新確認一件事：真正容易讓報告失真的，不一定是模型亂寫，而是資料來源抓錯、沒驗證、遇到限制時硬猜。對技術主管來說，AI 報告系統要先把取材流程產品化，才談得上可信。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 自動報告最容易失真的地方：不是生成，而是取材">
+<meta property="og:url" content="https://maplecheng.com/page/2026051601/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近維護幾個 AI 自動報告流程時，我重新確認一件事：真正容易讓報告失真的，不一定是模型亂寫，而是資料來源抓錯、沒驗證、遇到限制時硬猜。對技術主管來說，AI 報告系統要先把取材流程產品化，才談得上可信。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-05-15T21:00:59.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="工作流設計">
+<meta property="article:tag" content="技術管理">
+<meta property="article:tag" content="自動化">
+<meta property="article:tag" content="資料治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026051601/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI 自動報告最容易失真的地方：不是生成，而是取材 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026051601/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI 自動報告最容易失真的地方：不是生成，而是取材
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-05-16 05:00:59" itemprop="dateCreated datePublished" datetime="2026-05-16T05:00:59+08:00">2026-05-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近維護幾個 AI 自動報告流程時，我重新確認一件事：真正容易讓報告失真的，不一定是模型亂寫，而是資料來源抓錯、沒驗證、遇到限制時硬猜。對技術主管來說，AI 報告系統要先把取材流程產品化，才談得上可信。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在維護幾個 AI 自動報告流程時，我又被一件很不華麗、但很要命的事提醒：AI 報告最容易失真的地方，很多時候不是最後那段「生成文字」，而是前面的「取材」。</p>
+<p>這句話聽起來很像廢話，對吧？沒有好資料就沒有好輸出，大家都知道。但實際做排程報告時，災難通常不是以「資料很爛」的形式出現，而是以一堆看起來很合理的小妥協慢慢滲進來：某個來源 403、某個 API rate limit、某個頁面結構改了、某個 fallback 抓到的其實不是原文。然後報告還是準時產出，語氣還很篤定。</p>
+<span id="more"></span>
+
+<h3 id="報告準時，不代表它可信"><a href="#報告準時，不代表它可信" class="headerlink" title="報告準時，不代表它可信"></a>報告準時，不代表它可信</h3><p>做自動化的人很容易把焦點放在排程有沒有跑、格式有沒有對、訊息有沒有送到。這些當然重要，我也不是說可以不管。可是 AI 報告跟一般 ETL 最大的差異在於：它會把不完整的素材包裝成很順的文字。</p>
+<p>傳統程式抓不到資料，通常會丟 error、空值或 broken chart。難看，但至少你知道它壞了。AI 報告比較麻煩，它很擅長把「我只抓到一半」寫成「綜合觀察可以看出」。</p>
+<p>這就是我現在對自動報告最警覺的地方：不是怕它不會寫，而是怕它太會寫。</p>
+<p>一個來源失敗，如果系統沒有明確標記，模型可能會用其他片段補上。兩個來源互相矛盾，如果沒有交叉驗證，模型可能會挑比較像故事的那一邊。某個頁面被反爬擋住，如果 fallback 工具回來的是摘要或錯頁，模型可能根本不知道自己站在沙地上。</p>
+<p>最後送到主管、工程師或使用者眼前的，不是「資料不足」，而是一份看起來很完整的錯誤信心。這比直接失敗更危險。</p>
+<h3 id="取材流程要像產品，不是像臨時腳本"><a href="#取材流程要像產品，不是像臨時腳本" class="headerlink" title="取材流程要像產品，不是像臨時腳本"></a>取材流程要像產品，不是像臨時腳本</h3><p>我以前也常把報告取材寫得很工程師腦：先打 API，失敗就爬頁面，再失敗就走 reader service，再不行就搜尋一下。能抓到就好，反正後面模型會整理。</p>
+<p>現在我會比較保守。因為每一層 fallback 都不是免費的，它會改變資料的可信度。</p>
+<p>官方 API 通常結構穩、欄位清楚，但可能有 rate limit。官網文章權威性高，但可能有反爬、動態載入或 canonical URL 問題。搜尋結果適合 discovery，卻不適合直接當事實來源。第三方 reader 很方便，但它拿到的是不是完整頁面、是不是最新版本、是不是同一篇文章，都要驗證。</p>
+<p>所以取材流程不能只寫成「抓不到就換下一個」。它應該像一個小產品，有來源等級、有失敗狀態、有驗證規則，也有「寧可不報」的判斷。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+  A[排程啟動] --> B[來源 discovery]
+  B --> C{找到原始來源?}
+  C -->|是| D[抓取內容與 metadata]
+  C -->|否| X[標記資料不足，不硬寫]
+  D --> E{交叉驗證通過?}
+  E -->|是| F[交給模型整理]
+  E -->|否| Y[降級為待確認線索]
+  F --> G[輸出報告]
+  Y --> G
+          </pre>
+
+<p>這張圖看起來很基本，但它背後的重點是：模型不應該負責猜資料品質。資料品質要在進模型之前就被標記清楚。</p>
+<h3 id="fallback-不是魔法，是風險轉移"><a href="#fallback-不是魔法，是風險轉移" class="headerlink" title="fallback 不是魔法，是風險轉移"></a>fallback 不是魔法，是風險轉移</h3><p>很多自動化系統壞掉，都是壞在 fallback 寫得太有自信。</p>
+<p>例如某個 API 被 rate limit，工程師很自然會想：「那我改爬網頁。」網頁被擋，再想：「那我用一個能轉純文字的 reader。」reader 也抓不到，再想：「那搜尋標題看有沒有別人轉載。」</p>
+<p>這些都不是錯。錯的是把它們當成同等可信的資料來源。</p>
+<p>fallback 的本質不是修好問題，而是把問題從「抓不到」轉成「抓到一個可信度較低的替代品」。如果系統沒有把這個可信度差異留下來，後面的人就會以為它們都是同一種事實。</p>
+<p>我現在會要求報告流程至少記住幾件事：資料來自哪裡、是不是原始來源、抓取時間、是否有第二來源驗證、哪些段落是推論、哪些只是線索。這些資訊不一定全部出現在最終報告裡，不然讀者會被 metadata 淹死；但系統裡一定要有。</p>
+<p>尤其是無人值守的 cron job，更不能靠「這次看起來沒問題」。凌晨三點的系統不會心虛，它只會照規則跑。規則如果把低可信來源當高可信，隔天早上你看到的就是一份很漂亮的假穩定。</p>
+<h3 id="寧可少寫，也不要補腦"><a href="#寧可少寫，也不要補腦" class="headerlink" title="寧可少寫，也不要補腦"></a>寧可少寫，也不要補腦</h3><p>做內容報告的人會有一個誘惑：每天都要有東西交差。排程固定跑，使用者也期待固定收到輸出。於是當資料不足時，系統很容易用一些語氣把空洞補起來。</p>
+<p>「市場持續關注」、「業界普遍認為」、「值得留意的是」——這些句子很滑順，也很危險。因為它們可以在沒有足夠來源時，製造出一種「我有看過很多資料」的錯覺。</p>
+<p>我寧可讓報告短一點，甚至某些欄位直接寫「今天沒有足夠可信來源」，也不要讓模型用漂亮話把缺口糊起來。這不是保守，是維持長期信任的成本。</p>
+<p>從技術主管角度看，自動報告不是文案產生器，而是一套資訊供應鏈。供應鏈最怕的不是慢，而是不知道哪一批料有問題。慢可以調整，少可以補；但如果系統把未驗證的東西混進正式輸出，後面每個決策都會被污染。</p>
+<h3 id="AI-報告的核心能力，是可追溯"><a href="#AI-報告的核心能力，是可追溯" class="headerlink" title="AI 報告的核心能力，是可追溯"></a>AI 報告的核心能力，是可追溯</h3><p>我越來越覺得，AI 報告系統要成熟，重點不只是 prompt 寫得多漂亮，也不是模型換得多新。真正的核心能力是可追溯。</p>
+<p>這份報告為什麼這樣寫？它看了哪些來源？哪些來源失敗？哪些結論有交叉驗證？哪些只是暫時觀察？如果明天有人問「這句話根據哪裡來的」，系統能不能回答？</p>
+<p>如果不能，那它就還只是很會寫作文的排程，不是可靠的資訊系統。</p>
+<p>生成式 AI 很適合把資訊整理成人能讀的形狀，這件事我完全買單。但前提是，我們不能把資料治理的責任丟給模型。模型可以幫忙摘要、比較、重組、提煉觀點；但來源可信度、失敗狀態、驗證鏈路，應該由工程流程負責。</p>
+<p>如果這幾天維護自動報告流程給我最大的提醒，大概就是這句：不要只問 AI 寫得像不像人，要問它吃進去的資料像不像事實。</p>
+<p>報告可以少一點，可以慢一點，可以保守一點。可信，比熱鬧重要多了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81%E8%A8%AD%E8%A8%88/" rel="tag"># 工作流設計</a>
+              <a href="/tags/%E8%B3%87%E6%96%99%E6%B2%BB%E7%90%86/" rel="tag"># 資料治理</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026051501/" rel="prev" title="把 AI 助理搬進團隊前，我先做的不是功能，而是隔離">
+      <i class="fa fa-chevron-left"></i> 把 AI 助理搬進團隊前，我先做的不是功能，而是隔離
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026051701/" rel="next" title="AI Agent 的技能庫不是文件夾，是會腐爛的作業系統">
+      AI Agent 的技能庫不是文件夾，是會腐爛的作業系統 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%B1%E5%91%8A%E6%BA%96%E6%99%82%EF%BC%8C%E4%B8%8D%E4%BB%A3%E8%A1%A8%E5%AE%83%E5%8F%AF%E4%BF%A1"><span class="nav-number">1.</span> <span class="nav-text">報告準時，不代表它可信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E6%9D%90%E6%B5%81%E7%A8%8B%E8%A6%81%E5%83%8F%E7%94%A2%E5%93%81%EF%BC%8C%E4%B8%8D%E6%98%AF%E5%83%8F%E8%87%A8%E6%99%82%E8%85%B3%E6%9C%AC"><span class="nav-number">2.</span> <span class="nav-text">取材流程要像產品，不是像臨時腳本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fallback-%E4%B8%8D%E6%98%AF%E9%AD%94%E6%B3%95%EF%BC%8C%E6%98%AF%E9%A2%A8%E9%9A%AA%E8%BD%89%E7%A7%BB"><span class="nav-number">3.</span> <span class="nav-text">fallback 不是魔法，是風險轉移</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%A7%E5%8F%AF%E5%B0%91%E5%AF%AB%EF%BC%8C%E4%B9%9F%E4%B8%8D%E8%A6%81%E8%A3%9C%E8%85%A6"><span class="nav-number">4.</span> <span class="nav-text">寧可少寫，也不要補腦</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AI-%E5%A0%B1%E5%91%8A%E7%9A%84%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%EF%BC%8C%E6%98%AF%E5%8F%AF%E8%BF%BD%E6%BA%AF"><span class="nav-number">5.</span> <span class="nav-text">AI 報告的核心能力，是可追溯</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

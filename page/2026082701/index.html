@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="同一份資料轉成另一種格式，不會自動增加精度或可信度。從技術主管視角談如何區分權威來源、交換格式與執行產物，避免轉檔後的資料被誤當成升級版真相。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="資料格式不是升級路徑，先分清保存、交換與執行">
+<meta property="og:url" content="https://maplecheng.com/page/2026082701/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="同一份資料轉成另一種格式，不會自動增加精度或可信度。從技術主管視角談如何區分權威來源、交換格式與執行產物，避免轉檔後的資料被誤當成升級版真相。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-08-26T21:00:55.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.347Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="Source of Truth">
+<meta property="article:tag" content="技術管理">
+<meta property="article:tag" content="檔案格式">
+<meta property="article:tag" content="系統整合">
+<meta property="article:tag" content="資料治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026082701/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>資料格式不是升級路徑，先分清保存、交換與執行 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026082701/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          資料格式不是升級路徑，先分清保存、交換與執行
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-08-27 05:00:55" itemprop="dateCreated datePublished" datetime="2026-08-27T05:00:55+08:00">2026-08-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">同一份資料轉成另一種格式，不會自動增加精度或可信度。從技術主管視角談如何區分權威來源、交換格式與執行產物，避免轉檔後的資料被誤當成升級版真相。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近整理一批路線與騎乘紀錄時，我重新確認了一個很基本、卻常被軟體介面模糊掉的事實：把檔案從一種格式轉成另一種格式，不會讓座標更準，也不會憑空長出更可靠的海拔。新格式可能多了轉彎提示、裝置相容性或更方便的欄位結構，但那是使用方式改變，不是原始證據升級。</p>
+<p>這個小問題很像企業系統每天發生的事。CSV 匯入資料庫、JSON 轉成事件、報表轉成 API，資料一旦穿上更正式的外衣，就很容易被誤認為更完整、更可信。站在技術主管的位置，我認為格式選擇真正該回答的，不是哪一種「比較高級」，而是這份資料現在要被保存、交換，還是拿去執行。</p>
+<span id="more"></span>
+
+<h2 id="容器變了，內容不會自動變好"><a href="#容器變了，內容不會自動變好" class="headerlink" title="容器變了，內容不會自動變好"></a>容器變了，內容不會自動變好</h2><p>格式轉換最容易製造的錯覺，是輸出檔看起來比輸入檔豐富。</p>
+<p>假設原始路線只有經緯度與地形模型估算的高度，轉換工具可以根據幾何關係加入轉彎提示，也可以重新取樣、補齊欄位，甚至畫出更平滑的高度曲線。這些功能都可能有用，但它們沒有回到現場重新量測。多出來的資訊是推導、插值或外部資料補充，不是原始感測器突然變準。</p>
+<p>企業資料也一樣。一份試算表匯入正式資料庫後，欄位有了型別、索引與 API，不代表來源裡的缺值、錯字與定義歧義就消失了。舊系統的文字狀態映射成新系統的狀態碼，也不代表流程語意已經一致。PDF 經 OCR 變成結構化 JSON，更不表示每個辨識結果都已經由人確認。</p>
+<p>問題不在轉換，而在我們常把「更適合機器使用」誤寫成「更接近事實」。</p>
+<h2 id="我會先替三種責任命名"><a href="#我會先替三種責任命名" class="headerlink" title="我會先替三種責任命名"></a>我會先替三種責任命名</h2><p>處理跨系統資料時，我現在傾向先分清楚三種角色。</p>
+<p>第一種是<strong>權威來源</strong>。它保留最接近原始事件或量測的資料，也承擔日後重建、查核與爭議處理的責任。實際騎乘時，裝置留下的原始紀錄通常比事後匯出的路線檔更接近現場；企業系統裡，正式交易事件、原始感測資料或經核准的主檔也扮演相同角色。</p>
+<p>第二種是<strong>交換格式</strong>。它的價值是讓不同工具能讀懂同一份內容，因此會追求通用、穩定與容易傳輸。交換格式可以捨棄某些來源特有欄位，也可能用共同欄位近似表達。它是一份互通契約，不一定是完整備份。</p>
+<p>第三種是<strong>執行產物</strong>。它為特定裝置、流程或當下任務最佳化，例如加入導航提示、建立批次匯入檔、把資料整理成模型可讀的上下文。這類產物可能最方便使用，卻也最依賴特定版本、規則與目標環境。</p>
+<p>三者可以來自同一份資料，但不能因為副檔名不同，就假設彼此等價。權威來源負責證明，交換格式負責溝通，執行產物負責完成任務。</p>
+<h2 id="衍生資料需要攜帶自己的出生證明"><a href="#衍生資料需要攜帶自己的出生證明" class="headerlink" title="衍生資料需要攜帶自己的出生證明"></a>衍生資料需要攜帶自己的出生證明</h2><p>只要轉換過程加入了新資訊，就應該留下來源與方法。</p>
+<p>我至少會記錄：輸入檔或來源紀錄的識別、轉換工具與版本、執行時間、使用的規則或外部資料、哪些欄位被丟棄、哪些欄位是新推導，以及輸出適用的目標。若有重新取樣、單位換算、時區處理、座標系轉換或缺值補齊，也都應在可查的位置說清楚。</p>
+<p>這些 metadata 看起來繁瑣，卻是日後判斷「能不能重做」的關鍵。當裝置不再支援某格式，我們應該能從權威來源重新產生新的執行檔，而不是拿多次轉換後的檔案繼續加工。每多轉一次，遺失欄位、累積誤差與失去來源脈絡的風險就多一層。</p>
+<p>因此，我不喜歡把匯出檔命名成 <code>final_v2_new</code>，再由下一個人猜哪份最真。比較成熟的做法，是讓衍生產物可丟棄、可重建，並把轉換流程版本化。真正值得長期保存的，是原始證據、必要的人工修正，以及能穩定重現產物的規則。</p>
+<h2 id="先選使用情境，再選格式"><a href="#先選使用情境，再選格式" class="headerlink" title="先選使用情境，再選格式"></a>先選使用情境，再選格式</h2><p>很多格式爭論最後會變成規格表比較：哪一種欄位比較多、哪一種裝置支援比較廣、哪一種看起來比較新。但技術選型若離開使用情境，功能愈多不一定愈好。</p>
+<p>若目的是保存與分析，我會優先保留資訊完整、來源清楚且能長期解析的格式。若目的是跨系統交換，我會在相容性與語意損失之間取捨，並用契約測試確認必要欄位沒有變形。若目的是送進裝置或工作流執行，我更在意目標端真正使用哪些欄位、失敗時怎麼回報，以及產物能否由來源重新生成。</p>
+<p>有時候，同一個流程同時保留三份檔案是合理的：一份原始紀錄、一份通用交換檔，以及一份針對裝置生成的執行檔。重複不是罪，沒有說明哪份負責什麼才是問題。</p>
+<h2 id="驗證也要分成兩件事"><a href="#驗證也要分成兩件事" class="headerlink" title="驗證也要分成兩件事"></a>驗證也要分成兩件事</h2><p>格式轉換完成後，不能只檢查「檔案打得開」。我會把驗證拆成語法與語意兩層。</p>
+<p>語法驗證確認 schema、型別、必要欄位、編碼與檔案完整性；語意驗證則比較關鍵筆數、時間順序、單位、座標範圍、狀態映射與允許誤差。對執行產物，還要在真正的目標裝置或沙箱流程跑一次，因為規格相容不代表實作相容。</p>
+<p>同時也要驗證沒有發生的事：沒有原始時間戳，就不該在輸出裡出現看似精確的實際速度；來源是估算高度，就不該被標成感測器量測；缺少正式核准，就不能因為匯入了核心系統而變成已核准狀態。</p>
+<h2 id="好的資料管線，不靠副檔名建立信任"><a href="#好的資料管線，不靠副檔名建立信任" class="headerlink" title="好的資料管線，不靠副檔名建立信任"></a>好的資料管線，不靠副檔名建立信任</h2><p>資料工程成熟之後，團隊不會只問「這份檔案是什麼格式」，而會問它從哪裡來、經過什麼轉換、為哪個用途產生、遺失了什麼，以及能不能回到權威來源重建。</p>
+<p>格式很重要。它決定系統是否能交換、裝置是否能執行、工具是否容易整合。但格式只是資料的容器與契約，不是品質認證。把資料轉進更正式的系統，不會自動修正來源；把它轉成欄位更多的格式，也不會增加從未被量測的事實。</p>
+<p>對我來說，最穩健的原則很簡單：原始證據要保留，人工修正要有紀錄，衍生產物要能重建，使用限制要跟著資料走。如此一來，我們才能放心為不同情境產生不同格式，而不會在某次轉檔之後，讓方便使用的副本悄悄取代了真正的來源。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%B3%87%E6%96%99%E6%B2%BB%E7%90%86/" rel="tag"># 資料治理</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E6%95%B4%E5%90%88/" rel="tag"># 系統整合</a>
+              <a href="/tags/%E6%AA%94%E6%A1%88%E6%A0%BC%E5%BC%8F/" rel="tag"># 檔案格式</a>
+              <a href="/tags/Source-of-Truth/" rel="tag"># Source of Truth</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026082601/" rel="prev" title="AI API 退場時，真正要搬的是狀態，不是端點">
+      <i class="fa fa-chevron-left"></i> AI API 退場時，真正要搬的是狀態，不是端點
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026082801/" rel="next" title="Agent 的執行預算不是成本上限，而是停止條件">
+      Agent 的執行預算不是成本上限，而是停止條件 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E8%AE%8A%E4%BA%86%EF%BC%8C%E5%85%A7%E5%AE%B9%E4%B8%8D%E6%9C%83%E8%87%AA%E5%8B%95%E8%AE%8A%E5%A5%BD"><span class="nav-number">1.</span> <span class="nav-text">容器變了，內容不會自動變好</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E6%9C%83%E5%85%88%E6%9B%BF%E4%B8%89%E7%A8%AE%E8%B2%AC%E4%BB%BB%E5%91%BD%E5%90%8D"><span class="nav-number">2.</span> <span class="nav-text">我會先替三種責任命名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%8D%E7%94%9F%E8%B3%87%E6%96%99%E9%9C%80%E8%A6%81%E6%94%9C%E5%B8%B6%E8%87%AA%E5%B7%B1%E7%9A%84%E5%87%BA%E7%94%9F%E8%AD%89%E6%98%8E"><span class="nav-number">3.</span> <span class="nav-text">衍生資料需要攜帶自己的出生證明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E9%81%B8%E4%BD%BF%E7%94%A8%E6%83%85%E5%A2%83%EF%BC%8C%E5%86%8D%E9%81%B8%E6%A0%BC%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">先選使用情境，再選格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A9%97%E8%AD%89%E4%B9%9F%E8%A6%81%E5%88%86%E6%88%90%E5%85%A9%E4%BB%B6%E4%BA%8B"><span class="nav-number">5.</span> <span class="nav-text">驗證也要分成兩件事</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A5%BD%E7%9A%84%E8%B3%87%E6%96%99%E7%AE%A1%E7%B7%9A%EF%BC%8C%E4%B8%8D%E9%9D%A0%E5%89%AF%E6%AA%94%E5%90%8D%E5%BB%BA%E7%AB%8B%E4%BF%A1%E4%BB%BB"><span class="nav-number">6.</span> <span class="nav-text">好的資料管線，不靠副檔名建立信任</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="當有狀態的 AI API 被新介面取代，遷移不只是改 SDK 與 endpoint；對話、工具執行、提示詞、稽核與使用者體驗都要重新對應。從技術主管視角談如何安全切換 AI 執行層。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI API 退場時，真正要搬的是狀態，不是端點">
+<meta property="og:url" content="https://maplecheng.com/page/2026082601/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="當有狀態的 AI API 被新介面取代，遷移不只是改 SDK 與 endpoint；對話、工具執行、提示詞、稽核與使用者體驗都要重新對應。從技術主管視角談如何安全切換 AI 執行層。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-08-25T21:00:59.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.347Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="API 遷移">
+<meta property="article:tag" content="技術債">
+<meta property="article:tag" content="狀態管理">
+<meta property="article:tag" content="系統架構">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026082601/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI API 退場時，真正要搬的是狀態，不是端點 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026082601/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI API 退場時，真正要搬的是狀態，不是端點
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-08-26 05:00:59" itemprop="dateCreated datePublished" datetime="2026-08-26T05:00:59+08:00">2026-08-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI-%E8%88%87%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">AI 與技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">當有狀態的 AI API 被新介面取代，遷移不只是改 SDK 與 endpoint；對話、工具執行、提示詞、稽核與使用者體驗都要重新對應。從技術主管視角談如何安全切換 AI 執行層。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看到一套有狀態的 AI API 正式退場，官方提供了新舊物件的對照：原本的助理、對話串、執行與步驟，分別由新的提示詞、會話、回應與項目承接。表面上看起來很像一次 API 改版，把幾個資源名稱和呼叫方式換掉就好。</p>
+<p>但其中有個訊號更值得技術主管注意：舊對話狀態不一定有自動遷移工具。這代表真正的工作不是把 endpoint 換掉，而是決定哪些歷史狀態值得搬、如何證明搬對，以及切換期間新舊世界要怎麼共存。</p>
+<span id="more"></span>
+
+<h2 id="無狀態-API-可以改呼叫，有狀態服務必須搬語意"><a href="#無狀態-API-可以改呼叫，有狀態服務必須搬語意" class="headerlink" title="無狀態 API 可以改呼叫，有狀態服務必須搬語意"></a>無狀態 API 可以改呼叫，有狀態服務必須搬語意</h2><p>傳統的無狀態 API 遷移，相對容易想像。請求欄位改名、回傳格式調整、驗證方式更新，我們修改 client、補契約測試，再逐步切換流量。只要相同輸入仍能得到符合預期的輸出，事情大致可控。</p>
+<p>有狀態的 AI API 不一樣。它保存的不只是幾筆聊天文字，還可能包含系統指令、工具定義、附件、執行順序、中途產物、錯誤、重試與使用者看到的對話脈絡。應用程式後續的判斷，往往依賴這些資料彼此的關係。</p>
+<p>當新平台用另一組資源模型承接時，即使名稱可以一對一畫箭頭，語意也未必完全相同。舊系統的一次執行，在新系統裡可能被拆成多個項目；以前隱含保存的工具結果，現在可能需要應用端明確管理；原本綁在助理物件上的提示詞，也可能改由另一套版本化機制提供。</p>
+<p>所以我不會把這類工作只交給「把 SDK 升級」的任務。它本質上是一次小型的狀態型服務遷移。</p>
+<h2 id="第一個決定不是怎麼搬，而是搬什麼"><a href="#第一個決定不是怎麼搬，而是搬什麼" class="headerlink" title="第一個決定不是怎麼搬，而是搬什麼"></a>第一個決定不是怎麼搬，而是搬什麼</h2><p>很多團隊聽到 API 即將關閉，第一反應是把所有歷史資料完整複製到新平台。這很直覺，卻未必合理。</p>
+<p>有些對話只是短期問答，早已沒有產品價值；有些歷史狀態受到保存期限、刪除要求或資料區域限制約束；有些 Thread 雖然存在，應用程式其實從未再讀取。若不先分類，就可能花大量時間搬移沒人使用的資料，甚至把原本應該退場的敏感內容重新延長壽命。</p>
+<p>我會先依用途把狀態分成幾類：仍在進行中的工作、使用者需要回看的歷史、系統為稽核而保留的證據，以及可以依法規或政策淘汰的暫存資料。每一類都要有不同策略。</p>
+<p>進行中工作需要維持連續性；可回看歷史不一定要重新注入模型，也可以轉成唯讀封存；稽核資料重點是不可竄改與可查證，不代表必須留在供應商的對話物件裡；過期資料則應趁遷移清掉，而不是因為「搬家比較保險」就全部續命。</p>
+<p>遷移不是備份競賽。保留愈多，不代表風險愈低。</p>
+<h2 id="不要把新舊資源名稱當成資料契約"><a href="#不要把新舊資源名稱當成資料契約" class="headerlink" title="不要把新舊資源名稱當成資料契約"></a>不要把新舊資源名稱當成資料契約</h2><p>官方 migration guide 會告訴我們物件如何對應，但企業真正需要的是自己的正規化狀態模型。</p>
+<p>如果應用程式把供應商的 Thread ID 當成核心業務識別，把每個 Run 狀態直接寫進流程判斷，供應商一改抽象，整個產品就跟著重構。這次改完，下一次仍會再痛一次。</p>
+<p>比較穩健的做法，是在應用層定義自己的 conversation、message、task、tool invocation 與 artifact。外部 API 的資源 ID 只是 adapter metadata，負責指出某筆內部狀態目前對應哪個供應商物件。產品規則依賴內部語意，不直接依賴外部命名。</p>
+<p>這不是為了追求「隨時可換供應商」的漂亮口號。不同 AI 平台能力差異很大，完全抽象化通常不切實際。真正的目標，是把不能丟的業務狀態與可以替換的執行介面分開。模型與 API 可以有平台特色，但使用者的工作進度、權限、附件來源與稽核證據不能只活在某家 SDK 裡。</p>
+<h2 id="我會採取先截流，再回填"><a href="#我會採取先截流，再回填" class="headerlink" title="我會採取先截流，再回填"></a>我會採取先截流，再回填</h2><p>面對沒有完整自動搬遷工具的狀況，我偏好的順序不是先搬完全部歷史才上線，而是先阻止舊資料繼續增加。</p>
+<p>第一階段讓新建立的對話直接走新 API，舊對話暫時維持原讀取路徑。這一步的價值，是先把遷移範圍固定下來。若新舊入口同時持續寫入，待搬資料每天增加，截止日只會愈來愈難控制。</p>
+<p>第二階段處理活躍狀態。依最後使用時間、業務重要性與資料敏感度建立批次，先遷移近期仍會續談或執行中的工作。每批都保存來源 ID、目標 ID、轉換版本、筆數、雜湊或其他可核對證據，並確保重跑不會製造重複資料。</p>
+<p>第三階段才處理長尾歷史。低頻內容可以在使用者打開時按需轉換，也可以保留成唯讀檢視，不必強迫所有舊紀錄重新成為新模型的上下文。</p>
+<p>這種策略不是偷懶，而是把「產品不能中斷」和「歷史要完整處理」拆成兩條可管理的工作流。</p>
+<h2 id="驗證不能只看資料筆數"><a href="#驗證不能只看資料筆數" class="headerlink" title="驗證不能只看資料筆數"></a>驗證不能只看資料筆數</h2><p>狀態遷移最容易出現的假成功，是來源與目標筆數一致，畫面也看得到對話，但行為已經不同。</p>
+<p>我至少會驗證幾個層次：訊息角色與順序是否保留、附件是否仍可存取、工具呼叫與結果能否正確配對、取消與失敗狀態有沒有被誤轉成完成、時間與時區是否一致，以及權限與資料可見範圍是否維持原本限制。</p>
+<p>還要用真實任務做行為回歸。選一組包含長對話、工具呼叫、錯誤重試、人工確認與附件的案例，分別跑在新舊路徑，比較最終結果與中間軌跡。AI 輸出不一定逐字相同，但不可破壞的契約必須清楚：該停下來時有沒有停、該要求確認時有沒有確認、同一位使用者能否繼續原本的工作，以及稽核人員能不能重建發生過什麼。</p>
+<p>另外，回滾也不能只理解成把程式版本切回去。若新系統已經產生新狀態，舊 API 卻不認得，回滾後這些工作要去哪裡？比較安全的設計，是在切換期間讓應用層的正規化事件成為權威紀錄，外部 API 狀態則由 adapter 投影。至少在遷移窗口內，不要讓任何一邊成為唯一且無法匯出的真相。</p>
+<h2 id="API-退場，其實是在檢查架構主權"><a href="#API-退場，其實是在檢查架構主權" class="headerlink" title="API 退場，其實是在檢查架構主權"></a>API 退場，其實是在檢查架構主權</h2><p>供應商淘汰 API 不一定是壞事。新介面可能更一致、更容易組合工具，也更適合長時間執行。但它會迫使團隊回答一個平常很容易迴避的問題：我們的產品狀態，到底掌握在自己手上，還是只存在供應商替我們管理的物件裡？</p>
+<p>站在技術主管的位置，我不會要求所有 AI 能力都自己重做，也不會因為擔心綁定就拒絕使用託管狀態。真正務實的界線是：平台可以代管執行細節，但重要狀態要能盤點、匯出、驗證、淘汰，也要能在平台改變時重新投影。</p>
+<p>一次成熟的 AI API 遷移，完成條件不該只是新版 SDK 成功回傳 200。它應該證明新對話已經截流、活躍工作沒有中斷、歷史資料依政策處理、權限與稽核仍然成立，而且舊入口關掉後，沒有任何關鍵狀態被留在門後。</p>
+<p>端點可以改，物件名稱可以換，模型也會繼續更新。真正不能跟著供應商版本漂移的，是使用者正在做的事，以及我們對那段狀態負起的責任。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E5%82%B5/" rel="tag"># 技術債</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E6%9E%B6%E6%A7%8B/" rel="tag"># 系統架構</a>
+              <a href="/tags/API-%E9%81%B7%E7%A7%BB/" rel="tag"># API 遷移</a>
+              <a href="/tags/%E7%8B%80%E6%85%8B%E7%AE%A1%E7%90%86/" rel="tag"># 狀態管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026082401/" rel="prev" title="別讓 Agent 直接寫 SQL，把資料查詢做成可治理的能力">
+      <i class="fa fa-chevron-left"></i> 別讓 Agent 直接寫 SQL，把資料查詢做成可治理的能力
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026082701/" rel="next" title="資料格式不是升級路徑，先分清保存、交換與執行">
+      資料格式不是升級路徑，先分清保存、交換與執行 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%84%A1%E7%8B%80%E6%85%8B-API-%E5%8F%AF%E4%BB%A5%E6%94%B9%E5%91%BC%E5%8F%AB%EF%BC%8C%E6%9C%89%E7%8B%80%E6%85%8B%E6%9C%8D%E5%8B%99%E5%BF%85%E9%A0%88%E6%90%AC%E8%AA%9E%E6%84%8F"><span class="nav-number">1.</span> <span class="nav-text">無狀態 API 可以改呼叫，有狀態服務必須搬語意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%80%8B%E6%B1%BA%E5%AE%9A%E4%B8%8D%E6%98%AF%E6%80%8E%E9%BA%BC%E6%90%AC%EF%BC%8C%E8%80%8C%E6%98%AF%E6%90%AC%E4%BB%80%E9%BA%BC"><span class="nav-number">2.</span> <span class="nav-text">第一個決定不是怎麼搬，而是搬什麼</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E8%A6%81%E6%8A%8A%E6%96%B0%E8%88%8A%E8%B3%87%E6%BA%90%E5%90%8D%E7%A8%B1%E7%95%B6%E6%88%90%E8%B3%87%E6%96%99%E5%A5%91%E7%B4%84"><span class="nav-number">3.</span> <span class="nav-text">不要把新舊資源名稱當成資料契約</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E6%9C%83%E6%8E%A1%E5%8F%96%E5%85%88%E6%88%AA%E6%B5%81%EF%BC%8C%E5%86%8D%E5%9B%9E%E5%A1%AB"><span class="nav-number">4.</span> <span class="nav-text">我會採取先截流，再回填</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A9%97%E8%AD%89%E4%B8%8D%E8%83%BD%E5%8F%AA%E7%9C%8B%E8%B3%87%E6%96%99%E7%AD%86%E6%95%B8"><span class="nav-number">5.</span> <span class="nav-text">驗證不能只看資料筆數</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-%E9%80%80%E5%A0%B4%EF%BC%8C%E5%85%B6%E5%AF%A6%E6%98%AF%E5%9C%A8%E6%AA%A2%E6%9F%A5%E6%9E%B6%E6%A7%8B%E4%B8%BB%E6%AC%8A"><span class="nav-number">6.</span> <span class="nav-text">API 退場，其實是在檢查架構主權</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

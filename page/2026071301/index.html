@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="企業開始把 AI Agent 從聊天助理推向工作執行者時，記憶不再只是「讓它記得我說過什麼」。真正要設計的是 scope、來源、保存期限、刪除流程與稽核證據。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent 的記憶要先能被治理，才值得被相信">
+<meta property="og:url" content="https://maplecheng.com/page/2026071301/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="企業開始把 AI Agent 從聊天助理推向工作執行者時，記憶不再只是「讓它記得我說過什麼」。真正要設計的是 scope、來源、保存期限、刪除流程與稽核證據。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-07-12T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.345Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="企業 AI">
+<meta property="article:tag" content="記憶治理">
+<meta property="article:tag" content="資料治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026071301/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Agent 的記憶要先能被治理，才值得被相信 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026071301/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Agent 的記憶要先能被治理，才值得被相信
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-07-13 05:00:00" itemprop="dateCreated datePublished" datetime="2026-07-13T05:00:00+08:00">2026-07-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">企業開始把 AI Agent 從聊天助理推向工作執行者時，記憶不再只是「讓它記得我說過什麼」。真正要設計的是 scope、來源、保存期限、刪除流程與稽核證據。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看企業 AI Agent 的發展，我越來越覺得：記憶不是讓 Agent 變聰明的裝飾，而是讓它能不能進正式流程的分水嶺。聊天助理記錯一句偏好，頂多讓人皺眉；工作型 Agent 記錯一個規則、引用到不該看的資料、或沿用已經失效的上下文，後果就完全不是同一個等級。</p>
+<span id="more"></span>
+
+<p>很多團隊一開始做 Agent 記憶，直覺會往「怎麼讓它記更多」走。把對話摘要存起來、把使用者偏好寫進 profile、把常用文件丟進向量資料庫，然後期待下一次回答更貼近情境。這些都可以做，也確實有用。但如果目標是企業內部的正式工作流，我會先問另一組問題：這段記憶從哪裡來？誰有權讓它被召回？多久之後應該失效？如果內容錯了，要怎麼更正？如果不該再被使用，要怎麼確定真的刪乾淨？</p>
+<p>這些問題聽起來不像 AI，反而比較像資料治理。但也正因為如此，它才重要。</p>
+<h3 id="記憶不是一大包上下文"><a href="#記憶不是一大包上下文" class="headerlink" title="記憶不是一大包上下文"></a>記憶不是一大包上下文</h3><p>在原型階段，把「相關資料」全部塞進 prompt 是最快的做法。反正先讓 demo 跑起來，讓 Agent 看得到文件、看得到歷史對話、看得到任務紀錄，效果通常會立刻變好。可是這種做法有一個隱性代價：所有東西都被壓成同一種上下文，失去了原本的生命週期。</p>
+<p>企業資料其實很少是同質的。作業規範可能半年才改一次；客戶狀態可能每天變；使用者偏好可能只是某次任務的暫時選擇；錯誤修正則可能應該被保留成規則。這些資料如果都被叫做「記憶」，Agent 很容易在不該用的時候使用它，或在應該忘記的時候繼續相信它。</p>
+<p>我比較偏好的設計，是先把記憶拆成不同類型：事實、偏好、規則、任務狀態、人工更正、稽核紀錄。每一種類型都應該有自己的來源、權限、保存期限和召回條件。Agent 不是「想起所有相關的東西」，而是在某個明確 scope 裡，依照任務需要拿到被允許的上下文。</p>
+<h3 id="Scope-比記得多更重要"><a href="#Scope-比記得多更重要" class="headerlink" title="Scope 比記得多更重要"></a>Scope 比記得多更重要</h3><p>企業 Agent 最怕的不是不知道，而是不知道自己不該知道。</p>
+<p>例如一個協助整理採購資料的 Agent，可能需要看供應商基本資料、歷史交期、異常紀錄和當前詢價狀態。但它不一定應該看所有部門的成本結構，也不一定能讀到其他流程裡的敏感備註。若記憶系統只靠語意相似度召回，「看起來相關」就可能變成越權的入口。</p>
+<p>所以我現在看 Agent memory，會特別在意 scoped retrieval。不是只有「找得到」，而是要先通過身份、角色、任務、資料分類、流程狀態的過濾。召回不是搜尋功能而已，它本身就是權限執行的一部分。</p>
+<p>這也是為什麼我不太相信只用 prompt 約束的記憶治理。你可以在 system prompt 裡寫「不要使用未授權資料」，但如果底層 retrieval 已經把資料塞進上下文，模型就被迫在看過之後假裝沒看過。真正可靠的做法，是不該看的資料一開始就不要進入模型視野。</p>
+<h3 id="刪除能力是成熟度指標"><a href="#刪除能力是成熟度指標" class="headerlink" title="刪除能力是成熟度指標"></a>刪除能力是成熟度指標</h3><p>很多 AI 產品喜歡強調「長期記憶」，但我反而會先看它怎麼刪除。</p>
+<p>能記住很容易，能正確忘記才難。企業裡的資料可能因為合約、政策、個資、流程變更或人工修正而需要停止使用。這時候如果記憶散落在摘要、向量索引、cache、任務紀錄和使用者 profile 裡，只提供一個「刪除按鈕」其實不夠。你需要知道它刪了哪裡、還有哪些衍生物、下一次召回是否真的排除了它。</p>
+<p>這件事在 Agent 場景更麻煩，因為 Agent 會把資料轉成行動。它可能根據舊記憶做建議、建立草稿、更新任務，甚至觸發下一個流程。如果記憶被修正，相關的任務狀態也可能需要標記「曾使用過已撤回資訊」。這不是一般聊天紀錄刪除可以解決的。</p>
+<p>我會把刪除、失效、保留期限視為 memory schema 的一部分，而不是事後補上的管理功能。每一筆可召回記憶至少要有來源、擁有者、scope、有效狀態、版本與撤回紀錄。沒有這些欄位，短期看起來開發很快，長期會變成查不清楚的黑箱。</p>
+<h3 id="記憶要接進資料層，不只是模型層"><a href="#記憶要接進資料層，不只是模型層" class="headerlink" title="記憶要接進資料層，不只是模型層"></a>記憶要接進資料層，不只是模型層</h3><p>這幾年大家談 Agent，常常把焦點放在模型、工具和 prompt。但如果 Agent 真的要做工作，它的記憶最後一定會碰到資料庫、權限系統、文件管理、流程引擎和稽核紀錄。這些東西本來就是企業系統的老問題，只是 Agent 讓它變得更明顯。</p>
+<p>我不覺得每家公司都需要一開始就做很重的記憶平台。小型 MVP 可以很簡單：先限定任務範圍、只保存必要資訊、把記憶分型、保留來源與版本、確保人工可以檢視和撤回。但即使是 MVP，也不要把所有上下文混成一包「給 AI 參考」。這種債以後很難還。</p>
+<p>對 CTO 來說，Agent 記憶的關鍵問題不是「它能不能更像人一樣記得我」，而是「這套記憶能不能被組織管理」。能管理，才有辦法擴大；能追溯，才有辦法修正；能刪除，才有辦法承擔風險。</p>
+<p>我對企業 Agent 的判斷也越來越簡單：如果一個 Agent 只能靠記得更多來變好，它還停在助理階段；如果它能把記憶變成有 scope、有期限、有版本、有稽核的資料層，它才開始像一個可以被放進正式流程的工作系統。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E8%B3%87%E6%96%99%E6%B2%BB%E7%90%86/" rel="tag"># 資料治理</a>
+              <a href="/tags/%E4%BC%81%E6%A5%AD-AI/" rel="tag"># 企業 AI</a>
+              <a href="/tags/%E8%A8%98%E6%86%B6%E6%B2%BB%E7%90%86/" rel="tag"># 記憶治理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026071201/" rel="prev" title="企業 Agent 的第一個 MVP，應該選一個關得起來的問題">
+      <i class="fa fa-chevron-left"></i> 企業 Agent 的第一個 MVP，應該選一個關得起來的問題
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026071401/" rel="next" title="語音 Agent 的重點不是會說話，而是知道什麼時候交棒">
+      語音 Agent 的重點不是會說話，而是知道什麼時候交棒 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%98%E6%86%B6%E4%B8%8D%E6%98%AF%E4%B8%80%E5%A4%A7%E5%8C%85%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">1.</span> <span class="nav-text">記憶不是一大包上下文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scope-%E6%AF%94%E8%A8%98%E5%BE%97%E5%A4%9A%E6%9B%B4%E9%87%8D%E8%A6%81"><span class="nav-number">2.</span> <span class="nav-text">Scope 比記得多更重要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%AA%E9%99%A4%E8%83%BD%E5%8A%9B%E6%98%AF%E6%88%90%E7%86%9F%E5%BA%A6%E6%8C%87%E6%A8%99"><span class="nav-number">3.</span> <span class="nav-text">刪除能力是成熟度指標</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%98%E6%86%B6%E8%A6%81%E6%8E%A5%E9%80%B2%E8%B3%87%E6%96%99%E5%B1%A4%EF%BC%8C%E4%B8%8D%E5%8F%AA%E6%98%AF%E6%A8%A1%E5%9E%8B%E5%B1%A4"><span class="nav-number">4.</span> <span class="nav-text">記憶要接進資料層，不只是模型層</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

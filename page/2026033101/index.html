@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="一個 10 人小團隊從 Gitea 評估轉向 GitLab EE 的完整實測紀錄。從 Group 管理、Issue 追蹤、Epics、Scoped Labels 到 CI&#x2F;CD，逐項比較兩個平台的差異，分享最終選擇的考量。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小團隊的 Git 平台選擇：Gitea vs GitLab EE 實測比較">
+<meta property="og:url" content="https://maplecheng.com/page/2026033101/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="一個 10 人小團隊從 Gitea 評估轉向 GitLab EE 的完整實測紀錄。從 Group 管理、Issue 追蹤、Epics、Scoped Labels 到 CI&#x2F;CD，逐項比較兩個平台的差異，分享最終選擇的考量。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-03-30T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Git">
+<meta property="article:tag" content="GitLab">
+<meta property="article:tag" content="Gitea">
+<meta property="article:tag" content="團隊管理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026033101/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>小團隊的 Git 平台選擇：Gitea vs GitLab EE 實測比較 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026033101/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          小團隊的 Git 平台選擇：Gitea vs GitLab EE 實測比較
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-03-31 05:00:00" itemprop="dateCreated datePublished" datetime="2026-03-31T05:00:00+08:00">2026-03-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">一個 10 人小團隊從 Gitea 評估轉向 GitLab EE 的完整實測紀錄。從 Group 管理、Issue 追蹤、Epics、Scoped Labels 到 CI/CD，逐項比較兩個平台的差異，分享最終選擇的考量。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近花了一整天，認認真真地把 GitLab EE 從頭到尾建了一遍——不是那種「裝好看看首頁」的程度，而是把真實的組織架構、專案結構、Issue 流程全部搬進去跑一輪。</p>
+<p>原因很簡單：我們團隊用 Gitea 已經一段時間了，該有的功能都有，但隨著專案越來越多、跨專案協作的需求越來越頻繁，總覺得少了點什麼。</p>
+<span id="more"></span>
+
+<h3 id="先說結論"><a href="#先說結論" class="headerlink" title="先說結論"></a>先說結論</h3><p>如果你的團隊在 10 人以下、專案數量不超過 20 個、不太需要跨專案管理——Gitea 完全夠用，而且輕量到讓你感動。</p>
+<p>但如果你開始遇到「這個 Issue 跟那邊那個有關係」「我想看整個產品線的進度」「Label 在 A 專案跟 B 專案長得不一樣」這類問題，GitLab EE 提供的東西確實多了一個層次。</p>
+<h3 id="測試環境怎麼建的"><a href="#測試環境怎麼建的" class="headerlink" title="測試環境怎麼建的"></a>測試環境怎麼建的</h3><p>為了公平比較，我不是隨便開幾個空 repo 就算了。我建了一個完整的模擬環境：</p>
+<ul>
+<li>5 個使用者（模擬實際團隊角色：管理者、前端、後端、QA、AI 助理）</li>
+<li>7 個頂層 Group + 16 個子 Group（模擬公司組織架構、客戶專案、內部工具）</li>
+<li>33 個 Project，涵蓋核心框架、客戶專案、內部工具、文件庫</li>
+<li>20+ 個 Issues，帶完整的標籤、指派、里程碑</li>
+<li>Wiki 知識庫、CI&#x2F;CD 範本、Snippets</li>
+</ul>
+<p>對，就是把真實的開發日常原封不動搬進去。這樣才能感受到實際用起來是什麼體驗。</p>
+<h3 id="Gitea-做得好的地方"><a href="#Gitea-做得好的地方" class="headerlink" title="Gitea 做得好的地方"></a>Gitea 做得好的地方</h3><p>先給 Gitea 說句公道話。它真的是小團隊的神器：</p>
+<ul>
+<li><strong>輕量到不可思議</strong>：一個 binary、一個 SQLite，5 分鐘搞定。佔用資源大概是 GitLab 的 1&#x2F;10</li>
+<li><strong>Git 基本功能完整</strong>：Push、PR、Code Review、分支保護，該有的都有</li>
+<li><strong>API 很完整</strong>：幾乎所有操作都能透過 API 完成，自動化很方便</li>
+<li><strong>介面簡潔</strong>：不會有「功能太多找不到東西」的問題</li>
+</ul>
+<p>我們用 Gitea 搭配自己寫的一些 script，跑了蠻長一段時間，基本上沒什麼大問題。</p>
+<h3 id="但-Gitea-缺什麼？"><a href="#但-Gitea-缺什麼？" class="headerlink" title="但 Gitea 缺什麼？"></a>但 Gitea 缺什麼？</h3><p>問題出在「跨專案」這件事。當你同時維護十幾個客戶專案，加上幾個共用的核心框架，就開始痛了：</p>
+<p><strong>1. 沒有 Group-level Labels</strong></p>
+<p>在 Gitea，每個 repo 的 Label 是獨立的。你在 A 專案建了 <code>priority::high</code>、<code>type::bug</code>，到 B 專案要重新建一次。30 幾個 repo？好，建 30 次。</p>
+<p>而且——人是會手抖的。A 專案叫 <code>priority::high</code>，B 專案可能叫 <code>priority:high</code>（少一個冒號），C 專案叫 <code>high-priority</code>。三個月後你想跨專案篩選「所有高優先」，祝你好運。</p>
+<p>GitLab 的 Group-level Labels 就是解這個痛點的。在頂層 Group 定義一次，所有子 Group 和 Project 自動繼承。改一處，全部同步。</p>
+<p><strong>2. 沒有 Epics</strong></p>
+<p>這是 GitLab EE 的殺手級功能（CE 沒有）。</p>
+<p>舉個例子：你要做一個大功能，牽涉到後端 API、前端介面、資料庫 migration、文件更新。在 Gitea，你只能在各個 repo 開 Issue，然後在某個地方（Notion？Excel？腦子裡？）記錄「這幾個 Issue 是同一件事」。</p>
+<p>GitLab 的 Epic 讓你把跨專案的 Issues 串在一起，有進度條、有層級關係（Epic 裡面可以有子 Epic），一眼看出整個功能做到哪了。</p>
+<p><strong>3. Issue Links 的深度不同</strong></p>
+<p>Gitea 有 Issue 的交叉引用（<code>#123</code> 會自動連結），但就是一個連結而已。</p>
+<p>GitLab 的 Issue Links 有三種關係：</p>
+<ul>
+<li><code>relates_to</code>：相關</li>
+<li><code>blocks</code> &#x2F; <code>is_blocked_by</code>：阻擋關係</li>
+</ul>
+<p>「這個前端 Issue 被後端 API 的 Issue 擋住了」——這種依賴關係在專案管理上非常重要，尤其是你的 PM 或技術主管需要判斷「先做哪個」的時候。</p>
+<p><strong>4. Issue Boards 的層級</strong></p>
+<p>Gitea 有 Project Board（看板），但只到 repo 級別。</p>
+<p>GitLab 的 Issue Board 可以建在 Group 級別——也就是說，你可以看到整個組織、或整個客戶群組下所有專案的 Issue 狀態。對於技術主管來說，這就是「全局視野」和「一個一個 repo 點進去看」的差別。</p>
+<h3 id="GitLab-EE-實測心得"><a href="#GitLab-EE-實測心得" class="headerlink" title="GitLab EE 實測心得"></a>GitLab EE 實測心得</h3><p><strong>Scoped Labels 真的好用</strong></p>
+<p>GitLab 的 Scoped Labels（用 <code>::</code> 分隔）有一個很聰明的設計：同一個 scope 下只能選一個值。</p>
+<p>比如 <code>priority::high</code> 和 <code>priority::low</code> 不能同時存在於同一個 Issue 上。你一選 <code>priority::high</code>，原本的 <code>priority::low</code> 就自動移除。</p>
+<p>這聽起來是小事，但實際用起來防呆效果很好。再也不會出現「這個 Issue 同時標了 high 和 low 是什麼意思？」的情況。</p>
+<p><strong>Group Milestones 跨專案追進度</strong></p>
+<p>一個版本的 release 通常牽涉多個 repo。GitLab 的 Group Milestone 讓你建一個統一的里程碑，各 repo 的 Issue 都可以掛上去，進度一目了然。</p>
+<p>Gitea 的 Milestone 只到 repo 級別，跨 repo 的版本管理就只能靠人工追蹤了。</p>
+<p><strong>Incidents 事件管理</strong></p>
+<p>GitLab 內建 Incident 類型的 Issue，有 severity level、timeline、專屬的管理介面。雖然小團隊可能不需要這麼正式的 incident management，但隨著客戶越來越多，「哪個客戶什麼時候出過什麼事」的追蹤確實越來越重要。</p>
+<p><strong>Wiki 附在 Group 上</strong></p>
+<p>Gitea 的 Wiki 是 per-repo 的。共用的開發規範要放哪？開一個專門放文件的 repo？</p>
+<p>GitLab 可以在 Group 層級建 Wiki，組織層級的知識庫就有了自然的歸屬。</p>
+<h3 id="代價是什麼？"><a href="#代價是什麼？" class="headerlink" title="代價是什麼？"></a>代價是什麼？</h3><p>講了這麼多 GitLab 的好，得說說代價：</p>
+<p><strong>資源消耗</strong></p>
+<p>GitLab 是出了名的吃資源。官方建議最低 4 核 4GB RAM，實際跑起來 8GB 比較舒服。Gitea？512MB RAM 就活蹦亂跳了。</p>
+<p><strong>複雜度</strong></p>
+<p>GitLab 的設定頁面多到讓人頭暈。光是一個 Project 的 Settings 就有十幾個子頁面。Gitea 的設定大概五分鐘就能看完。</p>
+<p><strong>EE 授權費用</strong></p>
+<p>Epics、Scoped Labels 這些好東西，很多都是 EE（Premium 或 Ultimate）才有的。自架的話可以用免費的 EE 授權（功能有限），但要完整功能就得付費。</p>
+<p>而 Gitea 完全免費開源，MIT License。</p>
+<p><strong>維護成本</strong></p>
+<p>GitLab 的升級不像 Gitea 那麼無腦。資料庫 migration、背景 job、Sidekiq、Puma⋯⋯東西多，出問題的機會也多。</p>
+<h3 id="那到底該選哪個？"><a href="#那到底該選哪個？" class="headerlink" title="那到底該選哪個？"></a>那到底該選哪個？</h3><p>我的判斷框架：</p>
+<p><strong>選 Gitea 如果：</strong></p>
+<ul>
+<li>團隊 &lt; 10 人</li>
+<li>專案之間相對獨立，不太需要跨專案追蹤</li>
+<li>伺服器資源有限（例如跑在一台小 VPS 或 Raspberry Pi 上）</li>
+<li>需求單純：程式碼管理 + PR Review + 基本 Issue 追蹤</li>
+<li>預算有限，不想處理授權問題</li>
+</ul>
+<p><strong>選 GitLab EE 如果：</strong></p>
+<ul>
+<li>專案之間有大量交叉依賴</li>
+<li>需要組織層級的管理視野（Label、Board、Milestone 都要跨專案）</li>
+<li>有 PM 角色需要看全局進度</li>
+<li>計畫導入 CI&#x2F;CD（GitLab CI 是內建的，Gitea 需要外掛 Drone 或 Woodpecker）</li>
+<li>願意投入資源維護較重的基礎設施</li>
+</ul>
+<h3 id="一個折衷方案"><a href="#一個折衷方案" class="headerlink" title="一個折衷方案"></a>一個折衷方案</h3><p>其實還有一個思路：Gitea 當主力 Git server，搭配外部工具補足管理功能。</p>
+<p>比如用 Notion 或 Linear 做跨專案追蹤，Gitea 純粹負責程式碼和 PR。這樣既保留了 Gitea 的輕量優勢，又不受限於它的 Issue 管理能力。</p>
+<p>缺點是——資訊分散在兩個系統，同步是個問題。每次開 Issue 要在兩邊都建，或者寫 webhook 自動同步，又是一筆維護成本。</p>
+<h3 id="最後的碎碎念"><a href="#最後的碎碎念" class="headerlink" title="最後的碎碎念"></a>最後的碎碎念</h3><p>老實說，工具選型這件事沒有標準答案。重點不是「哪個比較好」，而是「哪個比較適合你現在的狀況」。</p>
+<p>我自己的體會是：工具的選擇應該跟著團隊的成長節奏走。一開始用 Gitea 快速上手，等到管理複雜度真的到了一個臨界點，再考慮遷移到 GitLab，也不遲。</p>
+<p>怕的是一開始就上重裝備，結果團隊花了大把時間在搞工具設定，沒時間寫 code。那就本末倒置了。</p>
+<p>如果你也在糾結類似的選擇，希望這篇實測紀錄能幫上忙。至少可以少走一些我走過的彎路 😂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Git/" rel="tag"># Git</a>
+              <a href="/tags/Gitea/" rel="tag"># Gitea</a>
+              <a href="/tags/GitLab/" rel="tag"># GitLab</a>
+              <a href="/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/tags/%E5%9C%98%E9%9A%8A%E7%AE%A1%E7%90%86/" rel="tag"># 團隊管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026033002/" rel="prev" title="ERP 系統的除法餘數怎麼處理？一個被忽略的精度陷阱">
+      <i class="fa fa-chevron-left"></i> ERP 系統的除法餘數怎麼處理？一個被忽略的精度陷阱
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026040201/" rel="next" title="用 openpyxl 複製 Worksheet 後 Excel 開起來兩個 Sheet 同時被選取？來看看這個冷門坑">
+      用 openpyxl 複製 Worksheet 後 Excel 開起來兩個 Sheet 同時被選取？來看看這個冷門坑 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%88%E8%AA%AA%E7%B5%90%E8%AB%96"><span class="nav-number">1.</span> <span class="nav-text">先說結論</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%AC%E8%A9%A6%E7%92%B0%E5%A2%83%E6%80%8E%E9%BA%BC%E5%BB%BA%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">測試環境怎麼建的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gitea-%E5%81%9A%E5%BE%97%E5%A5%BD%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="nav-number">3.</span> <span class="nav-text">Gitea 做得好的地方</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%86-Gitea-%E7%BC%BA%E4%BB%80%E9%BA%BC%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">但 Gitea 缺什麼？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GitLab-EE-%E5%AF%A6%E6%B8%AC%E5%BF%83%E5%BE%97"><span class="nav-number">5.</span> <span class="nav-text">GitLab EE 實測心得</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E5%83%B9%E6%98%AF%E4%BB%80%E9%BA%BC%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">代價是什麼？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%82%A3%E5%88%B0%E5%BA%95%E8%A9%B2%E9%81%B8%E5%93%AA%E5%80%8B%EF%BC%9F"><span class="nav-number">7.</span> <span class="nav-text">那到底該選哪個？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E5%80%8B%E6%8A%98%E8%A1%B7%E6%96%B9%E6%A1%88"><span class="nav-number">8.</span> <span class="nav-text">一個折衷方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%BE%8C%E7%9A%84%E7%A2%8E%E7%A2%8E%E5%BF%B5"><span class="nav-number">9.</span> <span class="nav-text">最後的碎碎念</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

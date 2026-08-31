@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="分享同時整合兩個 Notion workspace 時遇到的 Token 覆蓋、批量建立重複資料等踩坑經驗，以及 Notion API 的實用技巧與跨 workspace 整合模式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Notion API 雙 Workspace 踩坑記：Token 搞混、批量操作與去重實戰">
+<meta property="og:url" content="https://maplecheng.com/page/2026020508/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="分享同時整合兩個 Notion workspace 時遇到的 Token 覆蓋、批量建立重複資料等踩坑經驗，以及 Notion API 的實用技巧與跨 workspace 整合模式">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-05T03:15:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.339Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="API整合">
+<meta property="article:tag" content="Notion API">
+<meta property="article:tag" content="自動化">
+<meta property="article:tag" content="踩坑">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020508/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Notion API 雙 Workspace 踩坑記：Token 搞混、批量操作與去重實戰 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020508/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Notion API 雙 Workspace 踩坑記：Token 搞混、批量操作與去重實戰
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-05 11:15:00" itemprop="dateCreated datePublished" datetime="2026-02-05T11:15:00+08:00">2026-02-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">分享同時整合兩個 Notion workspace 時遇到的 Token 覆蓋、批量建立重複資料等踩坑經驗，以及 Notion API 的實用技巧與跨 workspace 整合模式</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在做一個自動化流程，需要同時串接兩個 Notion workspace——一個是我自己的個人任務管理，另一個是公司的專案管理。聽起來很單純對吧？兩個 API token、兩個 database，各打各的就好。結果實際做下去，踩了好幾個坑，有些還蠻痛的。這篇就來記錄一下整個過程，希望能幫到有類似需求的人。</p>
+<span id="more"></span>
+
+<h3 id="先搞懂-Notion-Integration-的-Workspace-隔離"><a href="#先搞懂-Notion-Integration-的-Workspace-隔離" class="headerlink" title="先搞懂 Notion Integration 的 Workspace 隔離"></a>先搞懂 Notion Integration 的 Workspace 隔離</h3><p>在開始之前，有一個很重要的觀念要先建立：<strong>Notion 的每個 Integration token 只能存取「建立它的那個 workspace」</strong>。這不是 bug，是 by design。</p>
+<p>什麼意思呢？假設你有 Workspace A（個人）和 Workspace B（公司），你在 A 建立了一個 Integration 拿到 token-A，在 B 建立了另一個 Integration 拿到 token-B。那麼 token-A 就只能操作 A 裡面的 database 和 page，拿它去打 B 的任何資源，都會得到 <code>object_not_found</code> 或權限錯誤。</p>
+<p>這件事文件上有寫，但實際操作時很容易忘記，尤其是當你的程式碼同時處理兩邊的時候。更容易犯的錯是：你以為 <code>object_not_found</code> 代表 database ID 錯了或是權限沒開，但其實是 token 拿錯了。這個誤判會讓你在錯誤的方向上浪費大量 debug 時間。</p>
+<p>另外值得一提的是，每個 Integration 建立之後，還需要在 Notion 介面裡手動把 database 或 page 「連接」到這個 Integration。就算 token 是對的，如果 database 沒有加這個 Integration 的存取權限，API 一樣會報 <code>object_not_found</code>。這個步驟超級容易忘記，我每次新增一個 database 都至少忘過一次。</p>
+<h3 id="踩坑-1：Token-覆蓋事件——Debug-到懷疑人生"><a href="#踩坑-1：Token-覆蓋事件——Debug-到懷疑人生" class="headerlink" title="踩坑 1：Token 覆蓋事件——Debug 到懷疑人生"></a>踩坑 1：Token 覆蓋事件——Debug 到懷疑人生</h3><p>這個坑是最痛的一個。</p>
+<p>事情是這樣的：我本來有兩個 token 檔案，分別存在不同路徑。某天在調整自動化腳本的時候，一個手滑，把 Workspace A（個人）的 token 檔案內容覆蓋成了 Workspace B（公司）的 token。</p>
+<p>然後災難就開始了。</p>
+<p>所有對 Workspace A 的 API 呼叫都回 <code>object_not_found</code>。我第一反應是去檢查 database ID 有沒有貼錯，結果 ID 完全正確。接著我懷疑是不是 database 的 Integration 權限沒開，跑去 Notion 介面裡確認，也是開著的。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;object&quot;</span><span class="punctuation">:</span> <span class="string">&quot;error&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="number">404</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;code&quot;</span><span class="punctuation">:</span> <span class="string">&quot;object_not_found&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Could not find database with ID: 7e22fe15-xxxx-xxxx-xxxx-xxxxxxxxxxxx.&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>就這個錯誤，反覆出現。我甚至開始懷疑是不是 Notion API 本身有問題，去查了他們的 status page。</p>
+<p>最後是因為拿同一個 token 去打 Workspace B 的 database 時<strong>成功了</strong>，我才驚覺：「等等，這個 token 怎麼能打到 B？它應該是 A 的 token 啊……」然後 <code>cat</code> 了一下 token 檔案，果然，兩個檔案內容一模一樣。</p>
+<p>整個 debug 過程大概花了快一個小時。回頭看覺得很蠢，但當下真的完全沒往這個方向想。因為你理所當然覺得兩個不同路徑的檔案內容不一樣嘛，腦子根本不會去質疑這件事。</p>
+<h4 id="教訓與防護措施"><a href="#教訓與防護措施" class="headerlink" title="教訓與防護措施"></a>教訓與防護措施</h4><p>token 檔案的命名<strong>一定要明確</strong>。不要用什麼 <code>notion-token</code>、<code>token-1</code>、<code>token-2</code> 這種模糊的名字。我後來改成了：</p>
+<ul>
+<li><code>notion-personal-token</code> — 個人 workspace</li>
+<li><code>notion-company-token</code> — 公司 workspace</li>
+</ul>
+<p>而且在程式碼裡，我會在初始化 client 的時候加上 workspace 名稱的註解和 log：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Personal workspace client</span></span><br><span class="line"><span class="keyword">const</span> personalClient = <span class="keyword">new</span> <span class="title class_">Client</span>(&#123; <span class="attr">auth</span>: personalToken &#125;);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Initialized personal workspace client&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Company workspace client  </span></span><br><span class="line"><span class="keyword">const</span> companyClient = <span class="keyword">new</span> <span class="title class_">Client</span>(&#123; <span class="attr">auth</span>: companyToken &#125;);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Initialized company workspace client&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>後來我還加了一個啟動時的 sanity check——用每個 token 打一個已知存在的 page，確認能正常存取。如果 check 失敗就直接 throw error 不讓程式繼續跑，避免用錯 token 又不知道：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">validateToken</span>(<span class="params">client, testPageId, label</span>) &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">await</span> client.<span class="property">pages</span>.<span class="title function_">retrieve</span>(&#123; <span class="attr">page_id</span>: testPageId &#125;);</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`✅ <span class="subst">$&#123;label&#125;</span> token validated`</span>);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">`❌ <span class="subst">$&#123;label&#125;</span> token validation failed: <span class="subst">$&#123;err.message&#125;</span>`</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>這個小小的 check 後來不只一次救了我。</p>
+<h3 id="踩坑-2：批量建立重複資料——36-筆幽靈日報"><a href="#踩坑-2：批量建立重複資料——36-筆幽靈日報" class="headerlink" title="踩坑 2：批量建立重複資料——36 筆幽靈日報"></a>踩坑 2：批量建立重複資料——36 筆幽靈日報</h3><p>第二個坑跟批量操作有關。</p>
+<p>需求很簡單：用腳本批量建立 28 天的日報紀錄到 Notion database。每天一筆，跑個迴圈就搞定了。</p>
+<p>腳本寫好、測試通過，正式跑的時候前面十幾筆都很順利，結果跑到一半 timeout 了。我看了一下，大概建了 15 筆就斷掉。</p>
+<p>正常人的反應：重跑一次。</p>
+<p>但問題來了——腳本沒有做 idempotency 檢查。它不會去看「這個日期的紀錄是不是已經存在了」，它就是無腦 create。所以重跑之後，前 15 天的日報就各多了一筆。</p>
+<p>更慘的是，第二次跑到第 20 筆又 timeout 了（Notion API 在短時間大量 create 時有 rate limit），我又重跑了第三次。最後的結果：28 天的日報，居然產生了 64 筆紀錄，其中 36 筆是重複的，有些日期甚至有 3 筆。</p>
+<p>看著 database 裡一堆重複的紀錄，我只能苦笑。</p>
+<h4 id="去重策略"><a href="#去重策略" class="headerlink" title="去重策略"></a>去重策略</h4><p>手動刪太蠢了，我寫了一個去重腳本：</p>
+<ol>
+<li><strong>Query 所有紀錄</strong>：用 Notion API 的 database query，把所有日報都拉下來</li>
+<li><strong>按日期分組</strong>：用 Date 欄位的值做 grouping</li>
+<li><strong>每組保留最早的一筆</strong>：比對 <code>created_time</code>，保留最早建立的那筆</li>
+<li><strong>Archive 其餘的</strong>：Notion API 沒有 <code>DELETE</code> endpoint，要「刪除」一筆紀錄只能用 archive</li>
+</ol>
+<p>Archive 的做法是對 page 做 PATCH，把 <code>archived</code> 設成 <code>true</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> client.<span class="property">pages</span>.<span class="title function_">update</span>(&#123;</span><br><span class="line">  <span class="attr">page_id</span>: pageId,</span><br><span class="line">  <span class="attr">archived</span>: <span class="literal">true</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>這樣紀錄不會真的消失，在 Notion 介面裡還是可以找到（在垃圾桶裡），但不會出現在 database view 裡了。</p>
+<p>整個去重腳本大概 30 行，跑完之後從 64 筆降回正確的 28 筆。但這個過程讓我學到：<strong>批量寫入一定要做 idempotency</strong>。最簡單的做法就是在 create 之前先 query 一下那個日期有沒有紀錄了，有就 skip。</p>
+<h4 id="防止未來再犯"><a href="#防止未來再犯" class="headerlink" title="防止未來再犯"></a>防止未來再犯</h4><p>除了加 idempotency check，我後來也加了 rate limit 的處理。Notion API 的 rate limit 是每秒大約 3 次請求，超過的話會回 HTTP 429。我的做法是：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">rateLimitedCreate</span>(<span class="params">client, params, delayMs = <span class="number">350</span></span>) &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> result = <span class="keyword">await</span> client.<span class="property">pages</span>.<span class="title function_">create</span>(params);</span><br><span class="line">    <span class="keyword">await</span> <span class="title function_">sleep</span>(delayMs); <span class="comment">// 每次請求之間固定等待</span></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">  &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">    <span class="keyword">if</span> (err.<span class="property">status</span> === <span class="number">429</span>) &#123;</span><br><span class="line">      <span class="keyword">const</span> retryAfter = err.<span class="property">headers</span>?.[<span class="string">&#x27;retry-after&#x27;</span>] || <span class="number">1</span>;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`Rate limited, waiting <span class="subst">$&#123;retryAfter&#125;</span>s...`</span>);</span><br><span class="line">      <span class="keyword">await</span> <span class="title function_">sleep</span>(retryAfter * <span class="number">1000</span>);</span><br><span class="line">      <span class="keyword">return</span> <span class="title function_">rateLimitedCreate</span>(client, params, delayMs); <span class="comment">// retry</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">throw</span> err;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每次請求之間加 350ms 的間隔，加上 429 的 retry 機制，之後就沒再遇過 timeout 的問題了。</p>
+<h3 id="踩坑-3：Pagination-的隱形陷阱"><a href="#踩坑-3：Pagination-的隱形陷阱" class="headerlink" title="踩坑 3：Pagination 的隱形陷阱"></a>踩坑 3：Pagination 的隱形陷阱</h3><p>這個坑比較隱晦。Notion API 的 database query 預設每次最多回傳 100 筆結果。如果你的 database 超過 100 筆，就需要做 pagination——用 <code>start_cursor</code> 參數去拿下一頁。</p>
+<p>問題是：一開始你的 database 可能只有二三十筆，query 一次就拿完了，所以你的程式碼根本沒做 pagination。等到有一天 database 長到 100 筆以上，程式開始漏資料，而你可能要過好一陣子才會發現。</p>
+<p>我就是這樣中招的。我的工時紀錄 database 在前兩個月都正常，第三個月某天突然發現統計的工時跟實際不符。查了半天才發現是 query 只拿了前 100 筆，後面的全部漏掉了。</p>
+<p>正確的做法是從一開始就把 pagination 寫進去：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">queryAll</span>(<span class="params">client, databaseId, filter</span>) &#123;</span><br><span class="line">  <span class="keyword">let</span> results = [];</span><br><span class="line">  <span class="keyword">let</span> cursor = <span class="literal">undefined</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> response = <span class="keyword">await</span> client.<span class="property">databases</span>.<span class="title function_">query</span>(&#123;</span><br><span class="line">      <span class="attr">database_id</span>: databaseId,</span><br><span class="line">      <span class="attr">filter</span>: filter,</span><br><span class="line">      <span class="attr">start_cursor</span>: cursor,</span><br><span class="line">      <span class="attr">page_size</span>: <span class="number">100</span></span><br><span class="line">    &#125;);</span><br><span class="line">    results.<span class="title function_">push</span>(...response.<span class="property">results</span>);</span><br><span class="line">    cursor = response.<span class="property">has_more</span> ? response.<span class="property">next_cursor</span> : <span class="literal">undefined</span>;</span><br><span class="line">  &#125; <span class="keyword">while</span> (cursor);</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> results;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>不管你的 database 現在有幾筆，先把 pagination 做好。這是一個「現在不做，以後一定會後悔」的事。</p>
+<h3 id="Notion-API-實用技巧分享"><a href="#Notion-API-實用技巧分享" class="headerlink" title="Notion API 實用技巧分享"></a>Notion API 實用技巧分享</h3><p>踩完坑之後，整理一些實際用下來覺得值得記的技巧：</p>
+<h4 id="filter-sorts-做精準查詢"><a href="#filter-sorts-做精準查詢" class="headerlink" title="filter + sorts 做精準查詢"></a>filter + sorts 做精準查詢</h4><p>Notion API 的 database query 支援很彈性的 filter 和 sort。比如要查某個日期的所有紀錄：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> response = <span class="keyword">await</span> client.<span class="property">databases</span>.<span class="title function_">query</span>(&#123;</span><br><span class="line">  <span class="attr">database_id</span>: dbId,</span><br><span class="line">  <span class="attr">filter</span>: &#123;</span><br><span class="line">    <span class="attr">property</span>: <span class="string">&#x27;日期&#x27;</span>,</span><br><span class="line">    <span class="attr">date</span>: &#123;</span><br><span class="line">      <span class="attr">equals</span>: <span class="string">&#x27;2026-01-15&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">sorts</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">timestamp</span>: <span class="string">&#x27;created_time&#x27;</span>,</span><br><span class="line">      <span class="attr">direction</span>: <span class="string">&#x27;ascending&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>這個 filter 系統支援 <code>and</code>、<code>or</code> 巢狀，可以組合出很複雜的查詢條件。比如「找出本週未完成且優先級為高的任務」：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">filter</span>: &#123;</span><br><span class="line">  <span class="attr">and</span>: [</span><br><span class="line">    &#123; <span class="attr">property</span>: <span class="string">&#x27;狀態&#x27;</span>, <span class="attr">select</span>: &#123; <span class="attr">does_not_equal</span>: <span class="string">&#x27;完成&#x27;</span> &#125; &#125;,</span><br><span class="line">    &#123; <span class="attr">property</span>: <span class="string">&#x27;優先級&#x27;</span>, <span class="attr">select</span>: &#123; <span class="attr">equals</span>: <span class="string">&#x27;高&#x27;</span> &#125; &#125;,</span><br><span class="line">    &#123; <span class="attr">property</span>: <span class="string">&#x27;日期&#x27;</span>, <span class="attr">date</span>: &#123; <span class="attr">on_or_after</span>: <span class="string">&#x27;2026-01-27&#x27;</span> &#125; &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="rich-text-的-content-要從-array-取"><a href="#rich-text-的-content-要從-array-取" class="headerlink" title="rich_text 的 content 要從 array 取"></a>rich_text 的 content 要從 array 取</h4><p>Notion 的 <code>rich_text</code> 型別欄位回傳的不是一個字串，而是一個 array。要拿到文字內容，得這樣取：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> title = page.<span class="property">properties</span>[<span class="string">&#x27;Name&#x27;</span>].<span class="property">title</span>[<span class="number">0</span>]?.<span class="property">plain_text</span> ?? <span class="string">&#x27;&#x27;</span>;</span><br><span class="line"><span class="keyword">const</span> note = page.<span class="property">properties</span>[<span class="string">&#x27;備註&#x27;</span>].<span class="property">rich_text</span>[<span class="number">0</span>]?.<span class="property">plain_text</span> ?? <span class="string">&#x27;&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>注意那個 <code>[0]</code>，一開始很容易忘記，然後就會拿到 <code>undefined</code>。</p>
+<p>更要注意的是，如果文字裡面有混合格式（比如部分粗體、部分有連結），<code>rich_text</code> array 就會有多個元素。這時候你需要把所有元素的 <code>plain_text</code> 拼起來才能拿到完整內容：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fullText = page.<span class="property">properties</span>[<span class="string">&#x27;備註&#x27;</span>].<span class="property">rich_text</span></span><br><span class="line">  .<span class="title function_">map</span>(<span class="function"><span class="params">rt</span> =&gt;</span> rt.<span class="property">plain_text</span>)</span><br><span class="line">  .<span class="title function_">join</span>(<span class="string">&#x27;&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Date-欄位支援時間區段"><a href="#Date-欄位支援時間區段" class="headerlink" title="Date 欄位支援時間區段"></a>Date 欄位支援時間區段</h4><p>Date 欄位可以同時設 <code>start</code> 和 <code>end</code>，適合需要記錄時間區段的場景（像是工時紀錄）：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">properties</span>: &#123;</span><br><span class="line">  <span class="string">&#x27;工作時段&#x27;</span>: &#123;</span><br><span class="line">    <span class="attr">date</span>: &#123;</span><br><span class="line">      <span class="attr">start</span>: <span class="string">&#x27;2026-01-15T09:00:00+08:00&#x27;</span>,</span><br><span class="line">      <span class="attr">end</span>: <span class="string">&#x27;2026-01-15T18:00:00+08:00&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>這裡要特別注意時區。如果你省略時區後綴（比如只寫 <code>2026-01-15T09:00:00</code>），Notion 會用 UTC 來解讀。結果你以為設的是早上九點，實際存進去的是台灣時間下午五點。我在這裡也踩過一次坑。</p>
+<h4 id="created-by-不是你以為的那個人"><a href="#created-by-不是你以為的那個人" class="headerlink" title="created_by 不是你以為的那個人"></a>created_by 不是你以為的那個人</h4><p>用 API 建立的 page，<code>created_by</code> 回傳的是 <strong>Integration bot 的 ID</strong>，不是你這個使用者的 ID。這在做某些邏輯判斷的時候要注意，不能用 <code>created_by</code> 來判斷「是誰建的」，因為透過 API 建的全部都是同一個 bot。</p>
+<p>如果你需要追蹤「是誰觸發了這筆紀錄的建立」，建議自己多加一個 People 或 Rich Text 欄位來記錄。</p>
+<h4 id="建立-block-children-做列表"><a href="#建立-block-children-做列表" class="headerlink" title="建立 block children 做列表"></a>建立 block children 做列表</h4><p>要在 page 裡面加入列表，可以用 <code>append</code> block children：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> client.<span class="property">blocks</span>.<span class="property">children</span>.<span class="title function_">append</span>(&#123;</span><br><span class="line">  <span class="attr">block_id</span>: pageId,</span><br><span class="line">  <span class="attr">children</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">object</span>: <span class="string">&#x27;block&#x27;</span>,</span><br><span class="line">      <span class="attr">type</span>: <span class="string">&#x27;numbered_list_item&#x27;</span>,</span><br><span class="line">      <span class="attr">numbered_list_item</span>: &#123;</span><br><span class="line">        <span class="attr">rich_text</span>: [&#123; <span class="attr">type</span>: <span class="string">&#x27;text&#x27;</span>, <span class="attr">text</span>: &#123; <span class="attr">content</span>: <span class="string">&#x27;第一項工作&#x27;</span> &#125; &#125;]</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">object</span>: <span class="string">&#x27;block&#x27;</span>,</span><br><span class="line">      <span class="attr">type</span>: <span class="string">&#x27;numbered_list_item&#x27;</span>,</span><br><span class="line">      <span class="attr">numbered_list_item</span>: &#123;</span><br><span class="line">        <span class="attr">rich_text</span>: [&#123; <span class="attr">type</span>: <span class="string">&#x27;text&#x27;</span>, <span class="attr">text</span>: &#123; <span class="attr">content</span>: <span class="string">&#x27;第二項工作&#x27;</span> &#125; &#125;]</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>寫起來有點冗長，建議自己封裝一個 helper function 來簡化。我自己封裝了一個 <code>makeListItem(text)</code> 就省事多了。</p>
+<h3 id="跨-Workspace-整合模式"><a href="#跨-Workspace-整合模式" class="headerlink" title="跨 Workspace 整合模式"></a>跨 Workspace 整合模式</h3><p>回到最開始的需求：<strong>同時操作兩個 workspace</strong>。</p>
+<p>前面提過，一個 token 只能打一個 workspace，所以程式裡必須維護兩組 client。這個情境其實蠻常見的——比如我需要從個人 workspace 讀取今天的任務清單，然後把摘要寫入公司 workspace 的日報。</p>
+<p>我的做法是封裝成明確的 helper function：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">readPersonalTasks</span>(<span class="params">date</span>) &#123;</span><br><span class="line">  <span class="comment">// 使用 personalClient，只讀個人 workspace</span></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">await</span> personalClient.<span class="property">databases</span>.<span class="title function_">query</span>(&#123;</span><br><span class="line">    <span class="attr">database_id</span>: <span class="variable constant_">PERSONAL_TASKS_DB</span>,</span><br><span class="line">    <span class="attr">filter</span>: &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">writeCompanyReport</span>(<span class="params">date, content</span>) &#123;</span><br><span class="line">  <span class="comment">// 使用 companyClient，只寫公司 workspace</span></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">await</span> companyClient.<span class="property">pages</span>.<span class="title function_">create</span>(&#123;</span><br><span class="line">    <span class="attr">parent</span>: &#123; <span class="attr">database_id</span>: <span class="variable constant_">COMPANY_REPORTS_DB</span> &#125;,</span><br><span class="line">    <span class="attr">properties</span>: &#123; <span class="comment">/* ... */</span> &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>關鍵是：<strong>function 的名稱要明確標示它操作的是哪個 workspace</strong>。不要寫成 <code>readTasks</code> 和 <code>writeReport</code>，這樣三個月後回來看 code 會搞不清楚是打哪邊。</p>
+<p>另外一個建議是把兩組 token 的初始化放在同一個地方，方便管理：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">  <span class="attr">personal</span>: &#123;</span><br><span class="line">    <span class="attr">token</span>: <span class="title function_">readToken</span>(<span class="string">&#x27;notion-personal-token&#x27;</span>),</span><br><span class="line">    <span class="attr">databases</span>: &#123; <span class="attr">tasks</span>: <span class="string">&#x27;xxx-xxx-xxx&#x27;</span> &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">company</span>: &#123;</span><br><span class="line">    <span class="attr">token</span>: <span class="title function_">readToken</span>(<span class="string">&#x27;notion-company-token&#x27;</span>),</span><br><span class="line">    <span class="attr">databases</span>: &#123; <span class="attr">reports</span>: <span class="string">&#x27;yyy-yyy-yyy&#x27;</span>, <span class="attr">timesheet</span>: <span class="string">&#x27;zzz-zzz-zzz&#x27;</span> &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>這樣即使以後要加第三個 workspace（比如某個客戶的），架構也能很自然地擴展。</p>
+<h3 id="小結"><a href="#小結" class="headerlink" title="小結"></a>小結</h3><p>Notion API 的文件看起來蠻清楚的，endpoint 不多，概念也不複雜。但實際整合的時候，邊界條件比想像中多很多——尤其是多 workspace 的場景。</p>
+<p>總結幾個重點：</p>
+<ul>
+<li>Token 檔案命名要<strong>明確到讓你不可能搞混</strong>，加上啟動時的 sanity check</li>
+<li>批量寫入一定要做 <strong>idempotency 檢查</strong>，順便處理好 rate limit</li>
+<li>從第一天就實作 <strong>pagination</strong>，不要等到 database 超過 100 筆才補</li>
+<li>Notion 沒有 DELETE，只有 archive，心態要調整</li>
+<li><code>rich_text</code> 是 array，<code>created_by</code> 是 bot ID，Date 要注意時區——這些小細節不注意就會 debug 很久</li>
+<li>跨 workspace 整合就是維護多組 client，把函式命名和設定管理做好就不會亂</li>
+</ul>
+<p>這些坑每一個都不難解，但都是那種「沒遇到過就完全想不到」的問題。如果這篇能幫你少踩一兩個坑，那我的血淚就沒白流了 😄</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/Notion-API/" rel="tag"># Notion API</a>
+              <a href="/tags/API%E6%95%B4%E5%90%88/" rel="tag"># API整合</a>
+              <a href="/tags/%E8%B8%A9%E5%9D%91/" rel="tag"># 踩坑</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020507/" rel="prev" title="打造 AI 的長期記憶：OpenClaw Memory System 設計心得">
+      <i class="fa fa-chevron-left"></i> 打造 AI 的長期記憶：OpenClaw Memory System 設計心得
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020509/" rel="next" title="Cursor Agent CLI 深度探索：不只是 IDE 裡的 AI，它還能在終端機裡跑">
+      Cursor Agent CLI 深度探索：不只是 IDE 裡的 AI，它還能在終端機裡跑 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%88%E6%90%9E%E6%87%82-Notion-Integration-%E7%9A%84-Workspace-%E9%9A%94%E9%9B%A2"><span class="nav-number">1.</span> <span class="nav-text">先搞懂 Notion Integration 的 Workspace 隔離</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B8%A9%E5%9D%91-1%EF%BC%9AToken-%E8%A6%86%E8%93%8B%E4%BA%8B%E4%BB%B6%E2%80%94%E2%80%94Debug-%E5%88%B0%E6%87%B7%E7%96%91%E4%BA%BA%E7%94%9F"><span class="nav-number">2.</span> <span class="nav-text">踩坑 1：Token 覆蓋事件——Debug 到懷疑人生</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%99%E8%A8%93%E8%88%87%E9%98%B2%E8%AD%B7%E6%8E%AA%E6%96%BD"><span class="nav-number">2.1.</span> <span class="nav-text">教訓與防護措施</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B8%A9%E5%9D%91-2%EF%BC%9A%E6%89%B9%E9%87%8F%E5%BB%BA%E7%AB%8B%E9%87%8D%E8%A4%87%E8%B3%87%E6%96%99%E2%80%94%E2%80%9436-%E7%AD%86%E5%B9%BD%E9%9D%88%E6%97%A5%E5%A0%B1"><span class="nav-number">3.</span> <span class="nav-text">踩坑 2：批量建立重複資料——36 筆幽靈日報</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%BB%E9%87%8D%E7%AD%96%E7%95%A5"><span class="nav-number">3.1.</span> <span class="nav-text">去重策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%98%B2%E6%AD%A2%E6%9C%AA%E4%BE%86%E5%86%8D%E7%8A%AF"><span class="nav-number">3.2.</span> <span class="nav-text">防止未來再犯</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B8%A9%E5%9D%91-3%EF%BC%9APagination-%E7%9A%84%E9%9A%B1%E5%BD%A2%E9%99%B7%E9%98%B1"><span class="nav-number">4.</span> <span class="nav-text">踩坑 3：Pagination 的隱形陷阱</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Notion-API-%E5%AF%A6%E7%94%A8%E6%8A%80%E5%B7%A7%E5%88%86%E4%BA%AB"><span class="nav-number">5.</span> <span class="nav-text">Notion API 實用技巧分享</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#filter-sorts-%E5%81%9A%E7%B2%BE%E6%BA%96%E6%9F%A5%E8%A9%A2"><span class="nav-number">5.1.</span> <span class="nav-text">filter + sorts 做精準查詢</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rich-text-%E7%9A%84-content-%E8%A6%81%E5%BE%9E-array-%E5%8F%96"><span class="nav-number">5.2.</span> <span class="nav-text">rich_text 的 content 要從 array 取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Date-%E6%AC%84%E4%BD%8D%E6%94%AF%E6%8F%B4%E6%99%82%E9%96%93%E5%8D%80%E6%AE%B5"><span class="nav-number">5.3.</span> <span class="nav-text">Date 欄位支援時間區段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#created-by-%E4%B8%8D%E6%98%AF%E4%BD%A0%E4%BB%A5%E7%82%BA%E7%9A%84%E9%82%A3%E5%80%8B%E4%BA%BA"><span class="nav-number">5.4.</span> <span class="nav-text">created_by 不是你以為的那個人</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B-block-children-%E5%81%9A%E5%88%97%E8%A1%A8"><span class="nav-number">5.5.</span> <span class="nav-text">建立 block children 做列表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8-Workspace-%E6%95%B4%E5%90%88%E6%A8%A1%E5%BC%8F"><span class="nav-number">6.</span> <span class="nav-text">跨 Workspace 整合模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%B5%90"><span class="nav-number">7.</span> <span class="nav-text">小結</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

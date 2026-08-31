@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近調整一個 AI 自動化整理流程時，我重新被提醒：刪除資料不是 housekeeping，而是高風險操作。對 autonomous agent 來說，可逆、可審計、可回滾的設計，比把指令跑完更重要。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="刪除資料這件小事：AI 自動化裡最容易被低估的安全邊界">
+<meta property="og:url" content="https://maplecheng.com/page/2026051401/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近調整一個 AI 自動化整理流程時，我重新被提醒：刪除資料不是 housekeeping，而是高風險操作。對 autonomous agent 來說，可逆、可審計、可回滾的設計，比把指令跑完更重要。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-05-13T21:00:48.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="工程管理">
+<meta property="article:tag" content="自動化">
+<meta property="article:tag" content="資料治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026051401/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>刪除資料這件小事：AI 自動化裡最容易被低估的安全邊界 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026051401/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          刪除資料這件小事：AI 自動化裡最容易被低估的安全邊界
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-05-14 05:00:48" itemprop="dateCreated datePublished" datetime="2026-05-14T05:00:48+08:00">2026-05-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近調整一個 AI 自動化整理流程時，我重新被提醒：刪除資料不是 housekeeping，而是高風險操作。對 autonomous agent 來說，可逆、可審計、可回滾的設計，比把指令跑完更重要。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在調整一個 AI 自動化整理流程時，我又被一個看起來很小的細節敲了一下頭：刪除資料這件事，真的不能只把它當成 housekeeping。</p>
+<p>工程師很容易低估「清掉舊檔案」「移除垃圾紀錄」「整理重複資料」這類工作。因為它不像新功能那麼亮眼，也不像線上事故那麼刺激。但當這些工作交給 AI agent 或排程自動執行時，刪除就不再只是整理，而是一條非常清楚的安全邊界。</p>
+<span id="more"></span>
+
+<h3 id="最危險的指令，常常長得最無聊"><a href="#最危險的指令，常常長得最無聊" class="headerlink" title="最危險的指令，常常長得最無聊"></a>最危險的指令，常常長得最無聊</h3><p><code>rm</code>、批次刪除、regex 掃描後清理，這些東西在日常開發裡太常見了。常見到我們會忘記問一個基本問題：如果判斷錯了，誰救得回來？</p>
+<p>人手動下指令時，至少還有一點情境感。你大概知道自己在哪個目錄、剛剛看過哪些檔案、刪掉之後會不會後悔。當然，人也會手滑，這我不敢嘴，畢竟每個工程師心裡都有一個不想回憶的 <code>rm -rf</code> 故事。</p>
+<p>但 AI 自動化更麻煩。它可能是凌晨跑的，可能連續處理幾百筆候選資料，可能根據某個規則判斷「這看起來像垃圾」。問題是，「看起來像」這三個字，在刪除場景裡非常危險。</p>
+<p>對 AI 來說，刪除不該是普通操作。它應該被視為權限升級。</p>
+<h3 id="可逆，比聰明更重要"><a href="#可逆，比聰明更重要" class="headerlink" title="可逆，比聰明更重要"></a>可逆，比聰明更重要</h3><p>我現在設計這類流程時，第一個原則是：能不要真的刪，就先不要真的刪。</p>
+<p>例如要移除某個受版本控制的檔案，直接用系統層級的刪除指令，看起來很乾脆；但如果改用版本控制工具處理，至少會留下 diff、commit、history，也比較容易被 review 或 rollback。這不是因為 Git 比 shell 神聖，而是因為它把「刪除」變成一個有紀錄的狀態變更。</p>
+<p>同樣地，如果要清理資料庫裡的重複資料，我會偏好先標記、移到 quarantine、產出 dry run report，而不是直接 <code>DELETE FROM</code>。如果真的要刪，也要能回答幾個問題：刪了哪些？為什麼刪？依據哪個規則？什麼時間刪？能不能恢復？</p>
+<p>聽起來很囉唆對吧？但這就是自動化系統的現實。人類偶爾手動整理，犯錯範圍通常有限；排程一旦犯錯，是很有耐心地把錯誤重複執行到天亮。</p>
+<h3 id="Regex-命中不是事實，只是線索"><a href="#Regex-命中不是事實，只是線索" class="headerlink" title="Regex 命中不是事實，只是線索"></a>Regex 命中不是事實，只是線索</h3><p>另一個很容易踩的坑，是把 pattern match 當成真相。</p>
+<p>例如我們想找出 metadata 垃圾、壓縮後殘留、重複 transcript、無效暫存檔。寫幾個 regex 掃下去，很快就能列出一堆候選。那一刻會很有成就感，彷彿系統突然變乾淨了。</p>
+<p>但 regex 命中只代表「它符合某個文字形狀」，不代表「它應該被刪」。尤其在 AI 系統裡，很多檔案的內容本來就長得像模板、像 log、像暫存、像摘要。你以為抓到垃圾，實際上可能抓到一段未來要追溯的上下文。</p>
+<p>所以我會把掃描分成兩層：第一層是 detection，負責找出候選；第二層是 decision，負責判斷能不能處置。這兩層不要混在一起。尤其是高風險清理，寧可多產生一份報告給人看，也不要讓 agent 因為「規則看起來很準」就自己動刀。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart LR
+  A[掃描候選] --> B[分類風險]
+  B --> C{是否可逆?}
+  C -->|是| D[自動處理並留下紀錄]
+  C -->|否| E[產生 dry run 報告]
+  E --> F[人工確認或延後處理]
+  D --> G[驗證與可回滾紀錄]
+  F --> G
+          </pre>
+
+<h3 id="不要把安全設計推給-approval-dialog"><a href="#不要把安全設計推給-approval-dialog" class="headerlink" title="不要把安全設計推給 approval dialog"></a>不要把安全設計推給 approval dialog</h3><p>很多 agent runtime 都會有 approval 機制：危險指令要使用者同意、刪除操作要確認、外部寫入要攔一下。這很好，但我不喜歡把它當成主要防線。</p>
+<p>原因很簡單：approval dialog 是最後一道煞車，不是道路設計。</p>
+<p>如果一個流程每次都要靠人按「允許」才能跑完，它其實還沒有被設計成自動化。更糟的是，按久了人會疲乏，最後看到提示就反射性同意。這跟網站 cookie banner 很像，本來是保護機制，最後變成訓練大家閉著眼睛按確定。</p>
+<p>比較好的做法，是把高風險操作改寫成低風險操作。不要讓 agent 去做「不可逆刪除」，而是讓它產生可 review 的變更；不要讓它直接清空資料，而是讓它把候選移到隔離區；不要讓它自由組 destructive command，而是提供受限的工具介面，只允許幾種明確、可記錄、可回滾的動作。</p>
+<p>這樣 approval 才是例外，不是日常。</p>
+<h3 id="自動化不是少管，而是更好管"><a href="#自動化不是少管，而是更好管" class="headerlink" title="自動化不是少管，而是更好管"></a>自動化不是少管，而是更好管</h3><p>我常覺得，大家談 AI agent 時太容易把焦點放在「它能不能自己做事」。這當然重要，但對技術主管來說，我更在意的是：它做完之後，我能不能理解、追蹤、修正？</p>
+<p>一個好的 agent 工作流，應該像一個可靠的同事：不只會完成任務，也會留下清楚紀錄；不確定時會降級處理；碰到高風險動作會知道停手；事後 review 時講得出自己做了什麼。</p>
+<p>這不是要把 AI 綁到不能動。剛好相反，只有當邊界設計清楚，我才敢讓它跑更遠。因為我知道就算它判斷錯了，錯誤也會被限制在可恢復的範圍內。</p>
+<h3 id="小結：刪除是產品決策，不是清潔工作"><a href="#小結：刪除是產品決策，不是清潔工作" class="headerlink" title="小結：刪除是產品決策，不是清潔工作"></a>小結：刪除是產品決策，不是清潔工作</h3><p>自動化系統最迷人的地方，是它會默默幫你處理那些無聊但必要的事。整理資料、歸檔紀錄、清掉重複、維護知識庫，這些工作如果都靠人手動做，很快就會荒廢。</p>
+<p>但越是無聊的工作，越容易被我們放鬆警戒。尤其是刪除。它不像部署新版本那麼隆重，也不像權限設定那麼敏感，卻可能在某個凌晨安靜地造成不可逆的損失。</p>
+<p>所以我現在的標準很簡單：AI 可以幫我找垃圾，可以幫我分類，可以幫我產生清理建議，也可以處理那些已經設計成可逆的變更。但只要牽涉不可逆刪除，就必須有更高規格的流程。</p>
+<p>刪除資料不是打掃房間而已。對 AI 自動化來說，它是一個產品決策、一個治理問題，也是一條工程倫理的邊界。</p>
+<p>如果我們希望 agent 真的成為可靠的工作夥伴，就不能只教它怎麼做事，也要教它什麼時候不要動手。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/Agent/" rel="tag"># Agent</a>
+              <a href="/tags/%E8%B3%87%E6%96%99%E6%B2%BB%E7%90%86/" rel="tag"># 資料治理</a>
+              <a href="/tags/%E5%B7%A5%E7%A8%8B%E7%AE%A1%E7%90%86/" rel="tag"># 工程管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026051301/" rel="prev" title="AI 工具鏈的供應鏈安全：不要把模型倉庫當成免洗連結">
+      <i class="fa fa-chevron-left"></i> AI 工具鏈的供應鏈安全：不要把模型倉庫當成免洗連結
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026051501/" rel="next" title="把 AI 助理搬進團隊前，我先做的不是功能，而是隔離">
+      把 AI 助理搬進團隊前，我先做的不是功能，而是隔離 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%8D%B1%E9%9A%AA%E7%9A%84%E6%8C%87%E4%BB%A4%EF%BC%8C%E5%B8%B8%E5%B8%B8%E9%95%B7%E5%BE%97%E6%9C%80%E7%84%A1%E8%81%8A"><span class="nav-number">1.</span> <span class="nav-text">最危險的指令，常常長得最無聊</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E9%80%86%EF%BC%8C%E6%AF%94%E8%81%B0%E6%98%8E%E6%9B%B4%E9%87%8D%E8%A6%81"><span class="nav-number">2.</span> <span class="nav-text">可逆，比聰明更重要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Regex-%E5%91%BD%E4%B8%AD%E4%B8%8D%E6%98%AF%E4%BA%8B%E5%AF%A6%EF%BC%8C%E5%8F%AA%E6%98%AF%E7%B7%9A%E7%B4%A2"><span class="nav-number">3.</span> <span class="nav-text">Regex 命中不是事實，只是線索</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E8%A6%81%E6%8A%8A%E5%AE%89%E5%85%A8%E8%A8%AD%E8%A8%88%E6%8E%A8%E7%B5%A6-approval-dialog"><span class="nav-number">4.</span> <span class="nav-text">不要把安全設計推給 approval dialog</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8B%95%E5%8C%96%E4%B8%8D%E6%98%AF%E5%B0%91%E7%AE%A1%EF%BC%8C%E8%80%8C%E6%98%AF%E6%9B%B4%E5%A5%BD%E7%AE%A1"><span class="nav-number">5.</span> <span class="nav-text">自動化不是少管，而是更好管</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%B5%90%EF%BC%9A%E5%88%AA%E9%99%A4%E6%98%AF%E7%94%A2%E5%93%81%E6%B1%BA%E7%AD%96%EF%BC%8C%E4%B8%8D%E6%98%AF%E6%B8%85%E6%BD%94%E5%B7%A5%E4%BD%9C"><span class="nav-number">6.</span> <span class="nav-text">小結：刪除是產品決策，不是清潔工作</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

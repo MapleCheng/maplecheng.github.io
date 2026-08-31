@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="ERP 系統裡審核流程和單據狀態糾纏不清是常見的設計債。分享如何用 ApprovalRecord 架構把審核邏輯乾淨地抽離出來，支援退回重送、多版本審核歷程，不用再為了退回而起新號。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="別再把審核流程綁在單據狀態上了：ApprovalRecord 抽離實戰">
+<meta property="og:url" content="https://maplecheng.com/page/2026022701/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="ERP 系統裡審核流程和單據狀態糾纏不清是常見的設計債。分享如何用 ApprovalRecord 架構把審核邏輯乾淨地抽離出來，支援退回重送、多版本審核歷程，不用再為了退回而起新號。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-27T10:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="DataModel">
+<meta property="article:tag" content="ERP">
+<meta property="article:tag" content="實務經驗">
+<meta property="article:tag" content="架構設計">
+<meta property="article:tag" content="設計模式">
+<meta property="article:tag" content="軟體工程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026022701/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>別再把審核流程綁在單據狀態上了：ApprovalRecord 抽離實戰 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026022701/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          別再把審核流程綁在單據狀態上了：ApprovalRecord 抽離實戰
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-27 18:00:00" itemprop="dateCreated datePublished" datetime="2026-02-27T18:00:00+08:00">2026-02-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">ERP 系統裡審核流程和單據狀態糾纏不清是常見的設計債。分享如何用 ApprovalRecord 架構把審核邏輯乾淨地抽離出來，支援退回重送、多版本審核歷程，不用再為了退回而起新號。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>做 ERP 系統夠久的人，一定遇過這個問題：審核流程和單據狀態攪在一起，改一個就壞另一個。</p>
+<p>最近在重構一個提案單模組的時候，終於下定決心把審核邏輯從單據狀態裡抽出來。這篇記錄一下為什麼要這樣做，以及實際的架構設計。</p>
+<span id="more"></span>
+
+<h3 id="問題：一個欄位扛兩件事"><a href="#問題：一個欄位扛兩件事" class="headerlink" title="問題：一個欄位扛兩件事"></a>問題：一個欄位扛兩件事</h3><p>我們的提案單原本有兩個狀態欄位：<code>CurrentState</code> 和 <code>PermitState</code>。</p>
+<p><code>CurrentState</code> 管的是單據的生命週期：草稿、生效中、作廢。<br><code>PermitState</code> 管的是審核流程的進度：待審核、已核准、已駁回。</p>
+<p>聽起來分得很清楚對吧？但實際跑起來就不是那麼回事了。</p>
+<p>舉個例子：一張提案單被退回了，業務要修改內容重新送審。這時候要怎麼處理？</p>
+<p>原本的做法是：<strong>把這張單作廢，然後開一張新單。</strong></p>
+<p>為什麼要起新號？因為 <code>PermitState</code> 改回「待審核」之後，之前的審核紀錄就被覆蓋了。沒有人知道這張單被退回過、退回的原因是什麼、退回之前的內容長什麼樣。</p>
+<p>所以只好起新號，用另一張單重新走流程。</p>
+<p>這帶來一堆問題：</p>
+<ul>
+<li>同一個需求在系統裡有多個單號，追溯困難</li>
+<li>前一張單被作廢，但它其實不是「無效」，只是「被退回修改」</li>
+<li>業務要手動把舊單的內容複製到新單，容易出錯</li>
+<li>報表統計的時候，同一件事被算了好幾次</li>
+</ul>
+<h3 id="根因：審核流程不該是單據的屬性"><a href="#根因：審核流程不該是單據的屬性" class="headerlink" title="根因：審核流程不該是單據的屬性"></a>根因：審核流程不該是單據的屬性</h3><p>問題的根源在於：我們把「審核進度」當成了單據本身的屬性。</p>
+<p>但審核流程本質上是一個<strong>獨立的活動</strong>。一張單據可以被審核多次（退回重送），每次審核都有自己的版本、自己的評語、自己的結果。這些資訊應該存在獨立的表裡，而不是硬塞在單據欄位裡。</p>
+<p>用一個類比：你去銀行申請貸款，被退件要求補資料。銀行不會叫你重新開一個申請案，而是在同一個案件上標記「第二次送審」。原始申請、退件紀錄、補件內容、重新審核，全部串在同一個案號下面。</p>
+<h3 id="新架構：ApprovalRecord"><a href="#新架構：ApprovalRecord" class="headerlink" title="新架構：ApprovalRecord"></a>新架構：ApprovalRecord</h3><p>重構之後，架構變成這樣：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[提案單 Proposal] --> B[ApprovalRecord v1]
+    A --> C[ApprovalRecord v2]
+    A --> D[ApprovalRecord v3]
+    B --> E[審核動作紀錄]
+    C --> F[審核動作紀錄]
+    D --> G[審核動作紀錄]
+          </pre>
+
+<p><strong>提案單狀態簡化為兩個：Valid &#x2F; Closed</strong></p>
+<p>沒有「待審核」「已核准」「已駁回」了。單據只管自己是不是有效的。</p>
+<p><strong>審核邏輯全部搬到 ApprovalRecord 表</strong></p>
+<p>每次送審就建一筆 ApprovalRecord，帶版本號。退回重送就版本 +1，同一張單可以有多個版本。</p>
+<p>ApprovalRecord 的核心欄位：</p>
+<ul>
+<li><code>ProposalId</code> — 關聯到哪張提案單</li>
+<li><code>Version</code> — 第幾次送審（1, 2, 3…）</li>
+<li><code>Action</code> — 這次的動作（Submit &#x2F; Approve &#x2F; Reject &#x2F; Cancel）</li>
+<li><code>Status</code> — 這個版本目前的狀態（Pending &#x2F; Approved &#x2F; Rejected）</li>
+<li><code>SnapshotJson</code> — 送審當下的單據內容快照</li>
+<li><code>Comment</code> — 審核人的評語</li>
+<li><code>CreatedAt</code> &#x2F; <code>CreatedBy</code> — 誰在什麼時候操作的</li>
+</ul>
+<h3 id="退回重送：不起新號"><a href="#退回重送：不起新號" class="headerlink" title="退回重送：不起新號"></a>退回重送：不起新號</h3><p>有了 ApprovalRecord 之後，退回重送的流程變成：</p>
+<ol>
+<li>審核人駁回 → ApprovalRecord v1 的 Status 改為 Rejected，附上退回原因</li>
+<li>業務修改提案單內容（單據本身還是 Valid，不用作廢）</li>
+<li>業務重新送審 → 新建 ApprovalRecord v2，SnapshotJson 存修改後的內容</li>
+<li>審核人核准 → ApprovalRecord v2 的 Status 改為 Approved</li>
+</ol>
+<p>全程同一個單號。v1 的退回紀錄永遠保留，包含退回原因和當時的單據快照。任何時候想回顧「這張單被退回幾次、每次退回的原因」，查 ApprovalRecord 表就好。</p>
+<h3 id="SnapshotJson：時光機"><a href="#SnapshotJson：時光機" class="headerlink" title="SnapshotJson：時光機"></a>SnapshotJson：時光機</h3><p><code>SnapshotJson</code> 這個欄位值得特別說一下。</p>
+<p>每次送審的時候，把當下的單據內容序列化成 JSON 存進去。這樣即使單據後來被修改了，你還是能看到「送審的時候長什麼樣」。</p>
+<p>這在實務上非常有用：</p>
+<ul>
+<li>審計需求：「這張單核准的時候，規格欄寫的是什麼？」→ 直接查 SnapshotJson</li>
+<li>爭議釐清：「業務說他送審的版本跟現在不一樣」→ 比對 SnapshotJson 跟目前的資料</li>
+<li>流程追溯：「為什麼 v1 被退回？」→ 看 v1 的 SnapshotJson + Comment</li>
+</ul>
+<p>不存快照的話，這些問題都回答不了。因為單據被修改之後，原始內容就消失了。</p>
+<h3 id="流程設定：讓審核步驟可配置"><a href="#流程設定：讓審核步驟可配置" class="headerlink" title="流程設定：讓審核步驟可配置"></a>流程設定：讓審核步驟可配置</h3><p>光有 ApprovalRecord 還不夠。不同類型的提案單可能走不同的審核流程：</p>
+<ul>
+<li><strong>業務起單</strong>（從需求接收轉過來的）：需求接收 → 提案撰寫 → 業務確認 → 立案審核 → 已立案</li>
+<li><strong>工務自行起單</strong>：提案撰寫 → 立案審核 → 已立案</li>
+</ul>
+<p>這代表審核的「步驟」也需要是可配置的，不能硬編碼。</p>
+<p>所以我另外建了兩張表：</p>
+<p><strong>ApprovalFlow（審核流程）</strong></p>
+<ul>
+<li><code>FlowCode</code> — 流程代碼（如 <code>RDM_FROM_REQUEST</code>、<code>RDM_DIRECT</code>）</li>
+<li><code>Name</code> — 流程名稱</li>
+<li><code>Description</code> — 說明</li>
+</ul>
+<p><strong>ApprovalFlowStep（審核步驟）</strong></p>
+<ul>
+<li><code>FlowCode</code> — 屬於哪個流程</li>
+<li><code>StepOrder</code> — 第幾步</li>
+<li><code>StepName</code> — 步驟名稱（如「業務確認」「立案審核」）</li>
+<li><code>RoleOrDept</code> — 誰負責這一步</li>
+</ul>
+<p>提案單建立的時候，根據起單方式決定走哪個 Flow。每次送審就推進到下一個 Step。退回就退回到指定的 Step（不一定是第一步，有時候只退回上一步）。</p>
+<h3 id="這個設計的取捨"><a href="#這個設計的取捨" class="headerlink" title="這個設計的取捨"></a>這個設計的取捨</h3><p><strong>優點：</strong></p>
+<ul>
+<li>單據狀態極度簡單，只管 Valid &#x2F; Closed</li>
+<li>審核歷程完整保留，支援多版本</li>
+<li>退回不起新號，追溯清晰</li>
+<li>SnapshotJson 提供時間點的精確記錄</li>
+<li>流程步驟可配置，不用改 code 就能調整流程</li>
+</ul>
+<p><strong>代價：</strong></p>
+<ul>
+<li>多了兩三張表，Join 查詢複雜度增加</li>
+<li>SnapshotJson 佔空間（每次送審都存一份完整快照）</li>
+<li>需要寫 migration 把舊資料搬到新架構</li>
+<li>前端要配合改，從「讀單據狀態」改成「讀最新的 ApprovalRecord 狀態」</li>
+</ul>
+<p>這些代價我覺得都可以接受。空間換時間、複雜度換可維護性，在 ERP 系統裡是很划算的交易。</p>
+<h3 id="一些實作細節"><a href="#一些實作細節" class="headerlink" title="一些實作細節"></a>一些實作細節</h3><p><strong>如何判斷提案單目前的審核狀態？</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 取最新版本的 ApprovalRecord</span></span><br><span class="line"><span class="keyword">SELECT</span> TOP <span class="number">1</span> <span class="operator">*</span></span><br><span class="line"><span class="keyword">FROM</span> X_rdmProposalApproval</span><br><span class="line"><span class="keyword">WHERE</span> ProposalId <span class="operator">=</span> <span class="variable">@proposalId</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> Version <span class="keyword">DESC</span></span><br></pre></td></tr></table></figure>
+
+<p>不是看單據本身的欄位，而是看最新一筆 ApprovalRecord 的 Status。</p>
+<p><strong>如何判斷目前走到哪一步？</strong></p>
+<p>ApprovalRecord 上記錄 <code>CurrentStep</code>，每次 Approve 就 +1，直到走完所有步驟才變成最終核准。</p>
+<p><strong>SnapshotJson 要存多細？</strong></p>
+<p>我的做法是存整個 DTO——跟 API 回傳的格式一樣。這樣前端要顯示歷史版本的時候，可以直接用同一套 component render。</p>
+<h3 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h3><p>審核流程綁在單據狀態上，是 ERP 系統裡很常見的設計債。一開始做的時候不覺得有問題，因為第一版的流程通常很簡單。但隨著業務變複雜——加了退回重送、加了多層審核、加了審計需求——這個設計就開始撐不住了。</p>
+<p>如果你現在正在設計新的審核模組，建議一開始就把 ApprovalRecord 抽出來。前期多花兩天建表和寫 API，可以省下後面無數次的「改一個地方壞三個地方」。</p>
+<p>如果你跟我一樣是在重構既有系統，那就做好心理準備：migration 會比你想的痛苦。但痛完之後，那個清爽感是值得的。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88/" rel="tag"># 架構設計</a>
+              <a href="/tags/ERP/" rel="tag"># ERP</a>
+              <a href="/tags/DataModel/" rel="tag"># DataModel</a>
+              <a href="/tags/%E8%BB%9F%E9%AB%94%E5%B7%A5%E7%A8%8B/" rel="tag"># 軟體工程</a>
+              <a href="/tags/%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/" rel="tag"># 實務經驗</a>
+              <a href="/tags/%E8%A8%AD%E8%A8%88%E6%A8%A1%E5%BC%8F/" rel="tag"># 設計模式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026022501/" rel="prev" title="民國年條碼解析：當你的系統要處理非標準日期格式">
+      <i class="fa fa-chevron-left"></i> 民國年條碼解析：當你的系統要處理非標準日期格式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026022801/" rel="next" title="給 AI 寫的 Issue 要多詳細？一個 20K 字 Issue 的誕生過程">
+      給 AI 寫的 Issue 要多詳細？一個 20K 字 Issue 的誕生過程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%95%8F%E9%A1%8C%EF%BC%9A%E4%B8%80%E5%80%8B%E6%AC%84%E4%BD%8D%E6%89%9B%E5%85%A9%E4%BB%B6%E4%BA%8B"><span class="nav-number">1.</span> <span class="nav-text">問題：一個欄位扛兩件事</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E5%9B%A0%EF%BC%9A%E5%AF%A9%E6%A0%B8%E6%B5%81%E7%A8%8B%E4%B8%8D%E8%A9%B2%E6%98%AF%E5%96%AE%E6%93%9A%E7%9A%84%E5%B1%AC%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">根因：審核流程不該是單據的屬性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E6%9E%B6%E6%A7%8B%EF%BC%9AApprovalRecord"><span class="nav-number">3.</span> <span class="nav-text">新架構：ApprovalRecord</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%80%E5%9B%9E%E9%87%8D%E9%80%81%EF%BC%9A%E4%B8%8D%E8%B5%B7%E6%96%B0%E8%99%9F"><span class="nav-number">4.</span> <span class="nav-text">退回重送：不起新號</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SnapshotJson%EF%BC%9A%E6%99%82%E5%85%89%E6%A9%9F"><span class="nav-number">5.</span> <span class="nav-text">SnapshotJson：時光機</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B%E8%A8%AD%E5%AE%9A%EF%BC%9A%E8%AE%93%E5%AF%A9%E6%A0%B8%E6%AD%A5%E9%A9%9F%E5%8F%AF%E9%85%8D%E7%BD%AE"><span class="nav-number">6.</span> <span class="nav-text">流程設定：讓審核步驟可配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%99%E5%80%8B%E8%A8%AD%E8%A8%88%E7%9A%84%E5%8F%96%E6%8D%A8"><span class="nav-number">7.</span> <span class="nav-text">這個設計的取捨</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E5%AF%A6%E4%BD%9C%E7%B4%B0%E7%AF%80"><span class="nav-number">8.</span> <span class="nav-text">一些實作細節</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">9.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

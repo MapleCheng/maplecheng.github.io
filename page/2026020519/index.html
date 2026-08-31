@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="分享 DevContainer 的實戰經驗，說明為什麼容器化開發環境不只對人有利，更是讓 AI coding agent 高效協作的關鍵基礎設施">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DevContainer 實戰：打造 AI 友善的開發環境">
+<meta property="og:url" content="https://maplecheng.com/page/2026020519/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="分享 DevContainer 的實戰經驗，說明為什麼容器化開發環境不只對人有利，更是讓 AI coding agent 高效協作的關鍵基礎設施">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-05T06:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Coding Agent">
+<meta property="article:tag" content="DevContainer">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="開發環境">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020519/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>DevContainer 實戰：打造 AI 友善的開發環境 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020519/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DevContainer 實戰：打造 AI 友善的開發環境
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-05 14:00:00" itemprop="dateCreated datePublished" datetime="2026-02-05T14:00:00+08:00">2026-02-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">分享 DevContainer 的實戰經驗，說明為什麼容器化開發環境不只對人有利，更是讓 AI coding agent 高效協作的關鍵基礎設施</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>「在我的電腦上可以跑啊」— 軟體界最經典的一句話，也是最讓人翻白眼的一句話。</p>
+<p>DevContainer 出現之後，這個問題基本上被解決了。用 Docker 容器定義開發環境，誰 clone 下來都是同一套環境，不會因為你是 macOS、他是 Windows、另一個人的 Node.js 版本不對而搞半天。但用了一段時間之後，我發現 DevContainer 還有一個意想不到的好處 — 它讓 AI coding agent 更容易上手你的專案。</p>
+<p>這個發現徹底改變了我對「開發環境」這件事的思考方式。</p>
+<span id="more"></span>
+
+<h2 id="DevContainer-基礎"><a href="#DevContainer-基礎" class="headerlink" title="DevContainer 基礎"></a>DevContainer 基礎</h2><p>先簡單介紹一下 DevContainer，已經熟悉的可以跳過這段。</p>
+<p>DevContainer 的核心概念很簡單：用 Docker 容器來定義你的開發環境。在專案根目錄放一個 <code>.devcontainer/</code> 資料夾，裡面有 <code>devcontainer.json</code>（設定檔）和可選的 <code>Dockerfile</code>（客製化 image）。VS Code 和 Cursor 都原生支援，打開專案時會偵測到 <code>.devcontainer/</code>，問你要不要在容器裡開發。</p>
+<p>主要優點有三個：</p>
+<p><strong>環境一致性</strong> — 所有人用一模一樣的 runtime 版本、一模一樣的工具鏈、一模一樣的設定。不會再有「你的 .NET SDK 版本太舊」或「你的 npm 是全域裝的吧」這種問題。</p>
+<p><strong>新人 onboarding 快</strong> — 新進工程師第一天就能開始寫 code。不用花兩天「設定環境」，clone repo、打開 VS Code、等容器跑完，就可以開始了。</p>
+<p><strong>不汙染本機</strong> — 專案需要的 SDK、database、各種 CLI tool 都在容器裡。不用在本機裝一堆東西，也不會有專案 A 要 Node 18 但專案 B 要 Node 20 的衝突。</p>
+<p>聽起來很美好，但其實推動的過程也不是一帆風順的。團隊一開始的反應是「為什麼要多一層 Docker？直接跑不是比較快嗎？」是啊，直接跑確實比較快 — 在你的電腦上。但你有沒有算過，每次有新人加入或換電腦，花在「設定環境」的時間加起來是多少？</p>
+<h2 id="為什麼-DevContainer-讓-AI-更強"><a href="#為什麼-DevContainer-讓-AI-更強" class="headerlink" title="為什麼 DevContainer 讓 AI 更強"></a>為什麼 DevContainer 讓 AI 更強</h2><p>這才是這篇文章的重點。</p>
+<p>AI coding agent — 不管是 Cursor Agent、Claude Code、還是其他工具 — 它們要做的事情跟一個新進工程師其實很像：讀懂你的 code、改 code、build、跑 test、看結果、再改。但 AI 跟新人有個關鍵差異：AI 不會來問你「這個環境變數要設什麼」「這個指令怎麼跑不起來」。</p>
+<p>如果你的開發環境設定在「只有你知道的 local 環境」裡 — 某個 SDK 是你手動裝的、某個 config 是你從 Slack 訊息裡複製的、某個 database 是你本機跑的 — 那 AI 就完全無法 reproduce 你的環境。它寫完 code 之後沒辦法 build，不知道是 code 的問題還是環境的問題。</p>
+<p>DevContainer 把環境定義成 code。這意味著 AI 也能用同一套環境跑起你的專案。效果是什麼？AI 可以自己 build、跑 test、看 lint error，然後根據結果調整它的 code。這個「寫 code → build → 看 error → 修 → 再 build」的循環，就是 AI 產出品質大幅提升的關鍵。</p>
+<p>沒有 DevContainer 的時候，AI 寫 code 就像閉著眼睛投籃 — 可能進，但很看運氣。有了 DevContainer，AI 等於有了即時回饋，每次投籃都能看到結果，自然越投越準。</p>
+<h3 id="一個具體的數據分享"><a href="#一個具體的數據分享" class="headerlink" title="一個具體的數據分享"></a>一個具體的數據分享</h3><p>我們團隊有追蹤過一段時間的數據（非正式的，就是每次 AI 提 PR 我會記錄一下 review 結果）。在導入 DevContainer 之前，AI 提的 PR 大概有 60% 需要修改，其中有不少是「build 不過」這種低級問題。導入之後，需要修改的比例降到 30% 左右，而且剩下需要改的大多是業務邏輯的調整，不再是環境問題。</p>
+<p>這個數字不精確，但趨勢是很明顯的。</p>
+<h2 id="我的-DevContainer-設定策略"><a href="#我的-DevContainer-設定策略" class="headerlink" title="我的 DevContainer 設定策略"></a>我的 DevContainer 設定策略</h2><p>分享一下我實際在用的設定，以 .NET + React + SQL Server 的技術棧為例。這在做企業應用的團隊裡算是蠻常見的組合。</p>
+<p><strong>Base image</strong> 用 <code>mcr.microsoft.com/devcontainers/dotnet:8.0</code>，微軟官方的 DevContainer image，裡面已經包好 .NET SDK 和常用工具。</p>
+<p><strong>額外安裝</strong> Node.js 和 pnpm（前端需要）。這部分直接在 <code>devcontainer.json</code> 裡用 features 來裝：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;features&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;ghcr.io/devcontainers/features/node:1&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;22&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;pnpmVersion&quot;</span><span class="punctuation">:</span> <span class="string">&quot;10&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Docker Compose</strong> 是另一個重要的部分。App 容器和 SQL Server 容器用 <code>docker-compose.yml</code> 組合起來。SQL Server 用獨立的容器跑，App 容器透過 Docker network 連過去。這樣 database 的生命週期和 app 是分開的，不會每次 rebuild app 容器就要重建 database。</p>
+<p>一份簡化的 <code>docker-compose.yml</code> 大概長這樣：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="attr">app:</span></span><br><span class="line">    <span class="attr">build:</span></span><br><span class="line">      <span class="attr">context:</span> <span class="string">.</span></span><br><span class="line">      <span class="attr">dockerfile:</span> <span class="string">.devcontainer/Dockerfile</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">..:/workspace:cached</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">node_modules:/workspace/client/node_modules</span></span><br><span class="line">    <span class="attr">depends_on:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">db</span></span><br><span class="line">    </span><br><span class="line">  <span class="attr">db:</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">mcr.microsoft.com/azure-sql-edge</span></span><br><span class="line">    <span class="attr">environment:</span></span><br><span class="line">      <span class="attr">ACCEPT_EULA:</span> <span class="string">&quot;Y&quot;</span></span><br><span class="line">      <span class="attr">MSSQL_SA_PASSWORD:</span> <span class="string">&quot;YourDev_Password123&quot;</span></span><br><span class="line">    <span class="attr">ports:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&quot;1433:1433&quot;</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">sqldata:/var/opt/mssql</span></span><br><span class="line"></span><br><span class="line"><span class="attr">volumes:</span></span><br><span class="line">  <span class="attr">node_modules:</span></span><br><span class="line">  <span class="attr">sqldata:</span></span><br></pre></td></tr></table></figure>
+
+<p>注意 <code>node_modules</code> 用了 named volume，這是效能最佳化的關鍵（後面踩坑經驗會提到）。</p>
+<p>提醒一下用 Apple Silicon 的同行：SQL Server 的官方 image 不支援 ARM64，要改用 <code>mcr.microsoft.com/azure-sql-edge</code> 這個 image。功能上對開發來說夠用了，但第一次碰到的時候我確實卡了一陣子才找到這個替代品。</p>
+<p><strong>postCreateCommand</strong> 設定自動化的初始設定：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;postCreateCommand&quot;</span><span class="punctuation">:</span> <span class="string">&quot;dotnet restore &amp;&amp; dotnet build &amp;&amp; cd client &amp;&amp; pnpm install&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>容器建好之後自動還原套件和 build。這樣不管是人還是 AI 打開專案，第一次就能有一個可以跑的狀態。</p>
+<p><strong>VS Code extensions</strong> 在 <code>devcontainer.json</code> 裡預裝好，進容器就有：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;customizations&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;vscode&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;extensions&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="string">&quot;ms-dotnettools.csharp&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;ms-dotnettools.csdevkit&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;dbaeumer.vscode-eslint&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;esbenp.prettier-vscode&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;eamodio.gitlens&quot;</span></span><br><span class="line">      <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;settings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;editor.formatOnSave&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;editor.defaultFormatter&quot;</span><span class="punctuation">:</span> <span class="string">&quot;esbenp.prettier-vscode&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;[csharp]&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;editor.defaultFormatter&quot;</span><span class="punctuation">:</span> <span class="string">&quot;ms-dotnettools.csharp&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>這些設定加起來，整個開發環境的定義就是幾個檔案。任何人（或 AI）clone 下來，跑 <code>devcontainer up</code>，等幾分鐘，就有一個完整的開發環境。</p>
+<h2 id="AI-友善的開發環境-Checklist"><a href="#AI-友善的開發環境-Checklist" class="headerlink" title="AI 友善的開發環境 Checklist"></a>AI 友善的開發環境 Checklist</h2><p>除了 DevContainer 本身，還有一些配套措施可以讓 AI 更容易參與你的專案。我整理了一份 checklist，也是我們團隊目前在遵循的：</p>
+<p><strong>1. <code>devcontainer.json</code> 完整</strong> — 這是基本中的基本。AI 可以透過 <code>devcontainer up</code> 指令把整個環境跑起來。如果你的 DevContainer 設定不完整（少了某個套件、缺了某個 config），AI 一樣會卡住。</p>
+<p><strong>2. <code>README.md</code> 寫清楚 build&#x2F;test 指令</strong> — AI 讀了 README 就知道怎麼跑你的專案。不要假設「大家都知道」。寫清楚：怎麼 build、怎麼跑 test、怎麼啟動 dev server。如果有特殊的前置步驟，也要寫。</p>
+<p><strong>3. <code>.env.example</code> 列出所有環境變數</strong> — AI 需要知道你的專案需要哪些環境變數。<code>.env.example</code> 裡列出所有需要的 key，value 用假資料或說明填入。AI 看了就知道要設什麼。</p>
+<p><strong>4. Seed data &#x2F; migration script</strong> — AI 需要能自己初始化資料庫。如果跑完 migration 之後資料庫是空的，很多功能根本測不了。準備好 seed data，讓 AI 可以 <code>dotnet ef database update</code> 之後就有可用的測試資料。</p>
+<p><strong>5. CI&#x2F;CD config 可本地跑</strong> — 讓 AI 可以在提交前先驗證。如果 CI 只能在 GitHub Actions 上跑，AI 就沒辦法在 local 預先確認自己的改動是否會 break build。</p>
+<p><strong>6. <code>CLAUDE.md</code> 或 <code>.cursorrules</code></strong> — 這是給 AI 的專案 onboarding 文件。寫清楚 coding conventions、架構說明、常見的 pattern、地雷區域。把它想成「如果一個新的資深工程師加入團隊，你會跟他說什麼？」那些內容就寫在這裡面。</p>
+<p>這最後一點可能是最容易被忽略、但效果最好的。AI 不會讀心，但它會讀檔案。你把 conventions 寫下來，它就會遵守。你不寫，它就猜 — 而猜的結果往往跟你的偏好不同。</p>
+<h2 id="踩坑經驗"><a href="#踩坑經驗" class="headerlink" title="踩坑經驗"></a>踩坑經驗</h2><p>用了一年多的 DevContainer，踩過的坑也不少。分享幾個比較常見的：</p>
+<h3 id="Docker-Desktop-on-macOS-的效能問題"><a href="#Docker-Desktop-on-macOS-的效能問題" class="headerlink" title="Docker Desktop on macOS 的效能問題"></a>Docker Desktop on macOS 的效能問題</h3><p>這是每個 Mac 用戶都會碰到的。容器裡的檔案系統存取速度比 native 慢很多，尤其是 node_modules 這種有上萬個小檔案的目錄。</p>
+<p>解法是把 node_modules 用 named volume 而非 bind mount，效能可以改善不少。在 <code>docker-compose.yml</code> 裡這樣設定：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">volumes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">..:/workspace:cached</span>          <span class="comment"># workspace 用 cached mode</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">node_modules:/workspace/client/node_modules</span>  <span class="comment"># node_modules 用 named volume</span></span><br></pre></td></tr></table></figure>
+
+<p><code>cached</code> flag 告訴 Docker 可以接受 host 和 container 之間的檔案延遲同步，減少 I&#x2F;O 開銷。named volume 則是讓 node_modules 完全在容器裡面，不需要跟 host 同步。</p>
+<p>不過這也意味著你不能在 host 直接看到 node_modules 的內容，要在容器裡面操作。</p>
+<h3 id="SQL-Server-的-ARM64-支援"><a href="#SQL-Server-的-ARM64-支援" class="headerlink" title="SQL Server 的 ARM64 支援"></a>SQL Server 的 ARM64 支援</h3><p>前面提過了，用 <code>azure-sql-edge</code>。但要注意它的 SQL Server 版本可能跟 production 不完全一致，某些進階功能可能沒有。不過做開發和跑 test 是足夠的。</p>
+<p>另一個常見的坑是密碼複雜度。SQL Server 的 SA 密碼有強度要求 — 至少 8 個字、要有大小寫和數字。如果你的密碼太簡單，container 會啟動成功但 SQL Server 服務跑不起來，error log 又藏在容器裡面不好找。第一次碰到的時候我 debug 了半小時才發現是密碼的問題。</p>
+<h3 id="Node-js-版本衝突"><a href="#Node-js-版本衝突" class="headerlink" title="Node.js 版本衝突"></a>Node.js 版本衝突</h3><p>如果你同時維護多個專案，不同專案可能需要不同的 Node.js 版本。這正是 DevContainer 的優勢 — 每個專案在自己的容器裡用自己的版本。但記得在 Dockerfile 或 features 裡明確指定版本號，不要用 <code>latest</code>。今天的 <code>latest</code> 跟三個月後的 <code>latest</code> 可能不同，這會造成不可預期的問題。</p>
+<h3 id="容器啟動慢"><a href="#容器啟動慢" class="headerlink" title="容器啟動慢"></a>容器啟動慢</h3><p>第一次 build image 確實要等一陣子。善用 <code>cacheFrom</code> 指向一個 pre-built image，可以大幅減少重建時間。我們團隊會在 CI 裡自動 build DevContainer image 並 push 到 registry，這樣開發者和 AI agent 都可以直接 pull 現成的 image，不用從頭 build。</p>
+<p>在 <code>devcontainer.json</code> 裡這樣設定：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;build&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;cacheFrom&quot;</span><span class="punctuation">:</span> <span class="string">&quot;ghcr.io/your-org/your-project-devcontainer:latest&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="postCreateCommand-的時間管理"><a href="#postCreateCommand-的時間管理" class="headerlink" title="postCreateCommand 的時間管理"></a>postCreateCommand 的時間管理</h3><p>如果你的 <code>postCreateCommand</code> 太複雜或太久，容器啟動的等待時間會讓人（和 AI）很痛苦。把不必要的步驟拿掉，或是移到 <code>postStartCommand</code>（每次啟動容器時跑）和 <code>postAttachCommand</code>（每次連進容器時跑），根據需要分散。</p>
+<p>我的經驗是：<code>postCreateCommand</code> 只放「首次建立環境必要的步驟」（restore、build），其他像是 seed data 或 watch mode 放在 <code>postStartCommand</code> 或寫成手動觸發的 script。</p>
+<h3 id="容器內的-Git-身份設定"><a href="#容器內的-Git-身份設定" class="headerlink" title="容器內的 Git 身份設定"></a>容器內的 Git 身份設定</h3><p>這個坑比較隱蔽。容器內的 Git 預設可能沒有你的 user.name 和 user.email 設定，導致 commit 的時候出問題。DevContainer 會自動幫你帶入 host 的 Git config，但如果你用 Docker Compose 模式，有時候這個自動帶入不一定生效。</p>
+<p>保險的做法是在 <code>devcontainer.json</code> 裡加上：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;postCreateCommand&quot;</span><span class="punctuation">:</span> <span class="string">&quot;git config --global user.email &#x27;you@example.com&#x27; &amp;&amp; git config --global user.name &#x27;Your Name&#x27; &amp;&amp; dotnet restore &amp;&amp; dotnet build&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="和-AI-協作的實際流程"><a href="#和-AI-協作的實際流程" class="headerlink" title="和 AI 協作的實際流程"></a>和 AI 協作的實際流程</h2><p>講了這麼多設定，來說說實際上我們怎麼用 DevContainer 搭配 AI 工作的。</p>
+<p>流程大概是這樣：</p>
+<ol>
+<li>開一個 feature branch</li>
+<li>把需求描述清楚（在 issue 裡或是直接告訴 AI agent）</li>
+<li>讓 AI agent 在 DevContainer 裡開始工作</li>
+<li>AI 寫 code → build → 看 error → fix → 再 build → 直到 green</li>
+<li>AI 提交 PR</li>
+<li>人 review PR，提出修改意見</li>
+<li>AI 根據 review 修改 → 再跑一次 build&#x2F;test → 更新 PR</li>
+<li>人確認沒問題 → merge</li>
+</ol>
+<p>整個過程中，人不需要手動設定任何環境。不用跟 AI 說「先裝這個、再裝那個、然後跑這個指令」。AI 開了 DevContainer，環境就是對的，它可以專注在寫 code 上。</p>
+<p>這個流程的前提是什麼？就是前面說的那些 — DevContainer 設定完整、README 寫清楚、有 seed data、有 onboarding 文件。前期的投入看起來很花時間，但一旦到位，後續每次 AI 協作都會受益。</p>
+<p>而且說實話，這些東西就算不用 AI，對團隊本身也是有好處的。新人 onboarding 更快、環境問題更少、文件更完整。AI 只是讓你有更強的動機去做這些「本來就該做但一直拖延」的事情。</p>
+<h3 id="一個實際的協作案例"><a href="#一個實際的協作案例" class="headerlink" title="一個實際的協作案例"></a>一個實際的協作案例</h3><p>最近有一個客製需求是加一個批次列印功能。我在 issue 裡寫清楚需求（選擇多筆訂單 → 批次產生 PDF → 壓成 ZIP 下載），然後交給 AI agent。</p>
+<p>AI 在 DevContainer 裡：</p>
+<ol>
+<li>讀了 <code>CLAUDE.md</code> 了解架構</li>
+<li>找到現有的單筆列印功能作為參考</li>
+<li>在 server 端加了批次處理的 API</li>
+<li>在 client 端加了多選和批次列印的按鈕</li>
+<li>跑了 <code>dotnet build</code> 確認編譯通過</li>
+<li>跑了 <code>dotnet test</code> 確認沒有 break 既有的 test</li>
+<li>提了 PR</li>
+</ol>
+<p>我 review 的時候發現它的 ZIP 壓縮是在記憶體裡做的，大量訂單可能 OOM。提了 comment，AI 改成用 streaming 的方式寫入 temp file，再回傳 file stream。第二次 review 就過了。</p>
+<p>整個過程我大概花了 30 分鐘 review，AI 花了大概 15 分鐘從頭到尾。如果是我自己寫，大概要半天。</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>DevContainer 不只是給人用的，也是給 AI 用的。</p>
+<p>當你的開發環境可以用 code 定義，AI 就能成為你開發團隊的一員。它可以 clone repo、啟動環境、build 專案、跑 test、看結果、改 code — 全部自動化，不需要人在旁邊手把手指導。</p>
+<p>在 AI coding agent 越來越強大的今天，「開發環境的可重現性」不再只是一個 nice-to-have 的工程實踐，而是決定你能不能有效利用 AI 的關鍵因素。</p>
+<p>如果你的專案還沒有 DevContainer，現在開始設定並不晚。從一個簡單的 <code>devcontainer.json</code> 開始，把 base image 和必要的工具定義好，再逐步加入 Docker Compose、seed data、onboarding 文件。不用一次到位，但要開始。</p>
+<p>畢竟，你不只是在幫現在的團隊成員打造更好的開發體驗，也是在幫未來的 AI 隊友鋪路。而且說真的，就算完全不考慮 AI，DevContainer 本身就值得導入。少花時間在「設定環境」上，多花時間在「寫好 code」上 — 這不就是我們一直想要的嗎？</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/Coding-Agent/" rel="tag"># Coding Agent</a>
+              <a href="/tags/DevContainer/" rel="tag"># DevContainer</a>
+              <a href="/tags/Docker/" rel="tag"># Docker</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83/" rel="tag"># 開發環境</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020518/" rel="prev" title="ERP 產業觀察：AI 如何改變客製化地獄">
+      <i class="fa fa-chevron-left"></i> ERP 產業觀察：AI 如何改變客製化地獄
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020520/" rel="next" title="Monorepo 架構心得：為什麼它讓 AI 協作更順暢">
+      Monorepo 架構心得：為什麼它讓 AI 協作更順暢 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#DevContainer-%E5%9F%BA%E7%A4%8E"><span class="nav-number">1.</span> <span class="nav-text">DevContainer 基礎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC-DevContainer-%E8%AE%93-AI-%E6%9B%B4%E5%BC%B7"><span class="nav-number">2.</span> <span class="nav-text">為什麼 DevContainer 讓 AI 更強</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E5%80%8B%E5%85%B7%E9%AB%94%E7%9A%84%E6%95%B8%E6%93%9A%E5%88%86%E4%BA%AB"><span class="nav-number">2.1.</span> <span class="nav-text">一個具體的數據分享</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E7%9A%84-DevContainer-%E8%A8%AD%E5%AE%9A%E7%AD%96%E7%95%A5"><span class="nav-number">3.</span> <span class="nav-text">我的 DevContainer 設定策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AI-%E5%8F%8B%E5%96%84%E7%9A%84%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83-Checklist"><span class="nav-number">4.</span> <span class="nav-text">AI 友善的開發環境 Checklist</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B8%A9%E5%9D%91%E7%B6%93%E9%A9%97"><span class="nav-number">5.</span> <span class="nav-text">踩坑經驗</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Docker-Desktop-on-macOS-%E7%9A%84%E6%95%88%E8%83%BD%E5%95%8F%E9%A1%8C"><span class="nav-number">5.1.</span> <span class="nav-text">Docker Desktop on macOS 的效能問題</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SQL-Server-%E7%9A%84-ARM64-%E6%94%AF%E6%8F%B4"><span class="nav-number">5.2.</span> <span class="nav-text">SQL Server 的 ARM64 支援</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-js-%E7%89%88%E6%9C%AC%E8%A1%9D%E7%AA%81"><span class="nav-number">5.3.</span> <span class="nav-text">Node.js 版本衝突</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E5%95%9F%E5%8B%95%E6%85%A2"><span class="nav-number">5.4.</span> <span class="nav-text">容器啟動慢</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#postCreateCommand-%E7%9A%84%E6%99%82%E9%96%93%E7%AE%A1%E7%90%86"><span class="nav-number">5.5.</span> <span class="nav-text">postCreateCommand 的時間管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E5%85%A7%E7%9A%84-Git-%E8%BA%AB%E4%BB%BD%E8%A8%AD%E5%AE%9A"><span class="nav-number">5.6.</span> <span class="nav-text">容器內的 Git 身份設定</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%92%8C-AI-%E5%8D%94%E4%BD%9C%E7%9A%84%E5%AF%A6%E9%9A%9B%E6%B5%81%E7%A8%8B"><span class="nav-number">6.</span> <span class="nav-text">和 AI 協作的實際流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E5%80%8B%E5%AF%A6%E9%9A%9B%E7%9A%84%E5%8D%94%E4%BD%9C%E6%A1%88%E4%BE%8B"><span class="nav-number">6.1.</span> <span class="nav-text">一個實際的協作案例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">7.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

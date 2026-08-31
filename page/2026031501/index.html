@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="單一 AI Agent 處理複雜開發流程時容易失焦、失憶、亂做。這篇分享我設計多 Agent 協作架構的思路，包含角色分工、三大協定（Intake &#x2F; Escalation &#x2F; Resume），以及為什麼 AI 團隊跟人類團隊一樣需要流程管理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="當你的 AI 助理需要一個團隊：多 Agent 協作架構的設計思路">
+<meta property="og:url" content="https://maplecheng.com/page/2026031501/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="單一 AI Agent 處理複雜開發流程時容易失焦、失憶、亂做。這篇分享我設計多 Agent 協作架構的思路，包含角色分工、三大協定（Intake &#x2F; Escalation &#x2F; Resume），以及為什麼 AI 團隊跟人類團隊一樣需要流程管理。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-03-14T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="多 Agent 架構">
+<meta property="article:tag" content="自動化">
+<meta property="article:tag" content="開發流程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026031501/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>當你的 AI 助理需要一個團隊：多 Agent 協作架構的設計思路 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026031501/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          當你的 AI 助理需要一個團隊：多 Agent 協作架構的設計思路
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-03-15 05:00:00" itemprop="dateCreated datePublished" datetime="2026-03-15T05:00:00+08:00">2026-03-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">單一 AI Agent 處理複雜開發流程時容易失焦、失憶、亂做。這篇分享我設計多 Agent 協作架構的思路，包含角色分工、三大協定（Intake / Escalation / Resume），以及為什麼 AI 團隊跟人類團隊一樣需要流程管理。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近我做了一件有點瘋狂的事：我開始幫我的 AI 助理「組團隊」。</p>
+<p>不是開玩笑。當你讓一個 AI Agent 同時處理需求分析、架構設計、寫 code、code review，結果就跟讓一個人同時當 PM、架構師、工程師、QA 一樣——每個都做，每個都做不好。</p>
+<span id="more"></span>
+
+<h3 id="單一-Agent-的極限"><a href="#單一-Agent-的極限" class="headerlink" title="單一 Agent 的極限"></a>單一 Agent 的極限</h3><p>身為一個小公司的技術主管，我大量使用 AI Agent 來輔助開發。日常工作流程大概是這樣：收到需求、拆 issue、寫 code、review、merge。聽起來很順對吧？</p>
+<p>但問題來了——</p>
+<p>當我把這整套流程丟給一個 Agent 處理時，踩到了幾個反覆出現的坑：</p>
+<ul>
+<li><strong>Issue 不依規範做</strong>：Agent 拿到任務就開始寫 code，不會主動問「這個需求是不是有模糊的地方？」</li>
+<li><strong>Pipeline 經常亂做</strong>：該先建 DTO 的跑去改 Controller，該等後端完成的前端已經開始 mock 了</li>
+<li><strong>開發階段失憶</strong>：跑到第五步忘了第二步的設計決策，又做出矛盾的東西</li>
+<li><strong>PR Review 流於形式</strong>：「看起來沒問題，APPROVED」——拜託，你連 i18n key 不存在都沒發現</li>
+</ul>
+<p>這些問題的根源其實很簡單：<strong>context 污染</strong>。一個 Agent 同時扮演多個角色，每個角色需要的背景知識不同、關注的重點不同，全部塞在同一個 context window 裡，結果就是什麼都知道一點、什麼都做不精。</p>
+<h3 id="人類團隊的啟發"><a href="#人類團隊的啟發" class="headerlink" title="人類團隊的啟發"></a>人類團隊的啟發</h3><p>回頭看人類團隊怎麼運作的。一個健康的開發團隊會有：</p>
+<ul>
+<li><strong>PM</strong> 負責需求釐清，確保大家理解一致</li>
+<li><strong>Tech Lead</strong> 負責技術決策，確保架構合理</li>
+<li><strong>Developer</strong> 專注寫 code，不用煩惱需求是什麼意思</li>
+<li><strong>QA</strong> 用另一雙眼睛看產出，專門挑毛病</li>
+</ul>
+<p>每個角色有自己的 context、自己的關注點、自己的品質標準。這不是多餘的分工，是讓每個人能專注做好一件事的必要條件。</p>
+<p>那 AI Agent 為什麼不能這樣？</p>
+<h3 id="多-Agent-架構設計"><a href="#多-Agent-架構設計" class="headerlink" title="多 Agent 架構設計"></a>多 Agent 架構設計</h3><p>想通這一點之後，我開始設計一個多 Agent 協作架構。核心概念是：<strong>一個總指揮 + 多個專家 Agent，透過明確的協定溝通</strong>。</p>
+<h4 id="角色分工"><a href="#角色分工" class="headerlink" title="角色分工"></a>角色分工</h4><p>整個架構的角色大概長這樣：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            graph TD
+    User[👤 User] --> CS[Chief of Staff<br/>總助理]
+    CS --> PM[PM Agent<br/>需求分析]
+    CS --> TL[Tech Lead Agent<br/>技術決策]
+    CS --> DEV[Developer Agent<br/>寫 Code]
+    CS --> QA[QA Agent<br/>Code Review]
+    PM -.->|Escalation| CS
+    TL -.->|Escalation| CS
+    DEV -.->|Escalation| CS
+    QA -.->|Escalation| CS
+          </pre>
+
+<ul>
+<li><strong>Chief of Staff（總助理）</strong>：最懂使用者的 Agent，負責接收需求、理解意圖、派工給對的人、整合產出。不寫 code，不做技術決策。</li>
+<li><strong>PM Agent</strong>：專門做需求分析和任務拆解，產出清晰的 spec</li>
+<li><strong>Tech Lead Agent</strong>：負責架構設計和技術方向，確保 spec 落地可行</li>
+<li><strong>Developer Agent</strong>：專注寫 code，嚴格按照 spec 和技術決策執行</li>
+<li><strong>QA Agent</strong>：code review，用比開發者更嚴格的標準檢查產出</li>
+</ul>
+<p>每個 Agent 是獨立的 session，有自己的 system prompt、自己的 context、自己的專業知識。這樣 Developer 不會被需求分析的 context 干擾，QA 不會因為「我剛剛才寫的 code」而放水。</p>
+<h4 id="為什麼要一個總指揮？"><a href="#為什麼要一個總指揮？" class="headerlink" title="為什麼要一個總指揮？"></a>為什麼要一個總指揮？</h4><p>你可能會問：為什麼不讓 Agent 之間直接溝通？為什麼需要一個 Chief of Staff 當中間人？</p>
+<p>原因很實際：<strong>Agent 之間直接溝通會失控</strong>。</p>
+<p>沒有中央控制的話，PM 可能覺得需求很清楚了，但 Developer 覺得不清楚；QA 打回 PR，Developer 不知道該找 Tech Lead 還是自己硬改。訊息在 Agent 之間來回傳，沒有人知道全局狀態。</p>
+<p>Chief of Staff 的存在就是為了解決這個問題。它是唯一有全局視角的 Agent，知道每個任務的狀態、每個 Agent 的產出、以及使用者真正要什麼。</p>
+<h3 id="三大核心協定"><a href="#三大核心協定" class="headerlink" title="三大核心協定"></a>三大核心協定</h3><p>光有角色分工還不夠。Agent 之間怎麼溝通、什麼時候該停下來問人、失敗了怎麼恢復——這些才是讓整個系統真正運作的關鍵。</p>
+<p>我設計了三個核心協定：</p>
+<h4 id="1-Intake-Protocol（進場協定）"><a href="#1-Intake-Protocol（進場協定）" class="headerlink" title="1. Intake Protocol（進場協定）"></a>1. Intake Protocol（進場協定）</h4><p>派工之前，必須完成一份需求釐清 checklist。不是問 Agent「你懂了嗎」（它永遠說懂），而是要求它產出一份結構化的理解確認：</p>
+<ul>
+<li>這個需求要解決什麼問題？</li>
+<li>影響範圍是哪些模組？</li>
+<li>有沒有技術風險或模糊地帶？</li>
+<li>成功標準是什麼？</li>
+</ul>
+<p>如果 checklist 有任何一項不清楚，<strong>不派工</strong>。回去跟使用者確認。</p>
+<p>這聽起來很囉唆，但實際上省掉了大量「做到一半發現方向錯了」的浪費。人類團隊的 kickoff meeting 其實也是在做一樣的事。</p>
+<h4 id="2-Escalation-Protocol（上報協定）"><a href="#2-Escalation-Protocol（上報協定）" class="headerlink" title="2. Escalation Protocol（上報協定）"></a>2. Escalation Protocol（上報協定）</h4><p>這是我覺得最重要的一個。</p>
+<p>Agent 最大的問題就是「不知道自己不知道」。遇到模糊的需求，它不會說「我不確定」，它會猜一個答案然後繼續做。遇到技術決策點，它不會停下來討論，它會直接選一個方案（通常是最簡單的那個）。</p>
+<p>Escalation Protocol 就是強制 Agent 在特定情境下停下來：</p>
+<ul>
+<li>需求有多種解讀方式 → 停，回報給 Chief of Staff</li>
+<li>技術方案有 trade-off → 停，列出選項和各自的優缺點</li>
+<li>連續失敗超過兩次 → 停，不要繼續盲目重試</li>
+<li>發現前一個階段的產出有問題 → 停，回報而不是自己偷偷改</li>
+</ul>
+<p>關鍵在於：<strong>停下來不是失敗，是品質保證</strong>。</p>
+<p>寫進 system prompt 裡的措辭很重要。不能寫「如果遇到問題可以上報」，要寫「遇到以下情境你必須停止並上報，繼續執行是違反協定的」。對 LLM 來說，強制性的指令比建議性的指令有效得多。</p>
+<h4 id="3-Resume-Protocol（恢復協定）"><a href="#3-Resume-Protocol（恢復協定）" class="headerlink" title="3. Resume Protocol（恢復協定）"></a>3. Resume Protocol（恢復協定）</h4><p>Pipeline 中斷了怎麼辦？Agent session 超時了怎麼辦？</p>
+<p>Resume Protocol 要求在 pipeline 的關鍵節點設置 checkpoint。每個 checkpoint 記錄：</p>
+<ul>
+<li>目前完成了哪些步驟</li>
+<li>每個步驟的產出是什麼</li>
+<li>下一步應該做什麼</li>
+<li>當前的決策上下文</li>
+</ul>
+<p>這樣即使中斷了，新的 Agent session 可以從 checkpoint 恢復，而不是從頭開始。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            stateDiagram-v2
+    [*] --> Intake: 新需求
+    Intake --> Planning: ✅ Checklist 通過
+    Intake --> Intake: ❌ 需求不清
+    Planning --> Development: ✅ Spec 確認
+    Planning --> Escalation: ⚠️ 技術風險
+    Development --> Review: PR 建立
+    Development --> Escalation: ⚠️ 連續失敗
+    Review --> Done: ✅ Approved
+    Review --> Development: ❌ Changes Requested
+    Escalation --> Planning: 決策完成
+    Done --> [*]
+          </pre>
+
+<p>更重要的是，關鍵節點要加入 <strong>human-in-the-loop</strong>。不是每一步都要人確認（那就失去自動化的意義了），而是在「影響範圍大」或「不可逆」的節點讓人看一眼。</p>
+<p>比如：需求分析完成後讓人確認方向對不對、PR merge 前讓人看一下 review 結果。這兩個點的投入產出比最高。</p>
+<h3 id="實際跑起來的感受"><a href="#實際跑起來的感受" class="headerlink" title="實際跑起來的感受"></a>實際跑起來的感受</h3><p>說實話，這套架構還在迭代中。但即使是初版，也已經解決了幾個讓我很頭痛的問題：</p>
+<p><strong>需求品質變好了</strong>。有了 Intake Protocol，Agent 不再拿到 issue 就蒙頭寫 code。它會先產出一份理解確認，如果有模糊的地方會被擋下來。</p>
+<p><strong>Code Review 變嚴格了</strong>。讓獨立的 QA Agent 來 review，因為它沒有「這是我自己寫的」的包袱，會用更客觀的標準檢查。之前一個 i18n key 不存在的 bug 就是被 QA Agent 抓到的。</p>
+<p><strong>失敗恢復變順了</strong>。以前 pipeline 中斷，只能從頭來。現在有 checkpoint，可以從上次停的地方繼續。</p>
+<p>當然也有問題：</p>
+<ul>
+<li>Agent 之間的溝通成本不低，token 消耗增加了</li>
+<li>有時候 Escalation 太頻繁，反而拖慢速度（還在調整觸發條件）</li>
+<li>每個 Agent 的 system prompt 需要精心設計，這本身就是一個工程</li>
+</ul>
+<h3 id="寫給同樣在折騰-AI-工作流的人"><a href="#寫給同樣在折騰-AI-工作流的人" class="headerlink" title="寫給同樣在折騰 AI 工作流的人"></a>寫給同樣在折騰 AI 工作流的人</h3><p>如果你也在用 AI Agent 處理複雜的開發流程，我的建議是：</p>
+<p><strong>不要期望一個 Agent 搞定所有事。</strong> 跟人一樣，專注做一件事的品質永遠比同時做五件事好。</p>
+<p><strong>流程管理不是可選的。</strong> AI Agent 不會自己發展出好的工作習慣。你不寫 protocol，它就自由發揮，而自由發揮的結果通常不是你要的。</p>
+<p><strong>Human-in-the-loop 的位置很重要。</strong> 不是越多越好，也不是越少越好。找到「投入最少、攔截最多問題」的那幾個點。</p>
+<p><strong>停下來比做錯好。</strong> 這是我從 Escalation Protocol 學到最深的一課。教 Agent 說「我不確定」比教它「什麼都試試看」有價值得多。</p>
+<p>說到底，管理 AI Agent 團隊跟管理人類團隊其實沒有本質區別——都是在解決分工、溝通、品質控制的問題。只是 AI 不會抱怨加班，但也不會主動告訴你它搞砸了。</p>
+<p>如果這篇能讓你少走一些我踩過的彎路，那我凌晨兩點畫架構圖的時間就沒白費了 😂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E6%B5%81%E7%A8%8B/" rel="tag"># 開發流程</a>
+              <a href="/tags/%E5%A4%9A-Agent-%E6%9E%B6%E6%A7%8B/" rel="tag"># 多 Agent 架構</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026031201/" rel="prev" title="用 AI Agent 組一個軟體開發團隊：角色分離的實踐心得">
+      <i class="fa fa-chevron-left"></i> 用 AI Agent 組一個軟體開發團隊：角色分離的實踐心得
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026031801/" rel="next" title="Git Submodule 踩坑血淚史：當 .claude 目錄開始鬧彆扭">
+      Git Submodule 踩坑血淚史：當 .claude 目錄開始鬧彆扭 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%96%AE%E4%B8%80-Agent-%E7%9A%84%E6%A5%B5%E9%99%90"><span class="nav-number">1.</span> <span class="nav-text">單一 Agent 的極限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%BA%E9%A1%9E%E5%9C%98%E9%9A%8A%E7%9A%84%E5%95%9F%E7%99%BC"><span class="nav-number">2.</span> <span class="nav-text">人類團隊的啟發</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A-Agent-%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88"><span class="nav-number">3.</span> <span class="nav-text">多 Agent 架構設計</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%92%E8%89%B2%E5%88%86%E5%B7%A5"><span class="nav-number">3.1.</span> <span class="nav-text">角色分工</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E8%A6%81%E4%B8%80%E5%80%8B%E7%B8%BD%E6%8C%87%E6%8F%AE%EF%BC%9F"><span class="nav-number">3.2.</span> <span class="nav-text">為什麼要一個總指揮？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E5%A4%A7%E6%A0%B8%E5%BF%83%E5%8D%94%E5%AE%9A"><span class="nav-number">4.</span> <span class="nav-text">三大核心協定</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Intake-Protocol%EF%BC%88%E9%80%B2%E5%A0%B4%E5%8D%94%E5%AE%9A%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">1. Intake Protocol（進場協定）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Escalation-Protocol%EF%BC%88%E4%B8%8A%E5%A0%B1%E5%8D%94%E5%AE%9A%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">2. Escalation Protocol（上報協定）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Resume-Protocol%EF%BC%88%E6%81%A2%E5%BE%A9%E5%8D%94%E5%AE%9A%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">3. Resume Protocol（恢復協定）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%A6%E9%9A%9B%E8%B7%91%E8%B5%B7%E4%BE%86%E7%9A%84%E6%84%9F%E5%8F%97"><span class="nav-number">5.</span> <span class="nav-text">實際跑起來的感受</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%AB%E7%B5%A6%E5%90%8C%E6%A8%A3%E5%9C%A8%E6%8A%98%E9%A8%B0-AI-%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%9A%84%E4%BA%BA"><span class="nav-number">6.</span> <span class="nav-text">寫給同樣在折騰 AI 工作流的人</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

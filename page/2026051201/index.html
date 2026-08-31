@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近整理一批 AI 自動化排程時，我重新被提醒一件事：cron job 成功不代表使用者真的收到了價值。對 AI 工作流來說，輸出格式、通道限制、可讀性與失敗復原，全部都應該被當成產品設計處理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 排程不是有跑就好：輸出格式也是產品設計的一部分">
+<meta property="og:url" content="https://maplecheng.com/page/2026051201/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近整理一批 AI 自動化排程時，我重新被提醒一件事：cron job 成功不代表使用者真的收到了價值。對 AI 工作流來說，輸出格式、通道限制、可讀性與失敗復原，全部都應該被當成產品設計處理。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-05-11T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Cron Job">
+<meta property="article:tag" content="工作流設計">
+<meta property="article:tag" content="產品思維">
+<meta property="article:tag" content="系統設計">
+<meta property="article:tag" content="自動化">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026051201/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI 排程不是有跑就好：輸出格式也是產品設計的一部分 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026051201/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI 排程不是有跑就好：輸出格式也是產品設計的一部分
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-05-12 05:00:00" itemprop="dateCreated datePublished" datetime="2026-05-12T05:00:00+08:00">2026-05-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近整理一批 AI 自動化排程時，我重新被提醒一件事：cron job 成功不代表使用者真的收到了價值。對 AI 工作流來說，輸出格式、通道限制、可讀性與失敗復原，全部都應該被當成產品設計處理。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在整理一批 AI 自動化排程時，我又被一個很小、但很真實的問題敲了一下頭：排程明明都有跑，資料也有產出，可是最後送到使用者面前的東西，並不一定是「可用的」。</p>
+<p>這句話聽起來有點廢。程式有跑完、檔案有生成、log 沒爆紅，不就成功了嗎？</p>
+<p>以前我也很容易這樣想。但當 AI 開始接管更多日常工作流，尤其是每天固定產出報告、摘要、提醒、建議時，「有輸出」跟「有價值」中間其實隔著一條很深的溝。那條溝通常不是模型能力造成的，而是我們把輸出格式、傳遞通道、閱讀情境想得太簡單。</p>
+<span id="more"></span>
+
+<h3 id="排程成功，不代表工作完成"><a href="#排程成功，不代表工作完成" class="headerlink" title="排程成功，不代表工作完成"></a>排程成功，不代表工作完成</h3><p>很多工程師看 cron job 的直覺，是看三件事：</p>
+<ol>
+<li>有沒有準時啟動</li>
+<li>process exit code 是不是 0</li>
+<li>產物有沒有落在指定位置</li>
+</ol>
+<p>這三件事當然重要。沒有它們，整個系統連基本可靠性都談不上。</p>
+<p>但如果這是一個「給人看的 AI 工作流」，光是這三個指標其實不夠。因為真正的終點不是檔案存在，而是某個人在對的時間，用最低成本讀懂它，然後能採取下一步行動。</p>
+<p>最近我看到的狀況就很典型：AI 排程照時間跑完，報告也寫得不差，但因為內容太長，最後被當成附件丟出去。從系統角度來看，這很合理——平台訊息有長度限制，長文就變成檔案嘛。可是從使用者角度來看，體驗立刻變差。</p>
+<p>原本期待的是早上打開聊天工具，直接看到今天的重點；實際拿到的卻是一堆 Markdown 附件。要點開、下載、切換閱讀器，甚至還要猜哪個檔案是最重要的。這中間每多一步，資訊被真正消化的機率就下降一截。</p>
+<p>技術上成功，產品上失敗。這種落差在 AI 自動化裡特別常見。</p>
+<h3 id="AI-報告不是檔案，是一次溝通"><a href="#AI-報告不是檔案，是一次溝通" class="headerlink" title="AI 報告不是檔案，是一次溝通"></a>AI 報告不是檔案，是一次溝通</h3><p>我現在越來越傾向把 AI 產出的日報、週報、提醒，看成「一次溝通」，而不是「一份文件」。</p>
+<p>文件可以長，可以完整，可以留存。溝通則要考慮情境：對方現在在哪裡看？手機還是桌機？有多少時間？這份內容是要提醒、決策、追蹤，還是單純存檔？</p>
+<p>同一份資訊，在不同通道應該有不同形狀。</p>
+<p>例如技術分析報告放在 knowledge base 裡，可以有完整脈絡、資料來源、細節推導；但如果要丟到聊天工具，就應該先出一版「可掃讀」摘要：三個重點、兩個風險、一個建議。需要細節的人再點連結或看附件。</p>
+<p>這不是把內容變短而已，而是重新設計資訊的入口。</p>
+<p>AI 很擅長生成長文，這反而讓我們更需要節制。因為生成成本下降後，閱讀成本就變成真正瓶頸。以前人寫報告會因為累，所以自然收斂；現在模型不會累，一不小心就把所有上下文、所有推論、所有但書都塞進去。看起來很負責，實際上常常是在轉嫁理解成本。</p>
+<p>身為技術主管，我會更在意這件事：AI 工作流不是把人從寫作中解放出來，然後讓另一群人被閱讀淹沒。真正好的自動化，應該連「怎麼讀」都一起設計。</p>
+<h3 id="通道限制不是例外，是規格"><a href="#通道限制不是例外，是規格" class="headerlink" title="通道限制不是例外，是規格"></a>通道限制不是例外，是規格</h3><p>另一個踩坑點是通道限制。</p>
+<p>聊天平台有字數限制、格式限制、附件預覽限制；Email 有版面和垃圾信風險；Dashboard 有載入速度和權限問題；內部系統有通知疲勞。這些東西很煩，但它們不是部署後才處理的小麻煩，而是工作流設計的一部分。</p>
+<p>我以前看這類問題，會把它歸類成「傳送層」。也就是內容先產生，最後再想辦法送出去。但現在我覺得這個分層不太對。對 AI 報告來說，傳送層會反過來決定內容形狀。</p>
+<p>如果目標通道是聊天訊息，就要一開始就要求模型產生適合分段的結構：每段獨立可讀、有清楚標題、不依賴前一段才能理解。這樣當系統需要拆成多則訊息時，才不會把語意切爛。</p>
+<p>如果目標通道是 Email，就要有摘要、目錄、錨點與明確標題，避免使用者在一大坨文字裡迷路。</p>
+<p>如果目標是長期留存，就要補 metadata、來源、日期與版本，否則三週後回來看，只會變成一堆失去脈絡的漂亮文字。</p>
+<p>通道不是最後一步；通道應該進入 prompt、資料結構、驗證規則與測試案例。</p>
+<h3 id="「半死狀態」比直接失敗更危險"><a href="#「半死狀態」比直接失敗更危險" class="headerlink" title="「半死狀態」比直接失敗更危險"></a>「半死狀態」比直接失敗更危險</h3><p>這次整理過程中，還有另一個提醒：自動化系統最討厭的狀態，不是死掉，而是半死。</p>
+<p>死掉很好處理。監控會叫，服務會紅，使用者也會很快發現。真正麻煩的是 process 還在，pid 還活著，某些 log 看起來也正常，但關鍵 adapter 已經停了，或者某個外部連線沒有恢復。系統表面上活著，實際上不再完成它該完成的工作。</p>
+<p>AI 工作流特別容易遇到這種問題，因為它常常串很多東西：排程器、模型 API、資料來源、檔案系統、訊息平台、權限設定、長連線 gateway。任何一段進入半死狀態，最後使用者看到的可能只是「今天怎麼沒收到」。</p>
+<p>更麻煩的是，AI 產出有時不是強一致需求。少一份早報、晚一個提醒，系統不會像金流失敗那樣立刻爆炸。但長期下來，信任會慢慢流失。使用者開始不確定它到底會不會準時、內容到底是不是最新、沒出現時是沒有事件還是壞掉。</p>
+<p>信任一旦掉下去，自動化就從助手變成噪音。</p>
+<p>所以我現在會把「健康檢查」看得比以前更廣。不是只看 process alive，而是看工作流是否真的完成：今天應該送出的訊息有沒有送？送到哪個通道？內容是不是被降級成附件？有沒有被拆段？拆段後是否仍可讀？如果沒有新內容，是否有明確 silence 規則，而不是讓使用者猜？</p>
+<h3 id="讓-AI-工作流可被營運"><a href="#讓-AI-工作流可被營運" class="headerlink" title="讓 AI 工作流可被營運"></a>讓 AI 工作流可被營運</h3><p>這些問題最後都指向同一件事：AI 工作流不能只被開發，還要能被營運。</p>
+<p>傳統程式很多時候只要規格穩定，維護成本就可控。但 AI 工作流比較像一個會每天「出版」的系統。它會接觸新資料、產出新文字、面對新的邊界案例，也會因為外部平台限制改變而突然失準。</p>
+<p>因此我會建議至少保留幾個營運面設計：</p>
+<ul>
+<li>每個排程要有明確的「成功定義」，不是只有 exit code</li>
+<li>長文輸出要同時設計摘要版與完整留存版</li>
+<li>聊天通道要預先處理分段，而不是超長才硬切</li>
+<li>沒有新內容時要允許安靜，不要為了交差硬產文</li>
+<li>失敗時要能看出卡在哪一層：資料、模型、格式、傳送、權限或通道</li>
+<li>重要設定變更後，要有自動驗證，而不是靠人肉祈禱</li>
+</ul>
+<p>這些聽起來都不炫。沒有新的模型，沒有 fancy demo，也沒有讓人眼睛一亮的 AI magic。</p>
+<p>但實務上，這些才是 AI 自動化能不能長期活下來的關鍵。</p>
+<h3 id="小結：別只問-AI-能不能寫，還要問人能不能用"><a href="#小結：別只問-AI-能不能寫，還要問人能不能用" class="headerlink" title="小結：別只問 AI 能不能寫，還要問人能不能用"></a>小結：別只問 AI 能不能寫，還要問人能不能用</h3><p>現在很多團隊導入 AI，第一個問題都是「它能不能幫我產出？」</p>
+<p>這當然是起點，但不是終點。下一個更重要的問題應該是：「產出之後，人能不能真的用？」</p>
+<p>能不能在通勤時快速看懂？能不能在開會前抓到重點？能不能在需要追溯時找到完整版本？能不能在系統沒東西可講時安靜？能不能在壞掉時讓維護者知道哪裡壞？</p>
+<p>這些問題看起來不像 AI 問題，比較像產品設計、SRE、資訊架構與團隊流程的混合體。但我覺得，這正是接下來 AI 應用會拉開差距的地方。</p>
+<p>模型能力會越來越普及，大家都能產生一份看起來像樣的報告。真正稀缺的是，把那份報告放進一個可靠、可讀、可營運的工作流裡。</p>
+<p>AI 排程不是有跑就好。它每天送出去的每一則訊息、每一段摘要、每一個沉默，其實都在累積使用者對系統的信任。</p>
+<p>而信任，才是自動化最難重建的基礎設施。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81%E8%A8%AD%E8%A8%88/" rel="tag"># 工作流設計</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88/" rel="tag"># 系統設計</a>
+              <a href="/tags/Cron-Job/" rel="tag"># Cron Job</a>
+              <a href="/tags/%E7%94%A2%E5%93%81%E6%80%9D%E7%B6%AD/" rel="tag"># 產品思維</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026050701/" rel="prev" title="為什麼我又回到 Claude Code：OpenClaw 用一個月後的退坑紀錄">
+      <i class="fa fa-chevron-left"></i> 為什麼我又回到 Claude Code：OpenClaw 用一個月後的退坑紀錄
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026051301/" rel="next" title="AI 工具鏈的供應鏈安全：不要把模型倉庫當成免洗連結">
+      AI 工具鏈的供應鏈安全：不要把模型倉庫當成免洗連結 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E7%A8%8B%E6%88%90%E5%8A%9F%EF%BC%8C%E4%B8%8D%E4%BB%A3%E8%A1%A8%E5%B7%A5%E4%BD%9C%E5%AE%8C%E6%88%90"><span class="nav-number">1.</span> <span class="nav-text">排程成功，不代表工作完成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AI-%E5%A0%B1%E5%91%8A%E4%B8%8D%E6%98%AF%E6%AA%94%E6%A1%88%EF%BC%8C%E6%98%AF%E4%B8%80%E6%AC%A1%E6%BA%9D%E9%80%9A"><span class="nav-number">2.</span> <span class="nav-text">AI 報告不是檔案，是一次溝通</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E9%81%93%E9%99%90%E5%88%B6%E4%B8%8D%E6%98%AF%E4%BE%8B%E5%A4%96%EF%BC%8C%E6%98%AF%E8%A6%8F%E6%A0%BC"><span class="nav-number">3.</span> <span class="nav-text">通道限制不是例外，是規格</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E3%80%8C%E5%8D%8A%E6%AD%BB%E7%8B%80%E6%85%8B%E3%80%8D%E6%AF%94%E7%9B%B4%E6%8E%A5%E5%A4%B1%E6%95%97%E6%9B%B4%E5%8D%B1%E9%9A%AA"><span class="nav-number">4.</span> <span class="nav-text">「半死狀態」比直接失敗更危險</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%93-AI-%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%8F%AF%E8%A2%AB%E7%87%9F%E9%81%8B"><span class="nav-number">5.</span> <span class="nav-text">讓 AI 工作流可被營運</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%B5%90%EF%BC%9A%E5%88%A5%E5%8F%AA%E5%95%8F-AI-%E8%83%BD%E4%B8%8D%E8%83%BD%E5%AF%AB%EF%BC%8C%E9%82%84%E8%A6%81%E5%95%8F%E4%BA%BA%E8%83%BD%E4%B8%8D%E8%83%BD%E7%94%A8"><span class="nav-number">6.</span> <span class="nav-text">小結：別只問 AI 能不能寫，還要問人能不能用</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

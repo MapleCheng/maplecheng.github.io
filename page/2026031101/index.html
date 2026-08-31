@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="用 AI Coding Agent 跑完一整個功能模組，dotnet build 過了、pnpm build 也過了，結果 Code Review 改了五輪才收斂。記錄 AI 程式碼「能編譯但不合規範」的真實案例，以及我們後來怎麼降低這種落差。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 寫的程式碼能 Build 不代表能用：一次 Code Review 的血淚教訓">
+<meta property="og:url" content="https://maplecheng.com/page/2026031101/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="用 AI Coding Agent 跑完一整個功能模組，dotnet build 過了、pnpm build 也過了，結果 Code Review 改了五輪才收斂。記錄 AI 程式碼「能編譯但不合規範」的真實案例，以及我們後來怎麼降低這種落差。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-03-10T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Coding">
+<meta property="article:tag" content="Claude Code">
+<meta property="article:tag" content="Code Review">
+<meta property="article:tag" content="軟體工程">
+<meta property="article:tag" content="開發流程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026031101/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI 寫的程式碼能 Build 不代表能用：一次 Code Review 的血淚教訓 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026031101/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI 寫的程式碼能 Build 不代表能用：一次 Code Review 的血淚教訓
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-03-11 05:00:00" itemprop="dateCreated datePublished" datetime="2026-03-11T05:00:00+08:00">2026-03-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">用 AI Coding Agent 跑完一整個功能模組，dotnet build 過了、pnpm build 也過了，結果 Code Review 改了五輪才收斂。記錄 AI 程式碼「能編譯但不合規範」的真實案例，以及我們後來怎麼降低這種落差。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近我們用 AI Coding Agent 寫了一個完整的後端 + 前端功能模組。Agent 跑完之後，<code>dotnet build</code> 過了，<code>pnpm build</code> 也過了，單元測試也沒紅燈。</p>
+<p>看起來一切完美，對吧？</p>
+<span id="more"></span>
+
+<h3 id="Build-Pass-的假象"><a href="#Build-Pass-的假象" class="headerlink" title="Build Pass 的假象"></a>Build Pass 的假象</h3><p>事情是這樣的。我們有一個新功能需求：一個庫存轉換模組，包含後端 API（.NET Core）和前端介面（React）。我把需求拆成 11 個 unit，交給 AI Agent pipeline 去跑——後端 7 個、前端 4 個，依序執行。</p>
+<p>大概跑了一個多小時，11 個 unit 有 10 個成功（1 個因為 session lock timeout 失敗，清掉重跑就好了）。最後我手動確認：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dotnet build  <span class="comment"># ✅ Build succeeded</span></span><br><span class="line">pnpm build    <span class="comment"># ✅ Build succeeded</span></span><br></pre></td></tr></table></figure>
+
+<p>好，建 PR，準備 review。</p>
+<p>然後災難就開始了。</p>
+<h3 id="第一輪：命名全歪"><a href="#第一輪：命名全歪" class="headerlink" title="第一輪：命名全歪"></a>第一輪：命名全歪</h3><p>Review 的第一件事就發現，AI 產生的 DTO 命名跟我們的 codebase 慣例完全對不上。</p>
+<p>我們的慣例是這樣的：</p>
+<ul>
+<li>API 層：Request 用 <code>XxxReq</code>、Response 用 <code>XxxRes</code>、查詢用 <code>XxxSearchParams</code></li>
+<li>BLL 層：輸入用 <code>XxxInfo</code>、輸出用 <code>XxxResult</code>、查詢用 <code>XxxSearchInfo</code></li>
+<li>資料夾：<code>Dtos/Params/</code>（放 Req）、<code>Dtos/ViewModel/</code>（放 Res）</li>
+</ul>
+<p>AI 寫出來的呢？<code>XxxParams</code>、<code>XxxViewModel</code>、<code>XxxResModel</code>——每一個都「幾乎對」但「就是不對」。更慘的是，它在 API 層和 BLL 層之間的命名混在一起，改 A 的時候不小心動到 B。</p>
+<p>這不是 AI 笨。這是 AI 沒有讀過我們內部的 convention document，它只能從 prompt 裡的描述去「推測」命名規則。推測的結果就是——看起來合理，但跟實際 codebase 不一致。</p>
+<h3 id="第二輪：業務邏輯的「合理但錯誤」"><a href="#第二輪：業務邏輯的「合理但錯誤」" class="headerlink" title="第二輪：業務邏輯的「合理但錯誤」"></a>第二輪：業務邏輯的「合理但錯誤」</h3><p>命名改完，開始看邏輯。AI 寫了一個 <code>Save</code> 方法，做了這些事：</p>
+<ol>
+<li>判斷 <code>info.Id == null</code> 來決定新增或更新</li>
+<li>新增和更新分成兩個 private method</li>
+<li>用 transaction 包起來，失敗 rollback</li>
+</ol>
+<p>每一項都「聽起來合理」。但我們的 codebase 慣例是：</p>
+<ol>
+<li>用 <code>query.FirstOrDefault()</code> 判斷資料存不存在（不看 Id）</li>
+<li>單一 <code>Save</code> method，不拆分</li>
+<li>草稿存檔不需要 transaction</li>
+</ol>
+<p>這就是 AI 程式碼最危險的地方：<strong>它寫出來的東西在技術上完全正確，但不符合你的團隊慣例</strong>。如果你不熟悉自己的 codebase，你甚至不會發現有問題。</p>
+<h3 id="第三輪：Controller-Return-的鬼打牆"><a href="#第三輪：Controller-Return-的鬼打牆" class="headerlink" title="第三輪：Controller Return 的鬼打牆"></a>第三輪：Controller Return 的鬼打牆</h3><p>這一輪讓我印象最深刻，因為我自己也搞混了。</p>
+<p>AI 的 Controller 這樣寫：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[<span class="meta">HttpPost</span>]</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">async</span> Task&lt;IActionResult&gt; <span class="title">Post</span>(<span class="params">[FromBody] StockConvertCodeReq body</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">var</span> id = <span class="keyword">await</span> _bll.Save(info);</span><br><span class="line">    <span class="keyword">return</span> Ok(id);  <span class="comment">// ← 這行有問題</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看起來沒問題？但我們的慣例是：</p>
+<ul>
+<li>POST 新增 → <code>StatusCode(201, id)</code></li>
+<li>PUT 更新 → <code>StatusCode(201)</code></li>
+<li>DELETE → <code>StatusCode(204)</code></li>
+<li>GET → <code>Ok(data)</code></li>
+</ul>
+<p>我先改成 <code>Created()</code>，發現不對。改成 <code>Ok()</code>，還是不對。改成 <code>StatusCode(201)</code>，差一點。最後才確認是 <code>StatusCode(201, id)</code> ——因為前端需要拿回 id 做導航。</p>
+<p>這來回改了四次。四次。</p>
+<h3 id="第四輪：前端的過度工程"><a href="#第四輪：前端的過度工程" class="headerlink" title="第四輪：前端的過度工程"></a>第四輪：前端的過度工程</h3><p>前端也沒好到哪去。AI 為了一個「掃碼 → 新增明細」的功能，寫了 500 多行的 Form component，包含：</p>
+<ul>
+<li><code>materialLock</code> state</li>
+<li><code>qtyLock</code> state</li>
+<li><code>MaterialSelector</code> modal</li>
+<li><code>ensureMaterialInfo</code> 驗證函式</li>
+<li><code>useRef</code> 做 material cache</li>
+</ul>
+<p>實際上需要什麼？一個掃碼輸入框 + 一個 append 按鈕。掃完碼，填入 mini form，按 append 寫進主表單。大概 100 行。</p>
+<p>AI 傾向於「防禦性過度設計」——它會想像各種邊界情況然後全部處理，結果是把一個簡單的功能變成一個複雜的系統。</p>
+<h3 id="第五輪：細節魔鬼"><a href="#第五輪：細節魔鬼" class="headerlink" title="第五輪：細節魔鬼"></a>第五輪：細節魔鬼</h3><p>到了第五輪，剩下的都是小東西，但加起來很要命：</p>
+<ul>
+<li>編輯模式的按鈕文字用了 <code>save</code> 而不是 <code>update</code></li>
+<li>Form 嵌套問題（<code>&lt;Form&gt;</code> 裡面不能再放 <code>&lt;Form&gt;</code>）</li>
+<li><code>initialValues</code> 應該改用 <code>useEffect</code> + <code>setFieldsValue</code></li>
+<li>路由用 query string（<code>/form?id=xxx</code>）而不是 path params（<code>/:id/edit</code>）</li>
+</ul>
+<p>每一個都不難改，但 <strong>如果你信任 build pass 就直接 merge，這些問題全部會進 production</strong>。</p>
+<h3 id="問題出在哪？"><a href="#問題出在哪？" class="headerlink" title="問題出在哪？"></a>問題出在哪？</h3><p>回頭看這整件事，核心問題很清楚：</p>
+<p><strong>AI 能理解「通用最佳實踐」，但不能理解「你的團隊慣例」。</strong></p>
+<p><code>dotnet build</code> 檢查的是語法和型別。它不會檢查你的 DTO 叫 <code>Req</code> 還是 <code>Params</code>，不會檢查你的 Controller 回 <code>Ok()</code> 還是 <code>StatusCode(201)</code>，不會檢查你的 Save method 是不是 follow 團隊的固定 pattern。</p>
+<p>這些「慣例」存在於：</p>
+<ul>
+<li>團隊成員的腦中</li>
+<li>散落在各處的 convention document</li>
+<li>Codebase 裡已有 module 的「既有寫法」</li>
+</ul>
+<p>AI Agent 能接收 prompt，但 prompt 不可能把所有慣例都塞進去。結果就是——AI 寫出來的 code「技術正確、慣例錯誤」，而且錯得很隱蔽。</p>
+<h3 id="我們後來怎麼做"><a href="#我們後來怎麼做" class="headerlink" title="我們後來怎麼做"></a>我們後來怎麼做</h3><p>踩完這次坑之後，我們做了幾件事：</p>
+<p><strong>1. 把 convention document 原子化</strong></p>
+<p>原本我們有兩份大文件：<code>backend.md</code>（300+ 行）和 <code>frontend.md</code>（200+ 行）。問題是太長了，AI 不一定會把每條規則都記住。</p>
+<p>我們拆成小檔案，每個檔案 &lt; 200 行，開頭寫「什麼時候要讀這個檔案」：</p>
+<ul>
+<li><code>bll-save.md</code> — 寫 Save 方法時讀</li>
+<li><code>controller.md</code> — 寫 API endpoint 時讀</li>
+<li><code>frontend-form.md</code> — 寫表單時讀</li>
+</ul>
+<p>這樣 AI Agent 在執行特定任務時，只需要載入相關的小檔案，而不是一次消化 500 行規範。</p>
+<p><strong>2. Prompt 裡加 CRITICAL WARNINGS</strong></p>
+<p>在每個 unit 的 prompt 裡，我們開始加上醒目的警告：</p>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">⚠️ CRITICAL: BLL Save 必須用單一 Save <span class="keyword">method</span>，</span><br><span class="line">用 <span class="title function_">query</span>.<span class="title function_">FirstOrDefault</span><span class="params">()</span> 判斷新增/更新，</span><br><span class="line">不要拆成 <span class="title function_">Insert</span>/<span class="title function_">Update</span> 兩個方法。</span><br></pre></td></tr></table></figure>
+
+<p>不是期待 AI 自己推論，而是直接告訴它「你最可能犯的錯」。</p>
+<p><strong>3. Build Pass ≠ Review Pass</strong></p>
+<p>這是最重要的心態調整。我們現在的 pipeline 是：</p>
+<ol>
+<li>AI Agent 跑完 → 確認 build pass</li>
+<li><strong>人工 review</strong>（至少看 DTO 命名、BLL pattern、Controller return）</li>
+<li>修正 → 再 review</li>
+<li>確認 merge</li>
+</ol>
+<p>Build pass 只是第一關，不是最後一關。</p>
+<p><strong>4. 先 grep 再寫</strong></p>
+<p>這條規則現在寫死在我們的 agent prompt 裡：</p>
+<blockquote>
+<p>寫任何 BLL 方法前，先 grep 同類方法看現有 pattern，一模一樣照抄。</p>
+</blockquote>
+<p>不要讓 AI「發明」寫法。讓它先看你的 codebase 怎麼寫，然後照抄。</p>
+<h3 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h3><p>AI Coding Agent 是真的很強。一個小時跑完 11 個 unit，涵蓋 DDL、DTO、BLL、Controller、前端頁面——如果全部手寫，至少要兩三天。</p>
+<p>但「能跑」和「能用」之間，還是有一道很深的溝。</p>
+<p>這道溝不是 AI 的問題，是「團隊知識」的問題。你的命名慣例、你的 Save pattern、你的 return convention——這些東西沒有寫在任何 RFC 或 best practice guide 裡面，它們只存在於你的團隊文化中。</p>
+<p>AI 不會自動學會你的文化。你得教它。而且得教得很具體、很原子化、很不留餘地。</p>
+<p>如果你也在用 AI 寫 production code，我的建議是：<strong>永遠不要相信 build pass</strong>。Review 每一行。不是因為 AI 寫得爛，而是因為「正確」有兩個層次——技術正確和慣例正確。AI 能做到前者，後者目前還是需要人。</p>
+<p>至少目前是這樣。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Code-Review/" rel="tag"># Code Review</a>
+              <a href="/tags/%E8%BB%9F%E9%AB%94%E5%B7%A5%E7%A8%8B/" rel="tag"># 軟體工程</a>
+              <a href="/tags/Claude-Code/" rel="tag"># Claude Code</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E6%B5%81%E7%A8%8B/" rel="tag"># 開發流程</a>
+              <a href="/tags/AI-Coding/" rel="tag"># AI Coding</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026031001/" rel="prev" title="JavaScript 浮點數加總的陷阱：為什麼你的報表數字對不上">
+      <i class="fa fa-chevron-left"></i> JavaScript 浮點數加總的陷阱：為什麼你的報表數字對不上
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026031201/" rel="next" title="用 AI Agent 組一個軟體開發團隊：角色分離的實踐心得">
+      用 AI Agent 組一個軟體開發團隊：角色分離的實踐心得 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Build-Pass-%E7%9A%84%E5%81%87%E8%B1%A1"><span class="nav-number">1.</span> <span class="nav-text">Build Pass 的假象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E8%BC%AA%EF%BC%9A%E5%91%BD%E5%90%8D%E5%85%A8%E6%AD%AA"><span class="nav-number">2.</span> <span class="nav-text">第一輪：命名全歪</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E8%BC%AA%EF%BC%9A%E6%A5%AD%E5%8B%99%E9%82%8F%E8%BC%AF%E7%9A%84%E3%80%8C%E5%90%88%E7%90%86%E4%BD%86%E9%8C%AF%E8%AA%A4%E3%80%8D"><span class="nav-number">3.</span> <span class="nav-text">第二輪：業務邏輯的「合理但錯誤」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E8%BC%AA%EF%BC%9AController-Return-%E7%9A%84%E9%AC%BC%E6%89%93%E7%89%86"><span class="nav-number">4.</span> <span class="nav-text">第三輪：Controller Return 的鬼打牆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E8%BC%AA%EF%BC%9A%E5%89%8D%E7%AB%AF%E7%9A%84%E9%81%8E%E5%BA%A6%E5%B7%A5%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">第四輪：前端的過度工程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E8%BC%AA%EF%BC%9A%E7%B4%B0%E7%AF%80%E9%AD%94%E9%AC%BC"><span class="nav-number">6.</span> <span class="nav-text">第五輪：細節魔鬼</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%95%8F%E9%A1%8C%E5%87%BA%E5%9C%A8%E5%93%AA%EF%BC%9F"><span class="nav-number">7.</span> <span class="nav-text">問題出在哪？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E5%80%91%E5%BE%8C%E4%BE%86%E6%80%8E%E9%BA%BC%E5%81%9A"><span class="nav-number">8.</span> <span class="nav-text">我們後來怎麼做</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">9.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="從 Claude Code 與 Codex 互相委派、審查的工具趨勢，談 AI coding workflow 裡真正重要的不是多開幾個模型，而是把反對意見、交接邊界與驗收責任設計成流程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多代理互審不是多找一個 AI，而是設計反對意見的流程">
+<meta property="og:url" content="https://maplecheng.com/page/2026070701/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="從 Claude Code 與 Codex 互相委派、審查的工具趨勢，談 AI coding workflow 裡真正重要的不是多開幾個模型，而是把反對意見、交接邊界與驗收責任設計成流程。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-07-06T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.345Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="AI Coding">
+<meta property="article:tag" content="Code Review">
+<meta property="article:tag" content="技術管理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026070701/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>多代理互審不是多找一個 AI，而是設計反對意見的流程 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026070701/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          多代理互審不是多找一個 AI，而是設計反對意見的流程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-07-07 05:00:00" itemprop="dateCreated datePublished" datetime="2026-07-07T05:00:00+08:00">2026-07-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">從 Claude Code 與 Codex 互相委派、審查的工具趨勢，談 AI coding workflow 裡真正重要的不是多開幾個模型，而是把反對意見、交接邊界與驗收責任設計成流程。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看到越來越多工具開始把不同 AI coding agent 接在一起：一個負責寫，一個負責 review；一個卡住時，另一個接手 rescue；甚至刻意用「對抗式審查」去找原本模型沒看到的問題。這個方向我覺得很合理，但也很容易被誤解成一句話：多找一個 AI 看過，就比較安全。</p>
+<p>我現在比較在意的不是「有幾個模型參與」，而是團隊有沒有把反對意見設計成流程。</p>
+<span id="more"></span>
+
+<p>人類工程團隊早就知道一件事：code review 的價值不只是第二雙眼睛。真正有價值的是 review 角色和實作者之間有不同的責任、不同的視角，以及某種程度的獨立判斷。寫的人通常沉在實作細節裡，會自然地相信自己的假設；review 的人則應該站在需求、架構、維護成本、例外情境和資安風險的位置看同一段變更。</p>
+<p>AI coding agent 進來之後，這個問題變得更微妙。因為如果只是把同一段 prompt 丟給另一個模型，叫它「幫我 review」，它常常會變成比較有禮貌的附和者。尤其當輸入裡已經包含原本 agent 的解釋、測試結果、甚至自我辯護，第二個 agent 很容易沿著同一條推理路徑走下去，最後產出一份看起來很完整、但本質上沒有增加多少獨立性的 review。</p>
+<p>所以多代理互審的第一個重點，是不要只複製任務，要分離假設。</p>
+<p>例如實作者拿到的是「完成這個功能」；reviewer 拿到的應該不是「請檢查他做得好不好」而已，而是更具體的檢查框架：需求是否被縮水、資料邊界是否被誤讀、錯誤處理是否只是 happy path、權限是否被放大、測試是否只證明目前案例會過、是否改到不該改的地方。這些問題會強迫 reviewer 從反方向拆解，而不是接著實作者的敘事往下寫。</p>
+<p>第二個重點，是交接要有合約，不要只丟一坨上下文。</p>
+<p>我看過不少 AI workflow 的失敗，不是因為模型不聰明，而是因為交接太像「把整個聊天紀錄轉寄給下一個人」。接手的 agent 讀了一堆過程，但不知道哪些是事實、哪些是假設、哪些已驗證、哪些只是前一個 agent 的猜測。最後它要嘛重跑一遍，要嘛更糟：把猜測當成結論。</p>
+<p>如果要讓一個 agent 寫、另一個 agent review，或讓第三個 agent rescue 卡住的任務，我會希望 handoff 至少包含幾個明確欄位：目標、已修改檔案、已執行測試、未驗證風險、已知取捨、需要人工決定的問題。這些欄位不漂亮，但它們能把「故事」轉成「可接手的工程狀態」。</p>
+<p>第三個重點，是 reviewer 不能同時背負「把事情做完」的壓力。</p>
+<p>這點在人類團隊也一樣。如果 reviewer 的 KPI 是今天一定要把功能合併，那 review 很快就會變成幫忙擦屁股。AI agent 更容易掉進這個洞，因為它天生傾向完成任務、修補錯誤、讓 build pass。當 reviewer 發現問題時，它可能會順手改掉，然後又開始為自己的修改找理由。結果原本用來制衡的角色，又變成另一個實作者。</p>
+<p>我比較偏好的模式是：review agent 可以提出 patch 建議，但它的主要輸出應該是風險清單、證據、嚴重度和建議處置。要不要套用、由誰套用、是否需要回到需求澄清，應該是流程裡另一個明確步驟。這聽起來比較慢，但對正式產品來說，慢一點通常比「兩個 AI 很快地互相同意」可靠。</p>
+<p>第四個重點，是對抗式審查要有邊界。</p>
+<p>「請用最嚴格的角度挑毛病」很有用，但如果沒有邊界，也會變成無限懷疑。好的 adversarial review 不該只是唱反調，而是針對高風險面向集中火力：資料遺失、權限繞過、交易一致性、背景任務重入、使用者看得到不該看的資訊、失敗後無法回復。換句話說，對抗不是情緒，是風險模型。</p>
+<p>這也是我覺得 CTO 或技術主管不能只把多代理工具當成個人生產力玩具的原因。當這些工具進入團隊流程，真正要設計的是責任鏈：誰提出變更、誰驗證、誰反對、誰決定接受風險、紀錄在哪裡、事後如何回溯。模型只是角色的執行者，流程才是系統的骨架。</p>
+<p>未來我相信 AI coding workflow 會越來越像一個小型工程組：planner、implementer、reviewer、tester、release checker，各自有不同工具和上下文。但這不代表我們可以放任它們在同一個聊天室裡自由發揮。相反地，越多 agent 參與，越需要清楚的輸入輸出契約、權限分層、停止條件和審計紀錄。</p>
+<p>多代理互審最有價值的地方，不是讓 AI 彼此壯膽，而是讓系統裡真的出現一個會說「等一下，這裡不對」的角色。</p>
+<p>如果那個反對意見有證據、有範圍、有後續處置，而且不會被「趕快合併」的壓力吃掉，那它才不是多叫一個 AI 來背書，而是工程流程的一部分。這也是我對 AI coding 工具下一階段最期待的地方：不是更會寫，而是更會把不同意見留下來，變成可管理的品質迴路。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/Code-Review/" rel="tag"># Code Review</a>
+              <a href="/tags/AI-Coding/" rel="tag"># AI Coding</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026070601/" rel="prev" title="Agent 要進企業流程，不能只站在聊天視窗裡">
+      <i class="fa fa-chevron-left"></i> Agent 要進企業流程，不能只站在聊天視窗裡
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026070801/" rel="next" title="讓員工自建 Agent 之前，先把護欄做成產品">
+      讓員工自建 Agent 之前，先把護欄做成產品 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="分享在 Cursor 中使用三層模型策略（Opus 想、Sonnet 做、Auto 雜）的實戰經驗，如何在 AI 編程助手上找到品質與成本的平衡點。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI Coding Assistant 的三層模型策略：省錢又高效的實戰心得">
+<meta property="og:url" content="https://maplecheng.com/page/2026020902/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="分享在 Cursor 中使用三層模型策略（Opus 想、Sonnet 做、Auto 雜）的實戰經驗，如何在 AI 編程助手上找到品質與成本的平衡點。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-08T21:30:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Cursor">
+<meta property="article:tag" content="工作流程">
+<meta property="article:tag" content="成本優化">
+<meta property="article:tag" content="開發工具">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020902/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI Coding Assistant 的三層模型策略：省錢又高效的實戰心得 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020902/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI Coding Assistant 的三層模型策略：省錢又高效的實戰心得
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-09 05:30:00" itemprop="dateCreated datePublished" datetime="2026-02-09T05:30:00+08:00">2026-02-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">分享在 Cursor 中使用三層模型策略（Opus 想、Sonnet 做、Auto 雜）的實戰經驗，如何在 AI 編程助手上找到品質與成本的平衡點。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>用 AI Coding Assistant 寫程式已經是日常了，但你有沒有算過每個月在上面燒多少 premium quota？我最近重新整理了一下自己的模型使用策略，發現其實不需要每個任務都上最強的模型。</p>
+<span id="more"></span>
+
+<h3 id="問題：Premium-Quota-不夠用"><a href="#問題：Premium-Quota-不夠用" class="headerlink" title="問題：Premium Quota 不夠用"></a>問題：Premium Quota 不夠用</h3><p>如果你跟我一樣重度使用 Cursor 這類 AI 編程助手，應該對「premium request 用完了」這個提示不陌生。</p>
+<p>高階模型（像 Claude Opus 或 GPT-4 系列）確實強，但每次呼叫都會消耗 premium quota。如果什麼任務都丟給最強的模型，quota 大概撐不過半個月。</p>
+<p>但反過來，全部用免費或低階模型又會影響效率——簡單的 bug 可能修半天，架構建議可能牛頭不對馬嘴。</p>
+<p>所以核心問題是：<strong>怎麼在品質和成本之間找到平衡？</strong></p>
+<h3 id="三層模型策略"><a href="#三層模型策略" class="headerlink" title="三層模型策略"></a>三層模型策略</h3><p>經過幾個月的摸索，我整理出一套分層策略。核心概念很簡單：<strong>讓每個層級的模型做它最擅長的事</strong>。</p>
+<h4 id="第一層：頂級模型-—-負責「想」"><a href="#第一層：頂級模型-—-負責「想」" class="headerlink" title="第一層：頂級模型 — 負責「想」"></a>第一層：頂級模型 — 負責「想」</h4><p>用途：規劃、架構設計、Code Review、複雜 bug 分析</p>
+<p>頂級模型（比如 Claude Opus）的優勢在於推理能力和上下文理解。它能看懂整個 codebase 的架構，理解模組之間的依賴關係，給出有深度的建議。</p>
+<p>適合的場景：</p>
+<ul>
+<li><strong>Plan 模式</strong>：讓它分析需求，拆解成具體的實作步驟</li>
+<li><strong>Plan Review</strong>：執行完一輪修改後，讓它審視整體方向是否正確</li>
+<li><strong>複雜架構決策</strong>：「這個功能應該放在哪一層？」「這兩個模組要怎麼解耦？」</li>
+<li><strong>詭異 bug 分析</strong>：那種改了 A 壞了 B、log 看起來正常但行為就是不對的情況</li>
+</ul>
+<p>這類任務通常不會太頻繁（一天可能就幾次），但每次都很關鍵。用頂級模型來處理，值得。</p>
+<h4 id="第二層：中階模型-—-負責「做」"><a href="#第二層：中階模型-—-負責「做」" class="headerlink" title="第二層：中階模型 — 負責「做」"></a>第二層：中階模型 — 負責「做」</h4><p>用途：實際寫 code、修 bug、重構、Build error 處理</p>
+<p>中階模型（比如 Claude Sonnet）的 coding 能力其實已經很強了，差別主要在深度推理。對於「規劃好了，照著做」這類任務，中階模型綽綽有餘。</p>
+<p>適合的場景：</p>
+<ul>
+<li><strong>Execute 模式</strong>：根據 Plan 的結果，逐步實作</li>
+<li><strong>Build error 修復</strong>：編譯錯誤、型別不匹配這些，通常不需要太深的推理</li>
+<li><strong>重構</strong>：把一段程式碼改成另一種寫法，模式明確</li>
+<li><strong>測試撰寫</strong>：根據既有程式碼寫單元測試</li>
+</ul>
+<p>這類任務佔了日常開發的大部分時間。用中階模型能省下大量 premium quota，而且品質差異幾乎感覺不到。</p>
+<h4 id="第三層：Auto-免費模型-—-負責「雜事」"><a href="#第三層：Auto-免費模型-—-負責「雜事」" class="headerlink" title="第三層：Auto &#x2F; 免費模型 — 負責「雜事」"></a>第三層：Auto &#x2F; 免費模型 — 負責「雜事」</h4><p>用途：commit message、格式化、快速問答、lint 修復</p>
+<p>很多 AI 編程助手有「Auto」模式，會自動選擇最經濟的模型。這些小任務根本不需要動用到高階模型。</p>
+<p>適合的場景：</p>
+<ul>
+<li><strong>產生 commit message</strong>：看 diff 寫摘要，任何模型都做得到</li>
+<li><strong>程式碼格式化</strong>：排版、import 排序</li>
+<li><strong>快速問答</strong>：「這個 API 的參數是什麼？」「這個 error code 是什麼意思？」</li>
+<li><strong>Lint 修復</strong>：eslint、prettier 報的問題，通常有明確的修法</li>
+<li><strong>簡單的 code snippet</strong>：「幫我寫一個 debounce function」</li>
+</ul>
+<p>這類任務一天可能有幾十次，如果每次都用 premium 模型，quota 根本不夠燒。用 Auto 模式讓它自己選，完全沒問題。</p>
+<h3 id="實際效果"><a href="#實際效果" class="headerlink" title="實際效果"></a>實際效果</h3><p>用了這個策略大概兩週，我的觀察：</p>
+<p><strong>Premium 用量降了大約 60%。</strong> 之前什麼都丟給最強模型，現在只有真正需要深度思考的任務才用。剩下的 quota 可以用在刀口上。</p>
+<p><strong>開發效率沒有明顯下降。</strong> 中階模型執行 Plan 已經拆好的任務，其實跟頂級模型差不多快。因為難的部分（怎麼做）已經想好了，剩下的只是（照著做）。</p>
+<p><strong>反而更有結構。</strong> 被迫在每個任務前先想「這是哪個層級的工作」，間接讓開發流程更有組織。不會再出現「啊我直接叫 AI 幫我整個改掉」然後改到一半不知道在幹嘛的情況。</p>
+<h3 id="怎麼判斷一個任務該用哪層模型？"><a href="#怎麼判斷一個任務該用哪層模型？" class="headerlink" title="怎麼判斷一個任務該用哪層模型？"></a>怎麼判斷一個任務該用哪層模型？</h3><p>一個簡單的決策流程：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    START[新任務] --> Q1{需要跨檔案<br/>上下文理解？}
+    Q1 -->|是| T1["🧠 第一層：頂級模型<br/>Opus — 負責想"]
+    Q1 -->|否| Q2{需要架構決策<br/>或複雜分析？}
+    Q2 -->|是| T1
+    Q2 -->|否| Q3{有明確步驟<br/>只需執行？}
+    Q3 -->|是| T2["⚡ 第二層：中階模型<br/>Sonnet — 負責做"]
+    Q3 -->|否| T3["🔄 第三層：Auto<br/>免費模型 — 負責雜事"]
+          </pre>
+
+<ol>
+<li><strong>需要理解跨多個檔案的上下文嗎？</strong> → 第一層</li>
+<li><strong>需要做架構決策或分析複雜問題嗎？</strong> → 第一層</li>
+<li><strong>有明確的實作步驟，只需要執行嗎？</strong> → 第二層</li>
+<li><strong>是機械性的、有固定模式的任務嗎？</strong> → 第三層</li>
+</ol>
+<p>如果不確定？先用第二層試試。如果結果不理想，再升到第一層。這比每次都用第一層然後月底 quota 見底好多了。</p>
+<h3 id="進階技巧：模型之間的接力"><a href="#進階技巧：模型之間的接力" class="headerlink" title="進階技巧：模型之間的接力"></a>進階技巧：模型之間的接力</h3><p>最有效的用法不是孤立地用每一層，而是讓它們接力。</p>
+<p>一個典型的開發流程：</p>
+<ol>
+<li><strong>第一層</strong>：分析需求，產出 Plan（包含架構決策、步驟拆解、注意事項）</li>
+<li><strong>第二層</strong>：根據 Plan 逐步執行，每完成一個步驟就驗證</li>
+<li><strong>第二層</strong>：遇到 Build error，直接讓同層模型修</li>
+<li><strong>第一層</strong>：全部完成後，做一次 Plan Review，確認沒有偏離方向</li>
+<li><strong>第三層</strong>：產生 commit message，收工</li>
+</ol>
+<p>這個流程的關鍵在於：<strong>第一層產出的 Plan 是結構化的，第二層可以直接照著做</strong>。這比每次都讓頂級模型從頭理解整個 context 高效得多。</p>
+<h3 id="不同工具的設定方式"><a href="#不同工具的設定方式" class="headerlink" title="不同工具的設定方式"></a>不同工具的設定方式</h3><p>不同的 AI 編程助手有不同的切換方式：</p>
+<ul>
+<li><strong>Cursor</strong>：在 Settings 裡可以設定不同場景的預設模型，也可以在每次對話時手動切換</li>
+<li><strong>其他工具</strong>：大多支持在對話開始時指定模型，或者用 config file 設定預設值</li>
+</ul>
+<p>重點不在工具本身怎麼設定，而是<strong>你腦中有這個分層的概念</strong>。知道什麼時候該用什麼層級，比會設定工具更重要。</p>
+<h3 id="成本意識是開發者的基本素養"><a href="#成本意識是開發者的基本素養" class="headerlink" title="成本意識是開發者的基本素養"></a>成本意識是開發者的基本素養</h3><p>這個策略其實反映了一個更大的觀點：<strong>AI 工具的使用也需要成本意識</strong>。</p>
+<p>就像我們不會用 AWS 的 p4d.24xlarge 去跑一個 Hello World，也不應該用頂級 AI 模型去產生 commit message。資源永遠是有限的，聰明地分配才是正解。</p>
+<p>特別是在團隊裡，如果每個人都無腦使用最強模型，公司的 AI 工具預算很快就會爆掉。制定一個團隊級的模型使用指南，不只省錢，也能讓大家更有意識地思考「我現在需要 AI 幫我什麼」。</p>
+<h3 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h3><p>AI Coding Assistant 已經不是「要不要用」的問題，而是「怎麼用得聰明」的問題。三層模型策略不是什麼革命性的概念，但它讓我在品質和成本之間找到了一個實用的平衡點。</p>
+<p>如果你也覺得 premium quota 總是不夠用，不妨試試這個方法。把最強的火力留給最難的問題，剩下的交給夠好的模型就行了。</p>
+<p>畢竟，工程的本質就是在限制條件下做出最好的選擇——這點在 AI 工具的使用上也一樣。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/Cursor/" rel="tag"># Cursor</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E5%B7%A5%E5%85%B7/" rel="tag"># 開發工具</a>
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B/" rel="tag"># 工作流程</a>
+              <a href="/tags/%E6%88%90%E6%9C%AC%E5%84%AA%E5%8C%96/" rel="tag"># 成本優化</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020801/" rel="prev" title="小團隊的 Git 工作流：GitHub Flow + 日期版號的選擇">
+      <i class="fa fa-chevron-left"></i> 小團隊的 Git 工作流：GitHub Flow + 日期版號的選擇
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026021002/" rel="next" title="用 AI 自動產生每日站會報告，從日曆和任務清單組裝「昨天做了什麼」">
+      用 AI 自動產生每日站會報告，從日曆和任務清單組裝「昨天做了什麼」 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%95%8F%E9%A1%8C%EF%BC%9APremium-Quota-%E4%B8%8D%E5%A4%A0%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">問題：Premium Quota 不夠用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E5%B1%A4%E6%A8%A1%E5%9E%8B%E7%AD%96%E7%95%A5"><span class="nav-number">2.</span> <span class="nav-text">三層模型策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%A4%EF%BC%9A%E9%A0%82%E7%B4%9A%E6%A8%A1%E5%9E%8B-%E2%80%94-%E8%B2%A0%E8%B2%AC%E3%80%8C%E6%83%B3%E3%80%8D"><span class="nav-number">2.1.</span> <span class="nav-text">第一層：頂級模型 — 負責「想」</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%A4%EF%BC%9A%E4%B8%AD%E9%9A%8E%E6%A8%A1%E5%9E%8B-%E2%80%94-%E8%B2%A0%E8%B2%AC%E3%80%8C%E5%81%9A%E3%80%8D"><span class="nav-number">2.2.</span> <span class="nav-text">第二層：中階模型 — 負責「做」</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%A4%EF%BC%9AAuto-%E5%85%8D%E8%B2%BB%E6%A8%A1%E5%9E%8B-%E2%80%94-%E8%B2%A0%E8%B2%AC%E3%80%8C%E9%9B%9C%E4%BA%8B%E3%80%8D"><span class="nav-number">2.3.</span> <span class="nav-text">第三層：Auto &#x2F; 免費模型 — 負責「雜事」</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%A6%E9%9A%9B%E6%95%88%E6%9E%9C"><span class="nav-number">3.</span> <span class="nav-text">實際效果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%8E%E9%BA%BC%E5%88%A4%E6%96%B7%E4%B8%80%E5%80%8B%E4%BB%BB%E5%8B%99%E8%A9%B2%E7%94%A8%E5%93%AA%E5%B1%A4%E6%A8%A1%E5%9E%8B%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">怎麼判斷一個任務該用哪層模型？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%B2%E9%9A%8E%E6%8A%80%E5%B7%A7%EF%BC%9A%E6%A8%A1%E5%9E%8B%E4%B9%8B%E9%96%93%E7%9A%84%E6%8E%A5%E5%8A%9B"><span class="nav-number">5.</span> <span class="nav-text">進階技巧：模型之間的接力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E5%B7%A5%E5%85%B7%E7%9A%84%E8%A8%AD%E5%AE%9A%E6%96%B9%E5%BC%8F"><span class="nav-number">6.</span> <span class="nav-text">不同工具的設定方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%90%E6%9C%AC%E6%84%8F%E8%AD%98%E6%98%AF%E9%96%8B%E7%99%BC%E8%80%85%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%B4%A0%E9%A4%8A"><span class="nav-number">7.</span> <span class="nav-text">成本意識是開發者的基本素養</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">8.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

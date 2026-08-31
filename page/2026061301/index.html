@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="從 diffusion-style 語言模型看 AI 系統設計的下一個分水嶺：速度不是唯一重點，能不能反覆修正、平行生成、留下可治理的中間狀態，才會影響它能不能進入企業流程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="當語言模型不再一個字一個字往前猜">
+<meta property="og:url" content="https://maplecheng.com/page/2026061301/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="從 diffusion-style 語言模型看 AI 系統設計的下一個分水嶺：速度不是唯一重點，能不能反覆修正、平行生成、留下可治理的中間狀態，才會影響它能不能進入企業流程。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-06-12T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.344Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="技術觀察">
+<meta property="article:tag" content="系統設計">
+<meta property="article:tag" content="語言模型">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026061301/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>當語言模型不再一個字一個字往前猜 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026061301/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          當語言模型不再一個字一個字往前猜
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-06-13 05:00:00" itemprop="dateCreated datePublished" datetime="2026-06-13T05:00:00+08:00">2026-06-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">從 diffusion-style 語言模型看 AI 系統設計的下一個分水嶺：速度不是唯一重點，能不能反覆修正、平行生成、留下可治理的中間狀態，才會影響它能不能進入企業流程。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看到 diffusion-style 語言模型的討論，我腦中第一個浮出的不是「它會不會取代現在的 LLM」，而是另一個比較工程師式的問題：如果模型不再只能一個字一個字往前猜，我們設計 AI 應用的方式會不會也跟著改變？</p>
+<p>這件事乍看很底層，好像只是模型架構的差異。但站在企業系統與產品落地的角度，它其實牽動的是一個更大的方向：AI 不只是更快回答，而是能不能用更接近「反覆修稿」的方式完成任務。</p>
+<span id="more"></span>
+
+<p>過去這幾年，大部分人熟悉的語言模型都是 autoregressive，也就是從左到右一路生成。它很像一個打字很快的人，前面講出去的東西會影響後面，後面可以補充、轉彎、修飾，但很難真正回頭重寫前面的結構。當然，外層應用可以要求它「再改一版」，也可以用多輪 prompt 做 refinement，可是那比較像在模型外面包了一層工作流，不是模型本身的生成方式。</p>
+<p>Diffusion-style 的語言模型給我的想像不太一樣。它比較像先拿到一塊粗糙的文字畫布，然後在多個位置同時調整、去噪、補洞、修正。這不是單純把輸出速度拉快，而是把「產生答案」從一條線，變成一個可以反覆更新的面。</p>
+<p>如果只看 demo 或 benchmark，大家很容易把焦點放在吞吐量、延遲、成本。這些當然重要，尤其是企業場景真的很在意一個 request 要燒多少錢。但我更在意的是，當生成過程本身允許平行修正，應用層能不能拿到更多可用的控制點。</p>
+<p>舉個抽象一點的例子。今天我們讓 AI 產生一份規格、摘要、報告或流程建議，常見做法是先生成完整文字，再請另一個模型檢查，或再跑一輪修改。這種 pipeline 能用，但它有幾個老問題：第一，錯誤常常要到整份輸出完成後才被發現；第二，中間修正是黑盒，使用者只看到前後兩版；第三，若要加入格式、政策、權限、資料一致性檢查，通常得靠外部驗證器硬接。</p>
+<p>如果模型的生成更像「多輪局部更新」，那未來的 AI 應用也許可以更自然地把約束條件放進生成過程，而不是事後補救。不是等它寫完一大段才說「欸，這裡違反公司規則」，而是在它填補內容時就不斷拉回到允許的範圍。這對企業 AI 會很關鍵，因為企業流程最怕的不是答案不夠華麗，而是答案看起來很合理，實際上卻越過權限、引用錯資料，或把尚未確認的推論寫成事實。</p>
+<p>我一直覺得 AI 進企業的真正門檻，不在聊天介面，而在治理。模型越聰明，越不能只靠「相信它」。它要能被限制、被觀測、被驗證，最好還能在重要決策前停下來給人接手。從這個角度看，生成方式的改變可能會讓治理設計多一些新工具。</p>
+<p>例如，現在很多 AI 工作流是這樣：輸入資料、呼叫模型、得到結果、做驗證、失敗就重試。這套模式很直覺，但也很粗。重試有時只是多花錢買另一個錯誤版本；驗證器如果只在最後才出手，就像等報表印出來才發現欄位順序全錯。未來如果生成過程可以暴露更多中間狀態，系統就有機會在「還沒定稿」時介入，而不是等結果出爐後再退貨。</p>
+<p>這聽起來有點像把 AI 從打字機變成編輯器。</p>
+<p>打字機的邏輯是一路往前敲，錯了就用修正液或重打一張。編輯器的邏輯是文件一直在，段落可以搬、詞句可以改、結構可以重排，系統可以在旁邊做拼字檢查、格式檢查、協作註解。今天多數 LLM 應用雖然包在漂亮介面裡，但底層仍很像高速打字機。它很會產生，卻不一定很適合被逐步治理。</p>
+<p>當然，我不會天真地說 diffusion-style 語言模型明天就會改寫所有產品。模型架構從研究亮點走到穩定生產，中間還有很多現實問題：支援度、工具鏈、推理成本、長上下文能力、fine-tuning、生態整合、debug 方法，甚至團隊是否有能力理解它失敗時到底發生什麼事。企業導入技術最怕的不是晚一點採用，而是太早把不成熟的東西放進核心流程，最後變成一個沒人敢碰的黑盒。</p>
+<p>但我會把它視為一個訊號：語言模型的演進不只是在「更大、更會推理、更會工具調用」這條線上跑，也開始有人重新思考生成本身的形狀。</p>
+<p>這對產品設計很有啟發。很多時候，我們做 AI 功能會下意識沿用現有模型的限制：它一次吐一段文字，所以介面就設計成送出與回覆；它很難回頭改，所以我們就設計成多輪對話；它不容易暴露中間推理，所以我們就只保存最終答案。但如果未來模型更擅長在一個工作空間裡反覆修正，產品也許不該再把 AI 當成「回覆機器」，而是要把它放進文件、流程、看板、單據、程式碼、報表這些可編輯物件裡。</p>
+<p>換句話說，AI 的使用場景會從 chat box 走向 workspace。使用者不只是問問題，而是在一個共同工作物件上和 AI 協作。AI 先補草稿，人調整方向，系統檢查規則，AI 再局部修正，最後才提交到正式流程。這樣的互動比「請幫我寫一份報告」更接近真實工作，也更符合企業對責任邊界的要求。</p>
+<p>我自己比較期待的是這種變化，而不是又多一個排行榜第一名。排行榜會換人，但工作流的形狀一旦改變，影響會很久。</p>
+<p>技術主管在看這類新模型時，我覺得可以先問三個問題。</p>
+<p>第一，它帶來的是單純效能提升，還是新的產品互動方式？如果只是快一點便宜一點，那是成本優化；如果它讓我們能設計不同的協作模式，那才是架構機會。</p>
+<p>第二，它能不能讓系統更可治理？任何會進入企業流程的 AI，都要考慮權限、稽核、資料邊界、錯誤回復。新模型如果只讓黑盒跑得更快，價值有限；如果能讓中間狀態更容易被約束與觀測，那就值得多看一眼。</p>
+<p>第三，現有工具鏈準備好了嗎？再漂亮的架構，如果部署、監控、評估、除錯都跟不上，就不該急著塞進 production。研究突破是一回事，可靠營運是另一回事。這中間的落差，通常就是工程團隊真正要付的帳單。</p>
+<p>所以我不會把 diffusion-style 語言模型看成某種魔法解答。它比較像提醒我們：現在習慣的生成方式，不一定是終局。當模型從「線性接字」走向「平行修稿」，AI 應用也該從「得到一段答案」走向「管理一個可演化的工作物件」。</p>
+<p>這會讓產品設計更麻煩，因為你不能只做輸入框和送出按鈕；但也會讓 AI 更接近真正的工作現場。畢竟在現實裡，好的工作成果很少是一口氣講完的。它通常是先有一個粗稿，被限制條件拉住，被人修過，被系統檢查過，最後才變成可以負責任交出去的版本。</p>
+<p>如果下一代模型真的能把「修稿」這件事做得更原生，那我會覺得它比單純快幾倍更有意思。因為企業需要的不是更會表演的 AI，而是更能被放進流程、一起打磨結果的 AI。這件事聽起來沒那麼炫，但在真正的系統裡，通常就是這種不炫的能力，決定東西能不能長久運作。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88/" rel="tag"># 系統設計</a>
+              <a href="/tags/%E8%AA%9E%E8%A8%80%E6%A8%A1%E5%9E%8B/" rel="tag"># 語言模型</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E8%A7%80%E5%AF%9F/" rel="tag"># 技術觀察</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026061201/" rel="prev" title="智慧工廠的下一步，不是多一支手臂，而是多一個閉環">
+      <i class="fa fa-chevron-left"></i> 智慧工廠的下一步，不是多一支手臂，而是多一個閉環
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026061401/" rel="next" title="外掛不是資料夾：AI Agent 生態整合時，真正要看的是 Host Contract">
+      外掛不是資料夾：AI Agent 生態整合時，真正要看的是 Host Contract <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="OpenClaw（前身 MoltBot）用了一個月，從新鮮感滿滿到徹底放棄。Claude 訂閱制鎖第三方應用是壓垮駱駝的最後一根稻草，但更根本的問題是黑箱執行、context 調整時間遠大於產出時間。這篇記錄我為什麼回到 Claude Code，以及這段路上踩過的坑。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="為什麼我又回到 Claude Code：OpenClaw 用一個月後的退坑紀錄">
+<meta property="og:url" content="https://maplecheng.com/page/2026050701/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="OpenClaw（前身 MoltBot）用了一個月，從新鮮感滿滿到徹底放棄。Claude 訂閱制鎖第三方應用是壓垮駱駝的最後一根稻草，但更根本的問題是黑箱執行、context 調整時間遠大於產出時間。這篇記錄我為什麼回到 Claude Code，以及這段路上踩過的坑。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-05-07T06:30:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Claude Code">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="工作流">
+<meta property="article:tag" content="踩坑筆記">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026050701/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>為什麼我又回到 Claude Code：OpenClaw 用一個月後的退坑紀錄 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026050701/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          為什麼我又回到 Claude Code：OpenClaw 用一個月後的退坑紀錄
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-05-07 14:30:00" itemprop="dateCreated datePublished" datetime="2026-05-07T14:30:00+08:00">2026-05-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">OpenClaw（前身 MoltBot）用了一個月，從新鮮感滿滿到徹底放棄。Claude 訂閱制鎖第三方應用是壓垮駱駝的最後一根稻草，但更根本的問題是黑箱執行、context 調整時間遠大於產出時間。這篇記錄我為什麼回到 Claude Code，以及這段路上踩過的坑。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>離上次發文大概過了一個月，這段空窗不是因為懶——是因為我把整個工具鏈搬了一次家。</p>
+<p>簡單講：我放棄了 OpenClaw，回去用 Claude Code。</p>
+<span id="more"></span>
+
+<p>這篇不是技術 tutorial，純粹是退坑心得。如果你正在 OpenClaw 上掙扎，或在猶豫要不要跳這個坑，希望我這一個月的血淚可以讓你少走一些彎路。</p>
+<hr>
+<h3 id="直接的導火線：Claude-把訂閱制鎖起來了"><a href="#直接的導火線：Claude-把訂閱制鎖起來了" class="headerlink" title="直接的導火線：Claude 把訂閱制鎖起來了"></a>直接的導火線：Claude 把訂閱制鎖起來了</h3><p>最表層的原因很簡單：Anthropic 不給第三方 agent 用 Claude 訂閱制了。</p>
+<p>時間線其實很清楚——1 月 9 日就開始封 Max OAuth，2 月 19 日文件更新明確寫死，4 月 4 日 PT 12 點全面斷線。Claude Code 負責人 Boris Cherny 公開講過一句很白的話：「訂閱制本來就不是設計給 third-party 工具這種用法的。」言下之意——你們這群拿訂閱跑 agent 的，根本就在 abuse。</p>
+<p>當時據估計有十幾萬個 OpenClaw instance 在跑，這數字嚇人，難怪 Anthropic 受不了要動手。受影響的 Pro&#x2F;Max 訂戶有拿到一個月訂閱費 credit 當補償，算是有良心。</p>
+<p>對 OpenClaw 這種「拿你 Claude 帳號去跑 agent」的工具來說，這基本上是斷頭。我本來還在想是不是改用 API key 模式繼續撐，但算了一下費用就放棄了——用 API 跑 agent，跑兩天大概就把一個月的 Pro 訂閱錢燒完。</p>
+<p>如果只是要「讓 agent 多跑一點」，那 API 模式 ROI 完全不划算。所以與其在那邊掙扎，不如直接回去用 Claude Code，反正官方工具也夠用，甚至更好用。</p>
+<p>但說實話，這只是個藉口。如果 OpenClaw 真的好用到我離不開，我可能還是會付 API 錢撐下去。問題是——它不夠好用。</p>
+<hr>
+<h3 id="黑箱：你只能等他跑完"><a href="#黑箱：你只能等他跑完" class="headerlink" title="黑箱：你只能等他跑完"></a>黑箱：你只能等他跑完</h3><p>回去用 Claude Code 之後我發現一件事：原來工具本來就應該是這樣的。</p>
+<p>OpenClaw 最根本的問題是「黑箱」。你下了任務之後，他就自己跑，你只能等。他在思考什麼、要改哪些檔案、為什麼這樣決定，你完全看不到。等他跑完了，你看 diff 才知道他幹了什麼——然後通常會發現，他幹了一堆你不想要他幹的事情。</p>
+<p>Claude Code 不一樣。他每一步都顯示在你眼前，你隨時可以打斷、可以糾正、可以說「等等，這個方向錯了」。這個差別聽起來很小，但在實際工作上是天和地的差距。</p>
+<p>讓我用 mermaid 把這個對比畫出來：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart LR
+    A[你下任務] --> B{選工具}
+    B -->|Claude Code| C[每步顯示]
+    C --> D[隨時打斷]
+    D --> E[即時糾正方向]
+    E --> F[結果可控]
+    B -->|OpenClaw| G[黑箱啟動]
+    G --> H[盯著進度條]
+    H --> I[等他跑完]
+    I --> J[看 diff 後悔]
+    J --> K[從頭再來一次]
+          </pre>
+
+<p>OpenClaw 的循環很容易陷入「跑 → 失敗 → 從頭再來」的迴圈，因為你沒辦法在跑的當下調整方向，每次都要等結果出來才知道。</p>
+<hr>
+<h3 id="你以為你在工作，其實你在調-context"><a href="#你以為你在工作，其實你在調-context" class="headerlink" title="你以為你在工作，其實你在調 context"></a>你以為你在工作，其實你在調 context</h3><p>這是另一個讓我棄坑的關鍵。</p>
+<p>OpenClaw 跑得不好的時候，你第一反應是什麼？「我的 prompt 是不是寫得不夠清楚？」「context 是不是塞太多？」「是不是要改 system message？」「是不是要拆任務？」</p>
+<p>然後你就開始一頓亂調。調了半天跑一次，跑完發現還是不對，再調再跑。</p>
+<p>我有認真記錄過——一個下午，我大概有三個小時都在調 context、改任務描述、看他失敗、再改、再失敗。實際產出的程式碼，不到 20 行。</p>
+<p>如果我直接用 Claude Code 自己寫，三小時能做的事情多到嚇人。</p>
+<p>這就是 OpenClaw 最詭異的地方——你以為你在 leverage AI 提升效率，結果你變成 AI 的 prompt 助理，整天在伺候它的 context window。</p>
+<hr>
+<h3 id="但-OpenClaw-不是一無是處"><a href="#但-OpenClaw-不是一無是處" class="headerlink" title="但 OpenClaw 不是一無是處"></a>但 OpenClaw 不是一無是處</h3><p>講話要公道，OpenClaw 還是有他的優點。</p>
+<p>最大的好處是 <strong>mobile</strong>。你可以在 Discord 上下指令，他就在遠端某個地方默默幫你跑。我有過幾次在咖啡廳、捷運上用手機派任務的經驗，那種感覺確實很爽——你只是在通勤，但你的 agent 已經幫你把一個小功能寫完了。</p>
+<p>第二個好處是 <strong>iPad 終於變成「真．生產力工具」</strong>。以前 iPad 對我來說就是看影片、滑文章的玩具，有了 OpenClaw 之後它居然可以拿來推進實際工作。我朋友看到的時候問我：「你這個 iPad 真的有在做事嗎？」我說：「對，他在派 agent 寫 code」，朋友的表情我永遠記得。</p>
+<p>但這些好處是有期限的。</p>
+<hr>
+<h3 id="新鮮感過後，真實成本浮上來"><a href="#新鮮感過後，真實成本浮上來" class="headerlink" title="新鮮感過後，真實成本浮上來"></a>新鮮感過後，真實成本浮上來</h3><p>新鮮感大概可以撐兩到四週。</p>
+<p>過了之後你就會發現一件事——你「能 mobile 工作」的時間，遠少於你「在家好好工作」的時間。算下來，這個工具大部分的使用情境，其實還是在桌前。而桌前用 OpenClaw vs 桌前用 Claude Code，根本沒得比。</p>
+<p>更糟的是，因為 OpenClaw 比 Claude Code 慢、爛、難控制，所以「我桌前工作的效率」反而被它拖累。為了能在外面用 5% 的時間，犧牲掉 95% 在家的時間品質——這筆帳怎麼算都不划算。</p>
+<hr>
+<h3 id="越更新越爛：改名史本身就是一齣劇"><a href="#越更新越爛：改名史本身就是一齣劇" class="headerlink" title="越更新越爛：改名史本身就是一齣劇"></a>越更新越爛：改名史本身就是一齣劇</h3><p>這個我要好好吐槽一下。</p>
+<p>很多人不知道，OpenClaw 其實改了<strong>三次</strong>名字。一開始叫 Clawdbot（致敬 Claude 的龍蝦圖案），1 月 27 日被 Anthropic 商標警告，改成 Moltbot；結果作者覺得 Moltbot「念起來不順」，<strong>三天後</strong>又改成 OpenClaw。光是改名歷史就告訴你這個專案的決策節奏有多浮躁。</p>
+<p>我用的時候是 Moltbot 末期，那時候雖然有黑箱問題，但至少還算穩定。改成 OpenClaw 之後，就是直線式跳水。</p>
+<p>第一個改名版本就先爛了一波，然後接下來的一個月，每次更新都讓我懷疑是不是版本反向走了。最誇張的是更新完常常要去跑 doctor 自我修復。對，就是那種「吃藥不會死，但吃完藥還是病」的感覺。</p>
+<p>我大概更了三、四次之後就不想更了。但你不更他又開始警告版本太舊不支援——這種拉扯式的維護體驗最讓人崩潰。</p>
+<blockquote>
+<p>一個工具讓你維護他的時間 &gt; 他幫你做事的時間，那他就不算工具，是負擔。</p>
+</blockquote>
+<p>這句話我要刻在牆上。</p>
+<hr>
+<h3 id="殘留戰場：股票管理與-News，現在都壞了"><a href="#殘留戰場：股票管理與-News，現在都壞了" class="headerlink" title="殘留戰場：股票管理與 News，現在都壞了"></a>殘留戰場：股票管理與 News，現在都壞了</h3><p>我雖然把工作搬回 Claude Code 已經一段時間，但 OpenClaw 上面其實還有幾個「不重要但有用」的 task 在跑：</p>
+<ul>
+<li><strong>股票管理</strong>：每天自動拉行情、整理我關注的清單、寫進筆記</li>
+<li><strong>News</strong>：抓幾個技術社群的熱門文章、做每日摘要</li>
+</ul>
+<p>這些東西不在工作流主軸上，所以我一開始沒有急著搬。但因為 OpenClaw 持續爛化，再加上 Claude 鎖了訂閱制——這些 task 現在基本上都是壞的。</p>
+<p>我已經沒耐心去 debug 它了。再好的工具，當你不再信任它，你就不會花時間維護它。我寧願去找專門的工具或自己寫個小 script，反正只是抓行情、做摘要這種簡單事，半天就能寫完。</p>
+<hr>
+<h3 id="Hermes-Agent：先觀望"><a href="#Hermes-Agent：先觀望" class="headerlink" title="Hermes Agent：先觀望"></a>Hermes Agent：先觀望</h3><p>最近社群開始討論一個叫 Hermes Agent 的新東西，是 Nous Research 在 2 月發布的。看起來想做的事情跟 OpenClaw 差不多——多平台、Discord&#x2F;Telegram&#x2F;Slack 都接、可以遠端派任務——但有兩個比較吸引我的點：<strong>persistent memory</strong> 和 <strong>skill creation</strong>。簡單講，他標榜會「越用越懂你」，解掉一個任務後會自己寫成 reusable skill，下次遇到類似問題不用從頭講起。</p>
+<p>聽起來很美好。十週衝到 110k GitHub stars 也不是假的，社群熱度顯然在那。</p>
+<p>但我還沒裝來試，老實說我有點被 OpenClaw 燙到了——任何標榜「全自動跑」「mobile 派任務」的 agent 工具，我現在第一個反應都是：</p>
+<p>「他到底允不允許我介入？」<br>「壞了之後 debug 成本多高？」<br>「他的更新節奏會不會越改越爛？」<br>「persistent memory 累積錯誤的 context 會不會比沒記憶更糟？」</p>
+<p>這些問題在我裝之前都沒辦法回答，所以我打算等個兩三個月，看社群反饋再決定。Hermes 跟 OpenClaw 一樣是用 LLM API 計費（沒了訂閱制這個問題後，反而更乾淨），所以即使試了不爽，也不會像當初 OpenClaw 那樣被 Anthropic 鎖到動彈不得。</p>
+<p>如果有讀者已經試過 Hermes Agent，歡迎留言告訴我體驗如何。</p>
+<hr>
+<h3 id="給自己的小結"><a href="#給自己的小結" class="headerlink" title="給自己的小結"></a>給自己的小結</h3><p>這一個月的退坑過程讓我整理出幾條原則：</p>
+<ol>
+<li><strong>能介入的工具 &gt; 全自動的工具。</strong> 全自動聽起來很爽，但你失去控制的代價，往往遠大於你省下的時間。</li>
+<li><strong>新鮮感的保鮮期通常是兩到四週。</strong> 過了之後你才會看清楚這個工具的真實成本。前期感想都是虛的。</li>
+<li><strong>「跑」的時間不等於「產出」的時間。</strong> 跑半小時但結果不能用，等於零產出。但你心理上會覺得「我有在工作」，這是最危險的錯覺。</li>
+<li><strong>維護成本要算進總成本。</strong> 一個工具如果三天兩頭要 doctor、要重設 context，那它已經在跟你倒貼了。</li>
+<li><strong>mobile 派任務的爽感是真的，但替代方案很多。</strong> 你不一定要靠 agent 工具才能 mobile 工作——一個能遠端 SSH 的開發機 + Claude Code，其實也能做很多事。</li>
+</ol>
+<p>回到 Claude Code 之後我最大的感受是——終於可以好好寫程式了。每一步都看得見、可以隨時改方向、結果可預測。沒有 black box，沒有 doctor，沒有「我到底在跟誰打架」的精神內耗。</p>
+<p>如果你正在 OpenClaw 上掙扎，或者你在猶豫要不要跳坑，希望這篇能幫你做決定。如果你已經跳了，歡迎來 Claude Code 取暖，這邊水溫剛好 😂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/Claude-Code/" rel="tag"># Claude Code</a>
+              <a href="/tags/%E8%B8%A9%E5%9D%91%E7%AD%86%E8%A8%98/" rel="tag"># 踩坑筆記</a>
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/" rel="tag"># 工作流</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026041401/" rel="prev" title="固定維運不是雜事，是團隊不再每天失憶的產品力">
+      <i class="fa fa-chevron-left"></i> 固定維運不是雜事，是團隊不再每天失憶的產品力
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026051201/" rel="next" title="AI 排程不是有跑就好：輸出格式也是產品設計的一部分">
+      AI 排程不是有跑就好：輸出格式也是產品設計的一部分 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B4%E6%8E%A5%E7%9A%84%E5%B0%8E%E7%81%AB%E7%B7%9A%EF%BC%9AClaude-%E6%8A%8A%E8%A8%82%E9%96%B1%E5%88%B6%E9%8E%96%E8%B5%B7%E4%BE%86%E4%BA%86"><span class="nav-number">1.</span> <span class="nav-text">直接的導火線：Claude 把訂閱制鎖起來了</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%91%E7%AE%B1%EF%BC%9A%E4%BD%A0%E5%8F%AA%E8%83%BD%E7%AD%89%E4%BB%96%E8%B7%91%E5%AE%8C"><span class="nav-number">2.</span> <span class="nav-text">黑箱：你只能等他跑完</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%A0%E4%BB%A5%E7%82%BA%E4%BD%A0%E5%9C%A8%E5%B7%A5%E4%BD%9C%EF%BC%8C%E5%85%B6%E5%AF%A6%E4%BD%A0%E5%9C%A8%E8%AA%BF-context"><span class="nav-number">3.</span> <span class="nav-text">你以為你在工作，其實你在調 context</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%86-OpenClaw-%E4%B8%8D%E6%98%AF%E4%B8%80%E7%84%A1%E6%98%AF%E8%99%95"><span class="nav-number">4.</span> <span class="nav-text">但 OpenClaw 不是一無是處</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E9%AE%AE%E6%84%9F%E9%81%8E%E5%BE%8C%EF%BC%8C%E7%9C%9F%E5%AF%A6%E6%88%90%E6%9C%AC%E6%B5%AE%E4%B8%8A%E4%BE%86"><span class="nav-number">5.</span> <span class="nav-text">新鮮感過後，真實成本浮上來</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B6%8A%E6%9B%B4%E6%96%B0%E8%B6%8A%E7%88%9B%EF%BC%9A%E6%94%B9%E5%90%8D%E5%8F%B2%E6%9C%AC%E8%BA%AB%E5%B0%B1%E6%98%AF%E4%B8%80%E9%BD%A3%E5%8A%87"><span class="nav-number">6.</span> <span class="nav-text">越更新越爛：改名史本身就是一齣劇</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%98%E7%95%99%E6%88%B0%E5%A0%B4%EF%BC%9A%E8%82%A1%E7%A5%A8%E7%AE%A1%E7%90%86%E8%88%87-News%EF%BC%8C%E7%8F%BE%E5%9C%A8%E9%83%BD%E5%A3%9E%E4%BA%86"><span class="nav-number">7.</span> <span class="nav-text">殘留戰場：股票管理與 News，現在都壞了</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hermes-Agent%EF%BC%9A%E5%85%88%E8%A7%80%E6%9C%9B"><span class="nav-number">8.</span> <span class="nav-text">Hermes Agent：先觀望</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%A6%E8%87%AA%E5%B7%B1%E7%9A%84%E5%B0%8F%E7%B5%90"><span class="nav-number">9.</span> <span class="nav-text">給自己的小結</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

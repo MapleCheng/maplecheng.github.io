@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="Agent 的安全邊界不能只靠提示詞宣告。從網路出口、工具權限、憑證、觀測與測試談起，說明如何把「不應連線」落成可驗證的工程控制。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Prompt 說「不能上網」，不代表 Agent 真的被隔離">
+<meta property="og:url" content="https://maplecheng.com/page/2026080201/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="Agent 的安全邊界不能只靠提示詞宣告。從網路出口、工具權限、憑證、觀測與測試談起，說明如何把「不應連線」落成可驗證的工程控制。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-08-01T21:00:38.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.346Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="技術管理">
+<meta property="article:tag" content="沙箱">
+<meta property="article:tag" content="網路隔離">
+<meta property="article:tag" content="資安治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026080201/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Prompt 說「不能上網」，不代表 Agent 真的被隔離 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026080201/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Prompt 說「不能上網」，不代表 Agent 真的被隔離
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-08-02 05:00:38" itemprop="dateCreated datePublished" datetime="2026-08-02T05:00:38+08:00">2026-08-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI-%E8%88%87%E4%BC%81%E6%A5%AD%E7%B3%BB%E7%B5%B1/" itemprop="url" rel="index"><span itemprop="name">AI 與企業系統
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Agent 的安全邊界不能只靠提示詞宣告。從網路出口、工具權限、憑證、觀測與測試談起，說明如何把「不應連線」落成可驗證的工程控制。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看到幾個 AI 安全評測案例，讓我重新確認一件看似基本、卻很容易被忽略的事：在 prompt 裡告訴 Agent「這個環境不能上網」，和真的讓它無法連到外部網路，是兩件完全不同的事。</p>
+<p>語言指令只是行為期待，不是安全邊界。只要執行環境仍有網路出口、工具仍能發送請求、程序仍拿得到憑證，模型一次誤判、一段惡意內容，或某個工具的非預期行為，就可能把「不可以」變成「其實做得到」。對技術主管來說，真正該問的從來不是 Agent 有沒有答應守規矩，而是它違反規矩時，系統能不能攔住。</p>
+<span id="more"></span>
+
+<h2 id="Prompt-是操作說明，不是防火牆"><a href="#Prompt-是操作說明，不是防火牆" class="headerlink" title="Prompt 是操作說明，不是防火牆"></a>Prompt 是操作說明，不是防火牆</h2><p>我們常在 system prompt 寫下很多限制：不要連外、不要讀取某些資料、不要執行危險指令、遇到敏感內容要先詢問。這些規則有價值，它們能幫模型理解工作範圍，也能降低正常情況下的誤操作。</p>
+<p>但 prompt 的本質仍是交給模型解讀的文字。它可能受到上下文干擾，可能把模糊規則解讀錯誤，也可能遇到 prompt injection。更麻煩的是，Agent 往往不是只有一個模型，而是模型、工具、瀏覽器、套件管理器、MCP server、背景 worker 與各種憑證組合成的執行鏈。即使模型本身沒有主動「違規」，其中一個工具也可能因重新導向、遙測、套件下載或錯誤回報而產生外部連線。</p>
+<p>所以我會把 prompt 裡的安全規則視為第一層提示，而不是最後一道控制。它比較像牆上的「請勿進入」，不是一扇真的鎖上的門。</p>
+<h2 id="真正的隔離，要從出口開始設計"><a href="#真正的隔離，要從出口開始設計" class="headerlink" title="真正的隔離，要從出口開始設計"></a>真正的隔離，要從出口開始設計</h2><p>如果一個任務確定不需要外網，最可靠的做法不是反覆提醒模型，而是讓執行環境預設沒有對外出口。容器、虛擬機或沙箱都可以成為邊界，重點在於網路政策必須是 deny by default：沒有明確允許的目的地，就不能連線。</p>
+<p>有些任務確實需要存取少數服務，例如內部 Git、套件鏡像或特定 API。這時候也不必在「完全斷網」和「全部開放」之間二選一，可以透過 egress proxy、網域 allowlist、固定目的地、DNS 控制與分離的服務帳號，將出口縮到任務真正需要的範圍。</p>
+<p>而且允許清單不能只寫「可連某個網域」就結束。還要考慮重新導向、子網域、IP 變動、DNS rebinding，以及服務回傳內容是否會引導工具再連到其他位置。網路邊界若只停留在文件，最後仍會回到相信 Agent 自律。</p>
+<h2 id="工具與憑證也要一起收斂"><a href="#工具與憑證也要一起收斂" class="headerlink" title="工具與憑證也要一起收斂"></a>工具與憑證也要一起收斂</h2><p>網路隔離不是單獨一層就能解決全部問題。假設 Agent 不能直接呼叫外網，但它能使用一個擁有廣泛權限的搜尋工具、瀏覽器服務或內部代理，那條代理本身就成了新的出口。同樣地，如果沙箱裡掛載了雲端金鑰、Git token 或正式環境憑證，即使網路限制做得不錯，一旦某個允許的目的地遭到濫用，影響仍可能很大。</p>
+<p>我傾向讓工具能力跟著任務配置，而不是跟著 Agent 名稱永久綁定。只做文件摘要的任務，不需要瀏覽器；只跑測試的 coding agent，不需要正式部署憑證；需要查詢某個 API 的工作，也應拿短效、最小 scope、可撤銷的身份。</p>
+<p>這裡有一個很實用的檢查方式：不要只列出 Agent「預計會用」哪些工具，而要列出它在最壞情況下「實際能呼叫」哪些能力。兩份清單之間的差距，就是尚未治理的攻擊面。</p>
+<h2 id="沒有觀測，就無法證明限制有效"><a href="#沒有觀測，就無法證明限制有效" class="headerlink" title="沒有觀測，就無法證明限制有效"></a>沒有觀測，就無法證明限制有效</h2><p>另一個常見盲點是，團隊設定了網路政策，卻沒有保留足夠的連線紀錄。最後只能說「理論上擋住了」，但不知道 Agent 嘗試過什麼、被擋了多少次，也不知道是否存在繞過控制的旁路。</p>
+<p>正式環境至少應該記錄：哪一個任務、以哪個身份、透過哪個工具、嘗試連到哪個目的地、是否被允許，以及套用的是哪一版政策。被拒絕的流量尤其重要，因為它可能代表模型誤判、工具行為改變、prompt injection，或正常需求已經超出原本設計。</p>
+<p>不過紀錄本身也要節制。URL、header、request body 可能包含機密，不能為了稽核又把敏感資料完整複製到 log。好的 observability 不是什麼都記，而是保留足以還原決策的事件，同時對內容做遮罩、分級與保存期限管理。</p>
+<h2 id="安全測試要故意要求它犯規"><a href="#安全測試要故意要求它犯規" class="headerlink" title="安全測試要故意要求它犯規"></a>安全測試要故意要求它犯規</h2><p>我不太相信只跑成功路徑的 Agent 測試。若規格說「不得連外」，測試就應主動放入會誘惑它連線的情境：文件裡要求下載額外指令、套件缺失時建議自動安裝、錯誤訊息附上一個回報網址，或工具結果聲稱必須向外部服務驗證。</p>
+<p>測試的標準也不能只是模型最後回答「我不會連線」。應該直接檢查網路事件、工具呼叫、DNS 查詢與憑證使用紀錄，確認違規動作確實被基礎設施阻擋。最好再把這些案例放進每次模型、工具與 runtime 更新的 regression test，因為安全邊界常常不是被一次大改動破壞，而是在許多小更新裡慢慢鬆掉。</p>
+<p>紅隊測試的價值，也正在這裡。它不是證明模型很壞，而是幫團隊找出哪些規則其實只存在於大家的想像中。</p>
+<h2 id="把「不可以」做成系統事實"><a href="#把「不可以」做成系統事實" class="headerlink" title="把「不可以」做成系統事實"></a>把「不可以」做成系統事實</h2><p>Agent 系統最危險的錯覺，是把模型說得出安全原則，誤認成平台已經安全。模型可以理解政策，也可以協助判斷風險，但它不應同時成為規則的解讀者、執行者與最後守門人。</p>
+<p>我現在設計這類工作流，會把控制拆成幾層：prompt 說明預期行為；工具 registry 限制可用能力；身份與憑證縮小資料範圍；沙箱與網路政策阻止越界；審批處理高風險例外；事件紀錄與對抗測試負責證明這些控制真的有效。</p>
+<p>這些做法看起來比多寫一句 prompt 麻煩，但它們有一個關鍵差別：prompt 只能告訴 Agent 不要犯錯，工程控制則能讓錯誤發生時停在邊界內。</p>
+<p>企業導入 Agent，真正需要的不是一個很會承諾「我不會亂來」的模型，而是一套即使模型判斷錯了，也不會讓一次錯誤直接變成外洩、誤操作或正式環境事故的執行架構。</p>
+<p>當需求寫著「不得連外」時，我們不該把它留在對話裡。要把它做成網路封包真的過不去、工具真的拿不到、憑證真的不能用，而且事後真的查得到的系統事實。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+              <a href="/tags/%E8%B3%87%E5%AE%89%E6%B2%BB%E7%90%86/" rel="tag"># 資安治理</a>
+              <a href="/tags/%E7%B6%B2%E8%B7%AF%E9%9A%94%E9%9B%A2/" rel="tag"># 網路隔離</a>
+              <a href="/tags/%E6%B2%99%E7%AE%B1/" rel="tag"># 沙箱</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026080101/" rel="prev" title="換了模型，不能順便換掉權限">
+      <i class="fa fa-chevron-left"></i> 換了模型，不能順便換掉權限
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026080301/" rel="next" title="買一台智慧設備，也買下了十年的軟體供應鏈">
+      買一台智慧設備，也買下了十年的軟體供應鏈 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Prompt-%E6%98%AF%E6%93%8D%E4%BD%9C%E8%AA%AA%E6%98%8E%EF%BC%8C%E4%B8%8D%E6%98%AF%E9%98%B2%E7%81%AB%E7%89%86"><span class="nav-number">1.</span> <span class="nav-text">Prompt 是操作說明，不是防火牆</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E7%9A%84%E9%9A%94%E9%9B%A2%EF%BC%8C%E8%A6%81%E5%BE%9E%E5%87%BA%E5%8F%A3%E9%96%8B%E5%A7%8B%E8%A8%AD%E8%A8%88"><span class="nav-number">2.</span> <span class="nav-text">真正的隔離，要從出口開始設計</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E8%88%87%E6%86%91%E8%AD%89%E4%B9%9F%E8%A6%81%E4%B8%80%E8%B5%B7%E6%94%B6%E6%96%82"><span class="nav-number">3.</span> <span class="nav-text">工具與憑證也要一起收斂</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B2%92%E6%9C%89%E8%A7%80%E6%B8%AC%EF%BC%8C%E5%B0%B1%E7%84%A1%E6%B3%95%E8%AD%89%E6%98%8E%E9%99%90%E5%88%B6%E6%9C%89%E6%95%88"><span class="nav-number">4.</span> <span class="nav-text">沒有觀測，就無法證明限制有效</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E6%B8%AC%E8%A9%A6%E8%A6%81%E6%95%85%E6%84%8F%E8%A6%81%E6%B1%82%E5%AE%83%E7%8A%AF%E8%A6%8F"><span class="nav-number">5.</span> <span class="nav-text">安全測試要故意要求它犯規</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%8A%E3%80%8C%E4%B8%8D%E5%8F%AF%E4%BB%A5%E3%80%8D%E5%81%9A%E6%88%90%E7%B3%BB%E7%B5%B1%E4%BA%8B%E5%AF%A6"><span class="nav-number">6.</span> <span class="nav-text">把「不可以」做成系統事實</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

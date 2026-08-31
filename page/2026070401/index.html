@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="當 AI 開始協助滲透測試、弱點探索與工具串接，企業不能把它當成更會掃描的黑盒，而要重新設計授權、範圍、證據、審批與修復閉環。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 滲透測試工具變多之後，資安流程不能只靠跑一次掃描">
+<meta property="og:url" content="https://maplecheng.com/page/2026070401/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="當 AI 開始協助滲透測試、弱點探索與工具串接，企業不能把它當成更會掃描的黑盒，而要重新設計授權、範圍、證據、審批與修復閉環。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-07-03T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.344Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="CTO 筆記">
+<meta property="article:tag" content="DevSecOps">
+<meta property="article:tag" content="資安治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026070401/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI 滲透測試工具變多之後，資安流程不能只靠跑一次掃描 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026070401/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI 滲透測試工具變多之後，資安流程不能只靠跑一次掃描
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-07-04 05:00:00" itemprop="dateCreated datePublished" datetime="2026-07-04T05:00:00+08:00">2026-07-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">當 AI 開始協助滲透測試、弱點探索與工具串接，企業不能把它當成更會掃描的黑盒，而要重新設計授權、範圍、證據、審批與修復閉環。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看到越來越多 AI 滲透測試、自動化安全檢查、Agent 化資安工具冒出來，我第一個反應不是「太好了，以後弱點掃描可以全自動」，而是另一個比較掃興但更實際的問題：如果工具真的變得更會找問題，企業準備好讓它進流程了嗎？</p>
+<span id="more"></span>
+
+<p>資安工具過去其實已經很自動化。SAST、DAST、依賴套件掃描、Container image scanning、雲端設定檢查，這些都不是新東西。差別在於，傳統工具多半是在明確邊界內運作：讀原始碼、掃套件、打測試站、列出 CVE、產生報表。它可能吵、可能誤報很多，但它通常不會自己決定下一步要去哪裡探、要不要串另一個工具、要不要根據前一個結果改變攻擊路徑。</p>
+<p>Agent 型工具有趣也危險的地方就在這裡。它不是只把「掃描」做快一點，而是開始把偵察、假設、驗證、整理證據、產生修復建議串成一段工作流。對工程團隊來說，這很誘人，因為很多安全工作真正耗時間的不是按下掃描，而是理解上下文：這個 endpoint 是不是內部用？這個權限是不是設計如此？這個 dependency 能不能升？這個弱點到底能不能被利用？</p>
+<p>如果 AI 能協助把這些線索串起來，價值當然很高。但我不會因此把它想成「會自己做資安的同事」。比較健康的想法是：它是一個高彈性的資安執行層，而執行層一定要被治理。</p>
+<h3 id="第一個問題：它被允許碰哪裡？"><a href="#第一個問題：它被允許碰哪裡？" class="headerlink" title="第一個問題：它被允許碰哪裡？"></a>第一個問題：它被允許碰哪裡？</h3><p>資安測試最怕邊界模糊。人類工程師做滲透測試時，正常會先有授權範圍：哪些網域、哪些環境、哪些帳號、哪些時間、哪些手法可以用，哪些絕對不能碰。AI Agent 也一樣，而且要更嚴格。</p>
+<p>原因很簡單：Agent 很擅長「順著線索走」。它看到一個連結，可能想追；看到一個 token，可能想驗；看到一個內網服務名稱，可能想查更多。這些動作在研究環境裡很合理，在企業正式環境裡卻可能踩到不該踩的區域。</p>
+<p>所以我會把這類工具的第一層設計放在 scope contract，而不是 prompt。不是只在指令裡寫「不要做危險的事」，而是系統層明確限制它能使用哪些工具、工具能打哪些 host、哪些 HTTP method 允許、速率限制是多少、是否能使用憑證、是否能產生破壞性 payload。真正的安全邊界不該只靠模型自律。</p>
+<h3 id="第二個問題：它提出的發現算不算證據？"><a href="#第二個問題：它提出的發現算不算證據？" class="headerlink" title="第二個問題：它提出的發現算不算證據？"></a>第二個問題：它提出的發現算不算證據？</h3><p>AI 很會整理，也很會把零碎訊號講成一個漂亮故事。這在資安報告裡尤其要小心。弱點不是被寫得像弱點就算弱點，修復建議也不是看起來專業就能直接排進 sprint。</p>
+<p>我比較相信的流程是把 Agent 輸出拆成三層：觀察、驗證、判斷。</p>
+<p>觀察是它看到了什麼，例如某個套件版本、某個錯誤訊息、某個設定值。驗證是它做了什麼可重現檢查，例如請求記錄、測試輸入、回應差異、掃描器原始輸出。判斷才是它認為風險多高、影響範圍多大、應該怎麼修。</p>
+<p>這三層如果混在一起，報告會很好讀，但工程上很難處理。因為你不知道哪一段是事實、哪一段是推論、哪一段只是模型補出來的合理化。資安流程需要的是可追溯，不是文筆順。</p>
+<h3 id="第三個問題：修復閉環在哪裡？"><a href="#第三個問題：修復閉環在哪裡？" class="headerlink" title="第三個問題：修復閉環在哪裡？"></a>第三個問題：修復閉環在哪裡？</h3><p>很多公司導入安全工具後，最大的問題不是找不到弱點，而是找到之後沒人處理。報表越多，大家越麻木。最後安全掃描變成每週固定產生一疊 PDF，工程師看到 critical 也先懷疑是誤報，久了整套流程就失去信用。</p>
+<p>AI 如果只是讓報表變更多，反而會讓問題更糟。它應該被用來縮短「發現到處理」的距離，而不是擴大噪音。</p>
+<p>比較有用的做法，是讓 Agent 協助做分流：哪些是可自動建立 issue 的明確弱點，哪些需要安全人員覆核，哪些可能是誤報但要留下原因，哪些屬於架構性風險不能用升版解決。更進一步，它可以幫忙找 owner、對應 repo、整理最小重現步驟、提出修復草稿，甚至在低風險情境下開 PR。</p>
+<p>但這裡又回到同一個原則：越靠近動作，權限越要細。能讀掃描結果，不等於能開 issue；能開 issue，不等於能改程式；能開 PR，不等於能 merge；能在測試環境驗證，不等於能碰正式環境。</p>
+<h3 id="第四個問題：誰對它的行為負責？"><a href="#第四個問題：誰對它的行為負責？" class="headerlink" title="第四個問題：誰對它的行為負責？"></a>第四個問題：誰對它的行為負責？</h3><p>這是技術主管不能逃的問題。Agent 做了安全測試，如果打爆測試環境、觸發告警、誤封帳號、掃到不該掃的服務，不能回答「是 AI 做的」。在企業流程裡，AI 不是責任主體，它是工具。責任仍然在設計流程、授權工具、核准任務的人身上。</p>
+<p>因此我會要求這類系統至少留下幾種紀錄：任務是誰建立的、授權範圍是什麼、使用了哪些工具、對哪些目標做了哪些請求、哪些結果被判定為弱點、後續誰覆核、誰決定修或不修。這些紀錄不只是為了事後追究，也是為了讓流程可以被改善。</p>
+<p>如果每次誤報都只是被關掉，下次還會再出現。如果每次有效發現都沒有回饋給規則、測試或知識庫，Agent 也不會真的變好。資安自動化要有學習迴路，不然只是更快地重複同樣的噪音。</p>
+<h3 id="AI-讓資安更像流程設計，而不是工具採購"><a href="#AI-讓資安更像流程設計，而不是工具採購" class="headerlink" title="AI 讓資安更像流程設計，而不是工具採購"></a>AI 讓資安更像流程設計，而不是工具採購</h3><p>我其實樂觀看待 AI 進入資安工作。安全團隊人力永遠不夠，工程團隊也不可能每個人都熟所有攻擊手法。讓 AI 協助查線索、補上下文、整理證據、提出修復方向，會是很實際的生產力提升。</p>
+<p>但我不相信「買一套 AI 滲透測試工具，公司就比較安全」這種敘事。工具變聰明後，真正拉開差距的不是誰掃得比較勤，而是誰把授權、範圍、證據、分流、審批、修復和稽核設計得比較清楚。</p>
+<p>資安本來就不是一次掃描，它是一個持續縮小風險的系統。AI Agent 只是讓這個系統的執行力變強。執行力變強是好事，但如果方向盤、煞車和行車紀錄器都沒裝好，跑得更快不一定更安全。</p>
+<p>所以我現在看這類工具，會少問一句「它能找到多少弱點」，多問幾句比較無聊的問題：它怎麼限制範圍？證據怎麼保存？誤報怎麼回饋？修復怎麼進工作流？誰可以批准它升級動作？出了事能不能還原整段過程？</p>
+<p>這些問題不酷，但它們決定 AI 資安工具最後是變成可靠的工程能力，還是另一個很會製造警報的黑盒。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/CTO-%E7%AD%86%E8%A8%98/" rel="tag"># CTO 筆記</a>
+              <a href="/tags/%E8%B3%87%E5%AE%89%E6%B2%BB%E7%90%86/" rel="tag"># 資安治理</a>
+              <a href="/tags/DevSecOps/" rel="tag"># DevSecOps</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026070201/" rel="prev" title="Prompt Cache 不是省錢小技巧，而是 Agent 的工作記憶設計">
+      <i class="fa fa-chevron-left"></i> Prompt Cache 不是省錢小技巧，而是 Agent 的工作記憶設計
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026070501/" rel="next" title="Agent 的品質不是一次評測，是每天變好的迴路">
+      Agent 的品質不是一次評測，是每天變好的迴路 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%80%8B%E5%95%8F%E9%A1%8C%EF%BC%9A%E5%AE%83%E8%A2%AB%E5%85%81%E8%A8%B1%E7%A2%B0%E5%93%AA%E8%A3%A1%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">第一個問題：它被允許碰哪裡？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%80%8B%E5%95%8F%E9%A1%8C%EF%BC%9A%E5%AE%83%E6%8F%90%E5%87%BA%E7%9A%84%E7%99%BC%E7%8F%BE%E7%AE%97%E4%B8%8D%E7%AE%97%E8%AD%89%E6%93%9A%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">第二個問題：它提出的發現算不算證據？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%80%8B%E5%95%8F%E9%A1%8C%EF%BC%9A%E4%BF%AE%E5%BE%A9%E9%96%89%E7%92%B0%E5%9C%A8%E5%93%AA%E8%A3%A1%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">第三個問題：修復閉環在哪裡？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E5%80%8B%E5%95%8F%E9%A1%8C%EF%BC%9A%E8%AA%B0%E5%B0%8D%E5%AE%83%E7%9A%84%E8%A1%8C%E7%82%BA%E8%B2%A0%E8%B2%AC%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">第四個問題：誰對它的行為負責？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AI-%E8%AE%93%E8%B3%87%E5%AE%89%E6%9B%B4%E5%83%8F%E6%B5%81%E7%A8%8B%E8%A8%AD%E8%A8%88%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E5%B7%A5%E5%85%B7%E6%8E%A1%E8%B3%BC"><span class="nav-number">5.</span> <span class="nav-text">AI 讓資安更像流程設計，而不是工具採購</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

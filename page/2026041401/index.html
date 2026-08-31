@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="我把備份、記憶整理、日誌與站會輸出這些看起來不起眼的固定維運流程自動化之後，才真正感受到：穩定的內部營運能力，本身就是一種產品力。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="固定維運不是雜事，是團隊不再每天失憶的產品力">
+<meta property="og:url" content="https://maplecheng.com/page/2026041401/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="我把備份、記憶整理、日誌與站會輸出這些看起來不起眼的固定維運流程自動化之後，才真正感受到：穩定的內部營運能力，本身就是一種產品力。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-04-13T21:01:02.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="團隊協作">
+<meta property="article:tag" content="生產力">
+<meta property="article:tag" content="自動化">
+<meta property="article:tag" content="記憶系統">
+<meta property="article:tag" content="開發流程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026041401/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>固定維運不是雜事，是團隊不再每天失憶的產品力 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026041401/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          固定維運不是雜事，是團隊不再每天失憶的產品力
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-04-14 05:01:02" itemprop="dateCreated datePublished" datetime="2026-04-14T05:01:02+08:00">2026-04-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">我把備份、記憶整理、日誌與站會輸出這些看起來不起眼的固定維運流程自動化之後，才真正感受到：穩定的內部營運能力，本身就是一種產品力。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近我越來越有一種感覺：很多技術團隊不是缺能力，而是每天都在失憶。</p>
+<p>昨天修過的東西今天忘了，週會講過的重點下週蒸發，交接時只能靠聊天紀錄拼圖，然後每個人都覺得自己很忙、做很多，但一回頭卻很難說清楚到底累積了什麼。這種狀態最麻煩的地方，不是效率低而已，而是整個團隊的判斷品質會慢慢被稀釋。</p>
+<p>我這陣子花了不少時間把一些「看起來只是固定維運」的事情自動化：備份、記憶歸檔、每日工作摘要、站會日報、內容整理。做完之後我才更確定一件事——這些事情不是雜事，它其實是團隊基礎設施的一部分。</p>
+<span id="more"></span>
+
+<h3 id="技術團隊最常見的浪費，其實不是寫錯-code"><a href="#技術團隊最常見的浪費，其實不是寫錯-code" class="headerlink" title="技術團隊最常見的浪費，其實不是寫錯 code"></a>技術團隊最常見的浪費，其實不是寫錯 code</h3><p>講到效率問題，大家第一反應通常都是 build 太慢、部署太卡、測試不夠完整，或者某段 code 太醜。這些當然都是真的，但我覺得更常見、也更隱性的浪費，是資訊流失。</p>
+<p>資訊流失有很多長相：</p>
+<ul>
+<li>某次 debug 的關鍵原因沒有留下來</li>
+<li>某個設計決策只存在會議口頭結論</li>
+<li>昨天做了哪些事，要到隔天站會前才臨時回想</li>
+<li>明明做過一次整理，下次又得從頭再查</li>
+</ul>
+<p>這種浪費最可怕的地方，在於它不會像 error message 一樣大聲尖叫。它只是讓團隊一直處在「好像都有在動，但一直沒有真正往前很多」的狀態。</p>
+<p>我自己以前也很常把這類工作視為附屬品。心態大概是：真正重要的是交付功能，這些整理、記錄、歸檔，有空再做就好。後來發現不對。因為當記錄是靠意志力維持，它就一定會在最忙的時候先被犧牲。而最忙的時候，偏偏也是最需要留下脈絡的時候。</p>
+<h3 id="把固定維運當成產品，而不是手工儀式"><a href="#把固定維運當成產品，而不是手工儀式" class="headerlink" title="把固定維運當成產品，而不是手工儀式"></a>把固定維運當成產品，而不是手工儀式</h3><p>我後來轉了一個角度思考：如果這些流程每天都要做，那它就不該是「提醒自己記得做」，而應該被設計成「系統自然會做」。</p>
+<p>差別很大。</p>
+<p>前者是靠責任感硬撐，後者是把責任感轉成機制。</p>
+<p>像是下面這種流程，如果還靠人工，其實很容易斷：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[一天的工作與對話] --> B[蒐集變更與事件]
+    B --> C[整理成 daily memory]
+    C --> D[產出站會摘要]
+    C --> E[歸檔舊記憶]
+    E --> F[沉澱成長期知識]
+    B --> G[自動備份]
+          </pre>
+
+<p>這張圖看起來很普通，但我後來越來越覺得，這種普通流程才是真正決定團隊穩不穩的地方。</p>
+<p>因為它處理的是連續性。</p>
+<p>功能開發解決的是「今天要做什麼」，維運自動化解決的是「明天還記不記得今天做了什麼」。而後者如果沒解，團隊就很難有真正的複利。</p>
+<h3 id="自動化之後，最大的改變不是省時間"><a href="#自動化之後，最大的改變不是省時間" class="headerlink" title="自動化之後，最大的改變不是省時間"></a>自動化之後，最大的改變不是省時間</h3><p>說實話，剛開始做這些流程時，我也以為重點是省時間。後來發現不只如此，甚至很多時候不是「比較快」，而是「終於穩定」。</p>
+<p>以前人工整理的狀態很像這樣：</p>
+<ul>
+<li>忙的時候先跳過</li>
+<li>晚一點再補</li>
+<li>補的時候記憶已經斷層</li>
+<li>為了補洞，只好憑印象寫</li>
+<li>寫完看起來有東西，但可信度其實下降</li>
+</ul>
+<p>這不是懶，是人類本來就不適合長期當背景程序。</p>
+<p>自動化之後，改善最明顯的是三件事：</p>
+<ul>
+<li>記錄比較即時，不用靠隔天回想</li>
+<li>脈絡比較完整，交接和回顧都輕鬆很多</li>
+<li>團隊成員比較不會因為資訊散落而重工</li>
+</ul>
+<p>更直接一點講，很多「我記得好像有做過」的模糊狀態，會慢慢變成「我知道在哪裡，而且能回頭驗證」。這種感覺超重要。因為技術管理本質上不是記得越多越厲害，而是需要時能夠穩定找回正確脈絡。</p>
+<h3 id="維運自動化其實是在降低管理摩擦"><a href="#維運自動化其實是在降低管理摩擦" class="headerlink" title="維運自動化其實是在降低管理摩擦"></a>維運自動化其實是在降低管理摩擦</h3><p>我做技術管理這幾年，一個很深的體感是：團隊摩擦常常不是來自能力差，而是來自上下文不對齊。</p>
+<p>舉幾個常見場景：</p>
+<ul>
+<li>工程師以為需求還沒定，但其實已經有結論</li>
+<li>PM 以為某件事還沒動，但實際上昨天已經處理一半</li>
+<li>站會報告講得很散，因為大家都在現場回想</li>
+<li>回顧會議花一半時間在確認「當時到底發生什麼事」</li>
+</ul>
+<p>如果把這些摩擦都攤開來看，本質上都是資訊沒有被穩定保留，也沒有被整理成適合下一個流程使用的格式。</p>
+<p>所以自動化不是只有替代人力，而是把一段資訊流變成下一段流程的可靠輸入。這才是它真正值錢的地方。</p>
+<p>我現在會把這種流程叫做「內部產品」。它不是賣給客戶的，但它的使用者是真實存在的：未來的自己、同事、接手的人、下週要開會的你。</p>
+<p>如果一個內部流程每天都有人用、用了會降低錯誤、沒了大家會痛，那它就是產品，只是剛好沒有掛在官網上而已。</p>
+<h3 id="不是什麼都該自動化，而是要挑有累積性的部分"><a href="#不是什麼都該自動化，而是要挑有累積性的部分" class="headerlink" title="不是什麼都該自動化，而是要挑有累積性的部分"></a>不是什麼都該自動化，而是要挑有累積性的部分</h3><p>當然，也不是每件小事都值得拉進自動化。什麼都自動化，很容易走火入魔，最後變成維護自動化本身比手做還痛苦。這我也踩過。</p>
+<p>我現在比較偏向用三個條件判斷：</p>
+<ul>
+<li>會重複發生</li>
+<li>做不好代價高</li>
+<li>結果有明確輸出格式</li>
+</ul>
+<p>符合這三點的流程，通常就很值得做。</p>
+<p>像是備份、daily log、狀態摘要、例行報告、知識沉澱，幾乎都符合。反過來說，如果某件事一年只做一次，而且每次情境差很多，那就先不要急著自動化，免得把彈性一起犧牲掉。</p>
+<h3 id="技術主管該優先投資的，不只是交付速度"><a href="#技術主管該優先投資的，不只是交付速度" class="headerlink" title="技術主管該優先投資的，不只是交付速度"></a>技術主管該優先投資的，不只是交付速度</h3><p>如果你也帶團隊，我真的很推薦重新看待「固定維運」這件事。</p>
+<p>很多時候，團隊感覺卡，不一定是因為大家不努力，也不一定是工具不夠強，而是基礎的連續性沒被照顧好。沒有可靠的記錄、摘要、備份、歸檔，再強的人都會被背景噪音慢慢拖垮。</p>
+<p>而一旦這些底層流程穩下來，你會發現很多事情自然變順：</p>
+<ul>
+<li>開會不再每次重講背景</li>
+<li>站會比較像同步，不像考記憶力</li>
+<li>決策能被追溯，不靠印象吵架</li>
+<li>新加入的人比較容易接上脈絡</li>
+</ul>
+<p>這些東西表面上不華麗，但它們真的會改變團隊每天的工作質地。</p>
+<p>所以現在如果有人問我，固定維運到底算不算重要工作？我的答案會很直接：算，而且它不是附屬品。</p>
+<p>它是一種讓團隊不再每天失憶的產品力。</p>
+<p>如果這篇剛好讓你想把某個一直靠人撐著的流程系統化，那我最近折騰這些內部基礎設施，應該就不算白忙了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%94%9F%E7%94%A2%E5%8A%9B/" rel="tag"># 生產力</a>
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/%E8%A8%98%E6%86%B6%E7%B3%BB%E7%B5%B1/" rel="tag"># 記憶系統</a>
+              <a href="/tags/%E5%9C%98%E9%9A%8A%E5%8D%94%E4%BD%9C/" rel="tag"># 團隊協作</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E6%B5%81%E7%A8%8B/" rel="tag"># 開發流程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026041402/" rel="prev" title="企業 AI 的主戰場，不是聊天介面，而是流程、權限與資料整合">
+      <i class="fa fa-chevron-left"></i> 企業 AI 的主戰場，不是聊天介面，而是流程、權限與資料整合
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026050701/" rel="next" title="為什麼我又回到 Claude Code：OpenClaw 用一個月後的退坑紀錄">
+      為什麼我又回到 Claude Code：OpenClaw 用一個月後的退坑紀錄 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E5%9C%98%E9%9A%8A%E6%9C%80%E5%B8%B8%E8%A6%8B%E7%9A%84%E6%B5%AA%E8%B2%BB%EF%BC%8C%E5%85%B6%E5%AF%A6%E4%B8%8D%E6%98%AF%E5%AF%AB%E9%8C%AF-code"><span class="nav-number">1.</span> <span class="nav-text">技術團隊最常見的浪費，其實不是寫錯 code</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%8A%E5%9B%BA%E5%AE%9A%E7%B6%AD%E9%81%8B%E7%95%B6%E6%88%90%E7%94%A2%E5%93%81%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E6%89%8B%E5%B7%A5%E5%84%80%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">把固定維運當成產品，而不是手工儀式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8B%95%E5%8C%96%E4%B9%8B%E5%BE%8C%EF%BC%8C%E6%9C%80%E5%A4%A7%E7%9A%84%E6%94%B9%E8%AE%8A%E4%B8%8D%E6%98%AF%E7%9C%81%E6%99%82%E9%96%93"><span class="nav-number">3.</span> <span class="nav-text">自動化之後，最大的改變不是省時間</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B6%AD%E9%81%8B%E8%87%AA%E5%8B%95%E5%8C%96%E5%85%B6%E5%AF%A6%E6%98%AF%E5%9C%A8%E9%99%8D%E4%BD%8E%E7%AE%A1%E7%90%86%E6%91%A9%E6%93%A6"><span class="nav-number">4.</span> <span class="nav-text">維運自動化其實是在降低管理摩擦</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E6%98%AF%E4%BB%80%E9%BA%BC%E9%83%BD%E8%A9%B2%E8%87%AA%E5%8B%95%E5%8C%96%EF%BC%8C%E8%80%8C%E6%98%AF%E8%A6%81%E6%8C%91%E6%9C%89%E7%B4%AF%E7%A9%8D%E6%80%A7%E7%9A%84%E9%83%A8%E5%88%86"><span class="nav-number">5.</span> <span class="nav-text">不是什麼都該自動化，而是要挑有累積性的部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E4%B8%BB%E7%AE%A1%E8%A9%B2%E5%84%AA%E5%85%88%E6%8A%95%E8%B3%87%E7%9A%84%EF%BC%8C%E4%B8%8D%E5%8F%AA%E6%98%AF%E4%BA%A4%E4%BB%98%E9%80%9F%E5%BA%A6"><span class="nav-number">6.</span> <span class="nav-text">技術主管該優先投資的，不只是交付速度</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

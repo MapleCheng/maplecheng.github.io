@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="讓 AI Coding Agent 寫程式很爽，但驗收才是地獄。分享一次 Sub-Agent 交出來的前端模組完全不符合專案規範的慘痛經驗，以及我後來建立的驗收 checklist。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI Sub-Agent 寫的 Code 怎麼驗收？Build Pass 不代表品質合格">
+<meta property="og:url" content="https://maplecheng.com/page/2026022401/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="讓 AI Coding Agent 寫程式很爽，但驗收才是地獄。分享一次 Sub-Agent 交出來的前端模組完全不符合專案規範的慘痛經驗，以及我後來建立的驗收 checklist。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-24T10:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Code Review">
+<meta property="article:tag" content="Coding Agent">
+<meta property="article:tag" content="踩坑經驗">
+<meta property="article:tag" content="軟體工程">
+<meta property="article:tag" content="開發流程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026022401/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI Sub-Agent 寫的 Code 怎麼驗收？Build Pass 不代表品質合格 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026022401/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI Sub-Agent 寫的 Code 怎麼驗收？Build Pass 不代表品質合格
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-24 18:00:00" itemprop="dateCreated datePublished" datetime="2026-02-24T18:00:00+08:00">2026-02-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">讓 AI Coding Agent 寫程式很爽，但驗收才是地獄。分享一次 Sub-Agent 交出來的前端模組完全不符合專案規範的慘痛經驗，以及我後來建立的驗收 checklist。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>昨天讓 AI Sub-Agent 寫一個前端模組，build 過了，TypeScript 沒報錯，頁面也跑得起來。</p>
+<p>我看了一眼就想翻桌。</p>
+<span id="more"></span>
+
+<h3 id="事情是這樣的"><a href="#事情是這樣的" class="headerlink" title="事情是這樣的"></a>事情是這樣的</h3><p>我們在做一個製造業客戶的系統，需要新增一個「製程管理」頁面。需求很明確：一個查詢列表、一個新增&#x2F;編輯表單，標準的 CRUD 頁面。這種頁面我們專案裡已經有十幾個了，pattern 都是固定的。</p>
+<p>所以我很放心地開了一個 Sub-Agent，給它 issue 描述和基本規格，讓它去寫。</p>
+<p>二十分鐘後，Sub-Agent 回報：「完成了，build 通過，所有檔案已建立。」</p>
+<p>好，讓我看看⋯⋯</p>
+<h3 id="第一眼就不對勁"><a href="#第一眼就不對勁" class="headerlink" title="第一眼就不對勁"></a>第一眼就不對勁</h3><p>打開檔案，第一個問題：<strong>假資料</strong>。</p>
+<p>它用了一個 <code>mockData</code> 陣列，裡面硬編碼了三筆假的製程資料，然後 Table 就直接吃這個 array。完全沒有呼叫 API。</p>
+<p>好吧，也許它不知道 API 怎麼接？但我們專案用 orval 自動產生 API hooks，swagger 文件都在那裡。它根本沒去看。</p>
+<p>第二個問題：<strong>手動 state 管理</strong>。</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Sub-Agent 寫的</span></span><br><span class="line"><span class="keyword">const</span> [visible, setVisible] = <span class="title function_">useState</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="keyword">const</span> [editingRecord, setEditingRecord] = <span class="title function_">useState</span>(<span class="literal">null</span>);</span><br><span class="line"><span class="keyword">const</span> [data, setData] = <span class="title function_">useState</span>(mockData);</span><br></pre></td></tr></table></figure>
+
+<p>我們專案有自己的 <code>FormDrawer</code> 元件，內建了 open&#x2F;close 狀態管理，有 <code>FormTypes</code> interface 定義表單的 open&#x2F;submit&#x2F;close 行為。這些東西全部寫在 <code>@packages/antd/components/dialog</code> 裡面，Sub-Agent 完全忽略，自己從頭搞了一套原生的 Modal。</p>
+<p>第三個問題：<strong>硬編碼中文</strong>。</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Sub-Agent 寫的</span></span><br><span class="line">&lt;<span class="title class_">Table</span>.<span class="property">Column</span> title=<span class="string">&quot;製程名稱&quot;</span> dataIndex=<span class="string">&quot;name&quot;</span> /&gt;</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">Table.Column</span> <span class="attr">title</span>=<span class="string">&quot;製程代碼&quot;</span> <span class="attr">dataIndex</span>=<span class="string">&quot;code&quot;</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">type</span>=<span class="string">&quot;primary&quot;</span>&gt;</span>新增<span class="tag">&lt;/<span class="name">Button</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>我們全專案用 <code>useTranslation</code> 做 i18n，所有 label 都放在 <code>locales/zhTW.json</code>。它直接寫死中文，完全無視國際化。</p>
+<h3 id="更多問題陸續浮出"><a href="#更多問題陸續浮出" class="headerlink" title="更多問題陸續浮出"></a>更多問題陸續浮出</h3><p>繼續往下看，問題越來越多：</p>
+<ul>
+<li>**沒用 <code>useTableSearch</code>**：我們的 Table 都搭配這個 hook 做查詢參數管理，它自己寫了一個 <code>handleSearch</code> function</li>
+<li>**沒用 <code>useFeedback</code>**：成功&#x2F;失敗的通知用原生 <code>message.success()</code>，不是我們封裝的 hook</li>
+<li>**沒用 <code>useProgramRule</code>**：權限控制完全沒做</li>
+<li><strong>沒在 <code>programRoutes.tsx</code> 註冊</strong>：雖然這個檔案是自動產生的，但它連對應的 route config 都沒加</li>
+</ul>
+<p>每一個問題單獨看都不嚴重。但加在一起，這個模組基本上是<strong>不能用的</strong>。它跟專案裡其他頁面的 pattern 完全不一致，如果就這樣 merge 進去，後續維護的人會很痛苦。</p>
+<h3 id="最扎心的是：Build-是過的"><a href="#最扎心的是：Build-是過的" class="headerlink" title="最扎心的是：Build 是過的"></a>最扎心的是：Build 是過的</h3><p>對，TypeScript 完全沒報錯。ESLint 也沒意見。<code>pnpm build</code> 順利產出。</p>
+<p>因為它寫的東西「語法上」完全正確——用原生 React + Ant Design 寫一個 CRUD 頁面，這有什麼錯？</p>
+<p>錯在它跟<strong>我們專案的規範</strong>不一致。而這些規範不是 TypeScript 能檢查的，也不是 ESLint rule 能涵蓋的。</p>
+<h3 id="根因：Sub-Agent-不會主動讀規範"><a href="#根因：Sub-Agent-不會主動讀規範" class="headerlink" title="根因：Sub-Agent 不會主動讀規範"></a>根因：Sub-Agent 不會主動讀規範</h3><p>這是最關鍵的教訓。</p>
+<p>我們的專案規範寫在 <code>.claude/skills/</code> 目錄裡，包括：</p>
+<ul>
+<li>頁面結構：主頁(Query+Table) → Table 用 FormDrawer ref → Form 實作 FormTypes</li>
+<li>元件使用：哪些情境用 FormDrawer、哪些用 FormModal</li>
+<li>API 串接：一律用 orval 產生的 hooks，不手寫 API call</li>
+<li>國際化：所有 label 走 useTranslation</li>
+<li>通知：用 useFeedback hook</li>
+</ul>
+<p>這些文件都在。但 Sub-Agent <strong>不會自己去讀</strong>。</p>
+<p>它拿到的 prompt 是：「幫我建一個製程管理頁面，需要查詢列表和新增&#x2F;編輯表單。」它就照自己的理解去寫了。它的理解來自訓練資料裡見過的無數個 React + Ant Design 範例，而不是來自我們專案的特定規範。</p>
+<h3 id="正確的做法"><a href="#正確的做法" class="headerlink" title="正確的做法"></a>正確的做法</h3><p>後來我自己重寫了這個模組。但更重要的是，我從這次經驗整理出了一套驗收流程：</p>
+<p><strong>派工時就要把規範塞進去</strong></p>
+<p>不能假設 Sub-Agent 會自己找規範。派工的 prompt 要明確寫：</p>
+<ul>
+<li>「先讀 <code>.claude/skills/frontend-patterns.md</code>」</li>
+<li>「Table 要用 <code>useTableSearch</code> hook」</li>
+<li>「表單要用 <code>FormDrawer</code> 搭配 <code>FormTypes</code> interface」</li>
+<li>「API 用 orval 產生的 hooks，不要手寫」</li>
+<li>「所有 label 要用 useTranslation」</li>
+</ul>
+<p>是的，很囉唆。但不寫就等著翻桌。</p>
+<p><strong>驗收 Checklist（不只看 build）</strong></p>
+<p>我現在驗收 Sub-Agent 的產出會逐項檢查：</p>
+<ul>
+<li>有沒有用到專案的共用元件？（而不是自己從頭寫）</li>
+<li>有沒有呼叫真正的 API？（而不是假資料）</li>
+<li>國際化有沒有做？</li>
+<li>權限控制有沒有做？</li>
+<li>跟現有頁面的 pattern 是否一致？</li>
+<li>commit message 有沒有帶 issue 號？</li>
+</ul>
+<p>這些全部用肉眼 review。沒有工具能自動檢查「你的 Modal 應該用 FormDrawer 而不是原生的」。</p>
+<p><strong>給 Sub-Agent 一個範例檔</strong></p>
+<p>與其寫一堆規範文字，不如直接指定：「參考 <code>src/modules/xxx/pages/YyyPage.tsx</code> 的寫法。」</p>
+<p>讓它照抄一個已經符合規範的頁面，比讓它從零開始理解規範文件有效得多。</p>
+<h3 id="為什麼這個問題很重要"><a href="#為什麼這個問題很重要" class="headerlink" title="為什麼這個問題很重要"></a>為什麼這個問題很重要</h3><p>AI Coding Agent 現在很火。Claude Code、Cursor、Copilot⋯⋯每個人都在用。但我發現大部分人只看兩件事：「能不能跑」和「build 有沒有過」。</p>
+<p>這在個人 side project 沒問題。但在團隊專案裡，code 的價值不只是「能跑」，還有「一致性」和「可維護性」。</p>
+<p>一個用原生 React 寫的 CRUD 頁面，跟一個用團隊封裝元件寫的 CRUD 頁面，功能上可能一模一樣。但半年後有人要改需求的時候，前者會讓人想罵人。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[AI 產出 Code] --> B{Build Pass?}
+    B -->|No| C[修到 Pass]
+    C --> B
+    B -->|Yes| D{符合專案規範?}
+    D -->|No| E[重寫 / 大幅修改]
+    D -->|Yes| F{跟現有 Pattern 一致?}
+    F -->|No| E
+    F -->|Yes| G[可以 Merge]
+          </pre>
+
+<p>大部分人在 Build Pass 那一步就停了。但真正的品質門檻在後面兩步。</p>
+<h3 id="一些補充想法"><a href="#一些補充想法" class="headerlink" title="一些補充想法"></a>一些補充想法</h3><p><strong>這不是 AI 的錯</strong></p>
+<p>公平地說，如果我找一個新人工程師，給他同樣的需求描述但不告訴他專案規範，他八成也會寫出類似的東西。差別只在於新人會在 code review 被打回來之後學到教訓，而 AI 下次還是會犯同樣的錯（除非你在 prompt 裡再次強調）。</p>
+<p><strong>Context 的成本</strong></p>
+<p>把所有規範塞進 prompt 是有成本的。Token 不是免費的，而且 context window 有上限。你需要判斷哪些規範是「不說就一定會錯」的，優先放進去。</p>
+<p>我的經驗是：共用元件的使用方式 &gt; API 串接方式 &gt; 國際化 &gt; 權限。因為前兩個錯了基本上要重寫，後兩個至少還能補。</p>
+<p><strong>可能的改善方向</strong></p>
+<p>長期來看，我覺得有幾個方向可以降低這個問題的嚴重性：</p>
+<ul>
+<li>用 ESLint custom rule 強制使用特定元件（比如禁止直接用 <code>antd</code> 的 <code>Modal</code>，必須用 <code>FormDrawer</code>）</li>
+<li>在 <code>.claude/</code> 規範裡加更多具體的 do&#x2F;don’t 範例</li>
+<li>派工時自動注入專案規範（透過 skill 或 template）</li>
+<li>建立自動化的 pattern consistency check</li>
+</ul>
+<p>但現階段，最實際的做法還是：<strong>認真做 code review，不要被 build pass 騙了。</strong></p>
+<h3 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h3><p>AI 寫 code 的能力已經很強了，但「寫出能跑的 code」和「寫出符合團隊規範的 code」之間，還有一段不小的距離。</p>
+<p>這段距離不是靠 AI 進步就能消除的——每個團隊的規範都不一樣，這本來就是 context-dependent 的東西。能消除它的，只有更好的 prompt engineering 和更嚴格的 code review。</p>
+<p>如果你也在團隊裡用 AI Coding Agent，記得：Build Pass 只是最低門檻。真正的驗收，從打開檔案的那一刻才開始。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Coding-Agent/" rel="tag"># Coding Agent</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E8%B8%A9%E5%9D%91%E7%B6%93%E9%A9%97/" rel="tag"># 踩坑經驗</a>
+              <a href="/tags/Code-Review/" rel="tag"># Code Review</a>
+              <a href="/tags/%E8%BB%9F%E9%AB%94%E5%B7%A5%E7%A8%8B/" rel="tag"># 軟體工程</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E6%B5%81%E7%A8%8B/" rel="tag"># 開發流程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026022201/" rel="prev" title="用撲克思維做股票：一個技術主管的跨界風險管理框架">
+      <i class="fa fa-chevron-left"></i> 用撲克思維做股票：一個技術主管的跨界風險管理框架
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026022501/" rel="next" title="民國年條碼解析：當你的系統要處理非標準日期格式">
+      民國年條碼解析：當你的系統要處理非標準日期格式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E6%83%85%E6%98%AF%E9%80%99%E6%A8%A3%E7%9A%84"><span class="nav-number">1.</span> <span class="nav-text">事情是這樣的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E7%9C%BC%E5%B0%B1%E4%B8%8D%E5%B0%8D%E5%8B%81"><span class="nav-number">2.</span> <span class="nav-text">第一眼就不對勁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E5%A4%9A%E5%95%8F%E9%A1%8C%E9%99%B8%E7%BA%8C%E6%B5%AE%E5%87%BA"><span class="nav-number">3.</span> <span class="nav-text">更多問題陸續浮出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E6%89%8E%E5%BF%83%E7%9A%84%E6%98%AF%EF%BC%9ABuild-%E6%98%AF%E9%81%8E%E7%9A%84"><span class="nav-number">4.</span> <span class="nav-text">最扎心的是：Build 是過的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E5%9B%A0%EF%BC%9ASub-Agent-%E4%B8%8D%E6%9C%83%E4%B8%BB%E5%8B%95%E8%AE%80%E8%A6%8F%E7%AF%84"><span class="nav-number">5.</span> <span class="nav-text">根因：Sub-Agent 不會主動讀規範</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E7%A2%BA%E7%9A%84%E5%81%9A%E6%B3%95"><span class="nav-number">6.</span> <span class="nav-text">正確的做法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E9%80%99%E5%80%8B%E5%95%8F%E9%A1%8C%E5%BE%88%E9%87%8D%E8%A6%81"><span class="nav-number">7.</span> <span class="nav-text">為什麼這個問題很重要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E8%A3%9C%E5%85%85%E6%83%B3%E6%B3%95"><span class="nav-number">8.</span> <span class="nav-text">一些補充想法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">9.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

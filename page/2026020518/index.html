@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="從 ERP 客製化的痛點出發，探討 AI 如何改變開發流程、提升效率，以及 ERP 團隊該如何擁抱 AI 時代的轉變">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ERP 產業觀察：AI 如何改變客製化地獄">
+<meta property="og:url" content="https://maplecheng.com/page/2026020518/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="從 ERP 客製化的痛點出發，探討 AI 如何改變開發流程、提升效率，以及 ERP 團隊該如何擁抱 AI 時代的轉變">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-05T05:45:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="ERP">
+<meta property="article:tag" content="客製化">
+<meta property="article:tag" content="數位轉型">
+<meta property="article:tag" content="軟體產業">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020518/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>ERP 產業觀察：AI 如何改變客製化地獄 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020518/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ERP 產業觀察：AI 如何改變客製化地獄
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-05 13:45:00" itemprop="dateCreated datePublished" datetime="2026-02-05T13:45:00+08:00">2026-02-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">從 ERP 客製化的痛點出發，探討 AI 如何改變開發流程、提升效率，以及 ERP 團隊該如何擁抱 AI 時代的轉變</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>做 ERP 這行最大的痛是什麼？不是技術難、不是加班多，而是每個客戶都覺得自己的流程「很特殊」。</p>
+<p>「我們公司的採購流程跟別人不一樣」、「我們的簽核邏輯比較複雜」、「這個報表的格式一定要長這樣」— 聽了十幾年，我已經可以在客戶開口前就猜到下一句是什麼。標準功能明明覆蓋了八成需求，但客戶永遠只盯著那兩成的差異，然後跟你說：「這個客製化應該很簡單吧？」</p>
+<p>客製化做到最後，維護成本吃掉利潤，團隊被綁死在舊案子裡，新功能永遠排不上。這就是我們這行的「客製化地獄」。但最近一兩年，AI 的進展讓我看到一些脫離地獄的可能性。</p>
+<span id="more"></span>
+
+<h2 id="ERP-客製化的現實"><a href="#ERP-客製化的現實" class="headerlink" title="ERP 客製化的現實"></a>ERP 客製化的現實</h2><p>先說說這個地獄到底有多深。</p>
+<p>標準功能覆蓋 80% 的需求，這個數字聽起來很高對吧？但問題是，客戶不會因為那 80% 選你，他們會因為那 20% 的差異來決定要不要用你的系統。更慘的是，那 20% 往往涉及他們最核心的業務流程 — 採購審批的特殊邏輯、生產排程的獨家算法、品質檢驗的多層簽核。</p>
+<p>客製化的成本不只是「開發」而已。寫 code 可能花一週，但後續的維護才是真正的黑洞。每次產品版本升級，你要確保客製化的邏輯還能正常運作。每次修 bug，你要小心不能影響到客製的部分。然後客戶會問你：「為什麼升級要這麼久？」因為你有三十個客戶，每個的客製邏輯都不一樣，升級等於要測三十次啊（內心吶喊）。</p>
+<h3 id="客製化的技術債暴雷現場"><a href="#客製化的技術債暴雷現場" class="headerlink" title="客製化的技術債暴雷現場"></a>客製化的技術債暴雷現場</h3><p>我見過最離譜的狀況是，某個客戶的系統裡有一段十年前寫的存儲過程，當初寫的人早就離開了，文件是零，註解也只有一行 <code>-- 特殊處理</code>。問題是這段 code 涉及月結的核心邏輯，每個月跑一次，跑不出來整間公司的帳就關不了。</p>
+<p>你敢動它嗎？不敢。但它偶爾會出問題，出問題的時候你又必須碰它。這就是客製化的技術債 — 不只是 code smell，是真正的業務風險。</p>
+<p>小團隊做 ERP 的日常就是：人少、客戶多、每個案子的客製邏輯都不同，然後永遠在救火。今天 A 客戶的報表跑不出來，明天 B 客戶的簽核流程卡住，後天 C 客戶說上個月改的功能又壞了。你以為今天可以寫新功能，結果一整天都在處理客戶的 support ticket。</p>
+<p>而真正的地獄是什麼？是客戶說「這個很簡單吧」的功能。「我只是想在出貨單上多一個欄位」— 聽起來很簡單，但那個欄位的值要從採購單帶過來，經過 BOM 表的換算，還要根據客戶等級套用不同的計算邏輯。一個「簡單」的欄位，可能要動到三個模組的核心流程。</p>
+<h3 id="一個「簡單」需求的真實故事"><a href="#一個「簡單」需求的真實故事" class="headerlink" title="一個「簡單」需求的真實故事"></a>一個「簡單」需求的真實故事</h3><p>某個客戶有一次提了一個需求：「出貨單列印的時候，品名後面要加上客戶的品號。」聽起來超簡單對吧？但一查才發現：</p>
+<ul>
+<li>客戶品號存在另一個模組的對照表裡</li>
+<li>同一個產品對不同客戶有不同的品號</li>
+<li>有些產品是組合品，要顯示子件的品號</li>
+<li>列印格式已經被客製過三次，report designer 的版本跟目前系統不相容</li>
+</ul>
+<p>最後這個「簡單」的需求花了快兩週才搞定。客戶大概覺得我們很混，但我實在沒辦法跟他解釋這裡面的水有多深。</p>
+<h2 id="AI-帶來的改變：已經發生的"><a href="#AI-帶來的改變：已經發生的" class="headerlink" title="AI 帶來的改變：已經發生的"></a>AI 帶來的改變：已經發生的</h2><p>好了，抱怨完了。來說說好消息。</p>
+<p>過去一兩年，AI 已經實實在在地改變了我們團隊的工作方式，雖然不是什麼驚天動地的革命，但確實讓日子好過了一些。</p>
+<p><strong>Code generation</strong> 是最直接的效益。客製功能裡有大量的 boilerplate — CRUD 的 API、表單的 validation、資料轉換的 mapping。這些重複性高但又不能出錯的 code，現在交給 AI 寫初稿，人只需要處理核心的業務邏輯。以前一個客製功能要寫三天，現在一天半就能搞定。不是因為 AI 寫的 code 完美無缺，而是它幫你把「不需要思考但必須寫」的部分先處理掉了。</p>
+<p>舉個具體的例子。某個客戶需要一個「供應商評鑑」的客製模組。以前的做法是：</p>
+<ol>
+<li>手動建 database table schema</li>
+<li>寫 Entity class 和 DbContext 設定</li>
+<li>寫 Repository 和 Service 層</li>
+<li>寫 API Controller</li>
+<li>寫前端表單和列表</li>
+<li>寫 validation 和 error handling</li>
+</ol>
+<p>現在？把需求文件丟給 AI，跟它說「參考 <code>CLAUDE.md</code> 裡的架構規範」，它可以一口氣把 1-5 的初稿全部產出來。我只需要 review 業務邏輯的部分 — 評鑑分數的計算方式對不對、權重的設定合不合理、狀態流轉有沒有遺漏。</p>
+<p>但要讓 AI 有效幫忙，有個前提 — 你的 codebase 要夠標準化。如果每個專案的架構都不一樣、命名規則都不同，AI 也會一頭霧水。這點後面會再提。</p>
+<p><strong>需求分析</strong> 也是一個 AI 發揮很好的地方。客戶給的需求文件通常是一堆散亂的文字，夾雜著截圖和「如附件」。以前要花半天整理，現在丟給 AI 先做結構化 — 拆出 user story、列出影響範圍、標記不明確的地方。再拿這份結構化的結果和開發團隊 review，效率高了不少。</p>
+<p><strong>Bug 定位</strong> 可能是我最滿意的應用。客戶回報問題的時候，描述通常是「系統壞了」「報表跑不出來」這種超模糊的說法。以前要花很多時間問清楚、看 log、reproducing。現在把 error log 和客戶描述一起餵給 AI，它可以先幫你縮小範圍 — 可能是哪個 module、可能是什麼原因、建議從哪裡開始查。不一定百分百準確，但至少省了第一步的摸索時間。</p>
+<p><strong>文件撰寫</strong> 就更不用說了。操作手冊、API 文件、流程圖說明 — 這些以前總是拖到最後才寫（或根本不寫，別假裝你有寫）。現在讓 AI 根據 code 和 commit message 先產初稿，人再修正潤飾。文件的完成率從「隨緣」提升到了「至少有」。</p>
+<h2 id="AI-帶來的改變：正在發生的"><a href="#AI-帶來的改變：正在發生的" class="headerlink" title="AI 帶來的改變：正在發生的"></a>AI 帶來的改變：正在發生的</h2><p>除了開發端的改變，產品端也開始出現一些有趣的可能性。</p>
+<p><strong>自然語言查詢 ERP 資料</strong> 是我覺得最有潛力的方向。ERP 的報表功能通常很強大，但也很複雜 — 使用者要知道去哪個畫面、選哪些條件、怎麼設定篩選。如果使用者可以直接問「上個月出貨量前十大客戶」或「這個月應收帳款超過 90 天的有哪些」，不用學操作介面就能拿到答案，這對終端使用者來說是巨大的體驗提升。</p>
+<p>當然，這裡面有很多細節要處理 — 資料安全（使用者能查到的範圍）、查詢效能（不能讓 AI 生出一個跑十分鐘的 SQL）、結果正確性的驗證。但方向是對的。</p>
+<p><strong>智能表單驗證</strong> 也很有意思。傳統的 validation rule 是寫死的 — 數量不能為負、金額不能超過多少。但 AI 可以根據歷史資料判斷「這筆訂單的數量是否異常」。比如某個客戶平常都下一百件，這次突然下一萬件，系統可以跳出提醒。這不是 bug，而是「你確定嗎？」的智能檢查。</p>
+<p><strong>釣魚郵件防護</strong> 是近期越來越重要的議題。做 ERP 的人都知道，企業最怕的資安事件之一就是偽裝成供應商的詐騙郵件 — 通知你匯款帳號變更、要求緊急付款。AI 在辨識這類釣魚郵件方面已經比傳統的 rule-based 方法好很多。</p>
+<p><strong>工作流建議</strong> 則是 AI 分析過去的審批紀錄，建議最佳的簽核路徑。哪些類型的申請通常要經過誰、平均要多久、哪個環節最容易卡住 — 這些 pattern 讓 AI 來挖掘，比人工分析快得多。</p>
+<h3 id="AI-如何改變-ERP-的售前流程"><a href="#AI-如何改變-ERP-的售前流程" class="headerlink" title="AI 如何改變 ERP 的售前流程"></a>AI 如何改變 ERP 的售前流程</h3><p>這是我最近特別有感的一點。以前做 ERP 的售前簡報，要花大量時間準備客戶的產業背景、競品分析、功能對照。現在把客戶的基本資料和需求丟給 AI，它可以快速產出一份產業分析報告，包括這個產業的常見 ERP 需求痛點、通常會要哪些客製功能、導入時最容易碰到的問題。</p>
+<p>雖然 AI 產出的分析不能直接拿來用（每個客戶的實際情況還是要實地了解），但作為事前準備的起點，效率高了不只一個檔次。至少你去拜訪客戶之前，不會一片空白。</p>
+<h2 id="AI-還做不到的事"><a href="#AI-還做不到的事" class="headerlink" title="AI 還做不到的事"></a>AI 還做不到的事</h2><p>說了這麼多好話，也要說說 AI 目前還無法處理的部分，免得大家期望太高。</p>
+<p>首先，AI 無法理解客戶的「政治」。ERP 的簽核流程表面上是邏輯問題，但實際上是人際問題。為什麼這張採購單要經過那個部門的主管？不是因為流程規定，是因為那個主管想要 control。為什麼報表要寄給不相關的人？因為老闆交代的。這種「潛規則」AI 讀不懂，你也很難用 code 來表達。</p>
+<p>其次，<strong>跨系統整合</strong> 仍然是高度客製化的工作。ERP 要和 MES（製造執行系統）、WMS（倉儲管理系統）、CRM 串接，每家的 API 格式、資料定義、同步方式都不同。AI 可以幫你寫 API 的 boilerplate code，但整合的邏輯 — 什麼資料要對應到什麼欄位、衝突時怎麼處理、斷線時怎麼重試 — 這些還是需要人來設計。</p>
+<p>再來，<strong>資料遷移</strong> 也是 AI 幫不太上忙的地方。每個客戶從舊系統搬到新系統，資料格式、欄位定義、歷史資料的清洗 — 這些高度客製的工作需要大量的人工判斷。AI 可以幫你寫一些資料轉換的 script，但「這個欄位在舊系統裡什麼意思」「這筆資料明顯是錯的但客戶堅持要保留」這類問題，AI 處理不了。</p>
+<p>最後，AI 無法取代導入顧問。客戶需要的不只是一套系統，還有「被理解」的感覺。他們想要一個人坐在對面，聽他們講他們的痛點，然後告訴他們「我懂，我們可以這樣解決」。這個「被理解」的體驗，AI 暫時做不到。</p>
+<h2 id="給-ERP-同業的建議"><a href="#給-ERP-同業的建議" class="headerlink" title="給 ERP 同業的建議"></a>給 ERP 同業的建議</h2><p>如果你也在做 ERP，這是我這兩年摸索下來的一些心得。</p>
+<p><strong>先從內部工具 AI 化開始</strong>。不要急著在產品上加 AI 功能給客戶用。先讓你的開發團隊用起來 — code generation、文件生成、bug 分析。內部用順了，你才知道 AI 的能力邊界在哪裡，再來規劃客戶端的 AI 功能，就不會開出做不到的支票。</p>
+<p><strong>標準化你的 codebase</strong>。這是讓 AI 有效幫忙的前提。如果你每個專案的架構都不一樣、命名都不同、連 folder structure 都亂七八糟，那 AI 也救不了你。花時間建立 coding conventions、統一專案結構、寫好 onboarding 文件。這些工作對人有幫助，對 AI 更有幫助。我自己的做法是在每個專案根目錄放一份 <code>CLAUDE.md</code>，描述架構、coding conventions、常見 pattern，讓 AI coding agent 讀了就能上手。</p>
+<p><strong>記錄你的 domain knowledge</strong>。什麼是「帳齡分析」？「三聯式發票」的邏輯是什麼？「月結 60 天」在系統裡怎麼實現？這些 domain knowledge 是 AI 沒有的（或者說它有的是通用知識，不是你的行業 know-how）。把這些整理成文件，一方面團隊新人可以學，一方面 AI 也能參考。這是你的核心競爭力，不要讓它只存在於老員工的腦袋裡。</p>
+<p><strong>建立客製化的模組化框架</strong>。與其每次客製都從頭寫，不如設計一套模組化的架構 — 讓客製的部分可以像 plugin 一樣掛上去，不影響核心系統的升級。這不是新概念，但在 AI 時代特別重要，因為 AI 在標準化的框架裡寫 code 的效率遠高於每個案子都是 ad-hoc 的做法。</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>ERP 不會被 AI 取代。客戶的流程太複雜、太多「政治」、太多跨系統的眉角，這些短期內 AI 處理不來。</p>
+<p>但不用 AI 的 ERP 團隊，會被用 AI 的 ERP 團隊取代。</p>
+<p>當別人的團隊可以用一半的時間完成客製功能、用 AI 幫忙寫文件和抓 bug、讓 AI 在標準化的 codebase 上高效工作的時候，還在用純人力硬扛的團隊就會發現 — 不是你技術不好，是你的效率跟不上了。</p>
+<p>擁抱 AI 不需要什麼大革命。先從小的地方開始 — 讓 AI 幫你寫 boilerplate、讓 AI 幫你整理需求、讓 AI 幫你讀 log。然後標準化你的開發環境和 codebase，讓 AI 更容易參與你的工作流程。</p>
+<p>客製化地獄不會消失，但有了 AI 這個隊友，至少地獄的溫度可以降低一些。在這個行業待了這麼多年，第一次覺得「改變」不是威脅，而是一個讓工作沒那麼痛苦的機會。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/ERP/" rel="tag"># ERP</a>
+              <a href="/tags/%E5%AE%A2%E8%A3%BD%E5%8C%96/" rel="tag"># 客製化</a>
+              <a href="/tags/%E8%BB%9F%E9%AB%94%E7%94%A2%E6%A5%AD/" rel="tag"># 軟體產業</a>
+              <a href="/tags/%E6%95%B8%E4%BD%8D%E8%BD%89%E5%9E%8B/" rel="tag"># 數位轉型</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020516/" rel="prev" title="AI 助理的安全設計：從 Prompt Injection 到隱私邊界">
+      <i class="fa fa-chevron-left"></i> AI 助理的安全設計：從 Prompt Injection 到隱私邊界
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020519/" rel="next" title="DevContainer 實戰：打造 AI 友善的開發環境">
+      DevContainer 實戰：打造 AI 友善的開發環境 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ERP-%E5%AE%A2%E8%A3%BD%E5%8C%96%E7%9A%84%E7%8F%BE%E5%AF%A6"><span class="nav-number">1.</span> <span class="nav-text">ERP 客製化的現實</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%A2%E8%A3%BD%E5%8C%96%E7%9A%84%E6%8A%80%E8%A1%93%E5%82%B5%E6%9A%B4%E9%9B%B7%E7%8F%BE%E5%A0%B4"><span class="nav-number">1.1.</span> <span class="nav-text">客製化的技術債暴雷現場</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E5%80%8B%E3%80%8C%E7%B0%A1%E5%96%AE%E3%80%8D%E9%9C%80%E6%B1%82%E7%9A%84%E7%9C%9F%E5%AF%A6%E6%95%85%E4%BA%8B"><span class="nav-number">1.2.</span> <span class="nav-text">一個「簡單」需求的真實故事</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AI-%E5%B8%B6%E4%BE%86%E7%9A%84%E6%94%B9%E8%AE%8A%EF%BC%9A%E5%B7%B2%E7%B6%93%E7%99%BC%E7%94%9F%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">AI 帶來的改變：已經發生的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AI-%E5%B8%B6%E4%BE%86%E7%9A%84%E6%94%B9%E8%AE%8A%EF%BC%9A%E6%AD%A3%E5%9C%A8%E7%99%BC%E7%94%9F%E7%9A%84"><span class="nav-number">3.</span> <span class="nav-text">AI 帶來的改變：正在發生的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AI-%E5%A6%82%E4%BD%95%E6%94%B9%E8%AE%8A-ERP-%E7%9A%84%E5%94%AE%E5%89%8D%E6%B5%81%E7%A8%8B"><span class="nav-number">3.1.</span> <span class="nav-text">AI 如何改變 ERP 的售前流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AI-%E9%82%84%E5%81%9A%E4%B8%8D%E5%88%B0%E7%9A%84%E4%BA%8B"><span class="nav-number">4.</span> <span class="nav-text">AI 還做不到的事</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B5%A6-ERP-%E5%90%8C%E6%A5%AD%E7%9A%84%E5%BB%BA%E8%AD%B0"><span class="nav-number">5.</span> <span class="nav-text">給 ERP 同業的建議</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">6.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

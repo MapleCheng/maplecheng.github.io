@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="AI 助理不該只會回答問題。這篇分享我用 OpenClaw Cron Jobs 打造自動化工作流的實戰經驗，包括每日日報生成、投資分析推送、記憶整理，以及一路踩過的各種坑。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenClaw Cron Jobs 實戰：讓 AI 在你睡覺時自動幹活">
+<meta property="og:url" content="https://maplecheng.com/page/2026020506/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="AI 助理不該只會回答問題。這篇分享我用 OpenClaw Cron Jobs 打造自動化工作流的實戰經驗，包括每日日報生成、投資分析推送、記憶整理，以及一路踩過的各種坑。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-05T02:45:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.339Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Cron">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="排程">
+<meta property="article:tag" content="自動化">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020506/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>OpenClaw Cron Jobs 實戰：讓 AI 在你睡覺時自動幹活 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020506/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OpenClaw Cron Jobs 實戰：讓 AI 在你睡覺時自動幹活
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-05 10:45:00" itemprop="dateCreated datePublished" datetime="2026-02-05T10:45:00+08:00">2026-02-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">AI 助理不該只會回答問題。這篇分享我用 OpenClaw Cron Jobs 打造自動化工作流的實戰經驗，包括每日日報生成、投資分析推送、記憶整理，以及一路踩過的各種坑。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>大部分人用 AI 助理的方式是這樣的：打開對話 → 問問題 → 得到答案 → 關掉。</p>
+<p>這樣用當然沒問題，但你有沒有想過：如果 AI 能在你沒問的時候，自己去做那些你每天都要做的瑣事呢？每天早上幫你整理今天的行程和待辦、自動跑一份投資分析、凌晨幫你回顧一整天的對話然後寫進筆記？</p>
+<p>這才是 AI 助理的真正殺手級應用，而 <a target="_blank" rel="noopener" href="https://github.com/openclaw/openclaw">OpenClaw</a> 的 Cron Jobs 功能讓這件事變得非常容易實現。</p>
+<span id="more"></span>
+
+<h3 id="兩種排程模式：先搞清楚再動手"><a href="#兩種排程模式：先搞清楚再動手" class="headerlink" title="兩種排程模式：先搞清楚再動手"></a>兩種排程模式：先搞清楚再動手</h3><p>OpenClaw 的 cron job 有兩種執行模式，這是一開始最容易搞混的地方，我自己也在這裡卡了一陣子。</p>
+<h4 id="systemEvent：注入主-session"><a href="#systemEvent：注入主-session" class="headerlink" title="systemEvent：注入主 session"></a>systemEvent：注入主 session</h4><p>想像一下，你正在跟 AI 助理聊天，突然有人在對話中插入了一條系統訊息：「現在是早上九點，請執行每日回顧。」AI 會在現有的對話脈絡中看到這條訊息，然後執行。</p>
+<p>這就是 <code>systemEvent</code> 模式。它不會開新的 session，而是把排程指令「注入」到你正在進行的主 session 中。好處是 AI 可以看到之前的對話脈絡，壞處是如果你當時正在聊別的事，排程訊息可能會插得很突兀。</p>
+<p><strong>適用場景</strong>：需要對話脈絡的任務，比如「根據我們今天討論的內容整理一份摘要」。</p>
+<h4 id="agentTurn：獨立-session-執行"><a href="#agentTurn：獨立-session-執行" class="headerlink" title="agentTurn：獨立 session 執行"></a>agentTurn：獨立 session 執行</h4><p>這個模式完全不同。它會啟動一個全新的、獨立的 session，讓 AI 在裡面執行任務，完成後把結果推送到你指定的頻道。跟主 session 完全隔離，互不干擾。</p>
+<p><strong>適用場景</strong>：獨立的、不需要對話上下文的任務，比如「抓取今天的股市數據做分析」、「從行事曆生成日報」。</p>
+<p>我的經驗法則：**90% 的情況你應該用 <code>agentTurn</code>**。只有真的需要延續當前對話語境的時候才用 <code>systemEvent</code>。</p>
+<h3 id="排程類型：三種選擇"><a href="#排程類型：三種選擇" class="headerlink" title="排程類型：三種選擇"></a>排程類型：三種選擇</h3><p>在決定好執行模式之後，還要選排程類型：</p>
+<ul>
+<li>**<code>at</code>**：一次性排程，指定一個時間點執行一次就結束。適合「明天早上八點提醒我開會」這種場景</li>
+<li>**<code>every</code>**：固定間隔執行，比如每 30 分鐘、每 2 小時。適合定期巡檢之類的任務</li>
+<li>**<code>cron</code>**：標準的 cron expression，最靈活。<code>0 5 * * 1-5</code> 代表每個工作日早上五點執行</li>
+</ul>
+<p>我大部分的排程都用 <code>cron</code> 類型，因為它最靈活，可以精確控制「每週幾的幾點」執行。</p>
+<h3 id="設定方式：config-yaml-範例"><a href="#設定方式：config-yaml-範例" class="headerlink" title="設定方式：config.yaml 範例"></a>設定方式：config.yaml 範例</h3><p>實際設定 cron job 是在 OpenClaw 的 config 裡面完成的。大致結構長這樣：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">cron:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">daily-standup</span></span><br><span class="line">    <span class="attr">schedule:</span> <span class="string">&quot;0 5 * * 1-5&quot;</span></span><br><span class="line">    <span class="attr">tz:</span> <span class="string">&quot;Asia/Taipei&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">agentTurn</span></span><br><span class="line">    <span class="attr">deliver:</span> <span class="string">&quot;discord:#work-channel&quot;</span></span><br><span class="line">    <span class="attr">prompt:</span> <span class="string">|</span></span><br><span class="line"><span class="string">      從 Google Calendar 抓取今天的行程，</span></span><br><span class="line"><span class="string">      從 Notion 抓取進行中的任務和昨天完成的項目，</span></span><br><span class="line"><span class="string">      用站會格式生成日報。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">investment-analysis</span></span><br><span class="line">    <span class="attr">schedule:</span> <span class="string">&quot;30 8 * * *&quot;</span></span><br><span class="line">    <span class="attr">tz:</span> <span class="string">&quot;Asia/Taipei&quot;</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">agentTurn</span></span><br><span class="line">    <span class="attr">deliver:</span> <span class="string">&quot;discord:#investment&quot;</span></span><br><span class="line">    <span class="attr">prompt:</span> <span class="string">|</span></span><br><span class="line"><span class="string">      查詢我的觀察清單中所有標的的最新數據，</span></span><br><span class="line"><span class="string">      產出一份簡短的每日投資分析。</span></span><br></pre></td></tr></table></figure>
+
+<p>這個設定檔看起來很直覺，但有幾個細節容易漏掉。第一，<code>tz</code> 一定要設，不然會用系統預設時區（後面會細說這個坑）。第二，<code>deliver</code> 要指定正確的頻道名稱或 ID，不然結果會不知道推到哪裡去。第三，<code>prompt</code> 要寫得足夠詳細，因為 agentTurn 是全新的 session，它不知道你平常習慣怎樣。</p>
+<p>我一開始設定的時候，prompt 只寫了一句「生成日報」，結果 AI 給出來的東西格式亂七八糟，完全不是我要的。後來花了好幾次迭代，把期望的格式、資料來源、注意事項全部寫清楚，品質才穩定下來。</p>
+<h3 id="實戰案例：我的五個日常-Cron-Job"><a href="#實戰案例：我的五個日常-Cron-Job" class="headerlink" title="實戰案例：我的五個日常 Cron Job"></a>實戰案例：我的五個日常 Cron Job</h3><h4 id="1-每日站會日報（05-00）"><a href="#1-每日站會日報（05-00）" class="headerlink" title="1. 每日站會日報（05:00）"></a>1. 每日站會日報（05:00）</h4><p>我每天早上五點（對，五點，因為我想醒來就看到結果）會跑一個 agentTurn，它的 prompt 大致是：</p>
+<blockquote>
+<p>從 Google Calendar 抓取今天的行程，從 Notion 抓取進行中的任務和昨天完成的項目，然後用站會格式（昨天做了什麼 &#x2F; 今天要做什麼 &#x2F; 有什麼 blocker）生成一份日報。</p>
+</blockquote>
+<p>AI 會自動呼叫對應的 skill 去抓資料，整理好之後推送到我 Discord 的工作頻道。等我七八點起來，打開 Discord 就看到一份整理好的日報了。</p>
+<p>這個排程幫我省了每天至少 15 分鐘的手動整理時間。一個月下來就是 7.5 小時。聽起來不多，但積累下來真的很可觀。而且重點不只是省時間——是省掉那個「早上一坐下來先花十分鐘整理待辦」的心理負擔。</p>
+<h4 id="2-投資分析推送（08-30）"><a href="#2-投資分析推送（08-30）" class="headerlink" title="2. 投資分析推送（08:30）"></a>2. 投資分析推送（08:30）</h4><p>早上八點半，另一個 agentTurn 會啟動。它會透過金融 API 抓取我關注的標的數據——包括股價變動、法人買賣超、融資融券變化、近期月營收等。</p>
+<p>AI 拿到數據之後會做一份簡短分析：哪些標的有異常波動、法人動向是否有變化、有沒有需要注意的技術面訊號。然後把結果推送到我的投資分析頻道。</p>
+<p>這個 cron job 的 prompt 花了我不少時間調教。一開始 AI 給的分析太籠統，後來我在 prompt 裡加了很多具體的分析框架和判斷條件，效果才慢慢變好。比如我會明確告訴它：「如果外資連續三天賣超超過一千張，特別標示出來。」這種具體的條件比「分析法人動向」有用太多。</p>
+<h4 id="3-每日記憶整理（04-00）"><a href="#3-每日記憶整理（04-00）" class="headerlink" title="3. 每日記憶整理（04:00）"></a>3. 每日記憶整理（04:00）</h4><p>凌晨四點，AI 會自動回顧前一天的所有對話紀錄，然後把重要的資訊整理寫入記憶檔案。這個是 OpenClaw 記憶系統的一部分，確保長期重要的資訊不會隨著 session 結束而消失。</p>
+<p>這個任務我用 <code>systemEvent</code> 而不是 <code>agentTurn</code>，因為它需要存取主 session 的完整記憶上下文，才能正確判斷哪些資訊值得留下來。</p>
+<h4 id="4-Heartbeat-主動關心（每-4-小時）"><a href="#4-Heartbeat-主動關心（每-4-小時）" class="headerlink" title="4. Heartbeat 主動關心（每 4 小時）"></a>4. Heartbeat 主動關心（每 4 小時）</h4><p>這是 OpenClaw 內建的 heartbeat 機制。它會定期觸發一個檢查：「現在的狀況怎樣？有沒有什麼該做但還沒做的事？使用者今天有沒有異常（比如平常這個時間都會上線，今天卻沒有）？」</p>
+<p>說實話，一開始我覺得這個功能有點多餘。但用了一陣子之後發現還蠻有用的——它會在我忘記某個重要截止日期的時候主動提醒，或者在發現系統異常（比如某個 API 連線失敗）時通知我。</p>
+<p>有一次我完全忘了一個重要的會議，是 AI 主動在 Discord 提醒我的。從那之後我就再也沒關過 heartbeat。</p>
+<h4 id="5-週報摘要（每週五-18-00）"><a href="#5-週報摘要（每週五-18-00）" class="headerlink" title="5. 週報摘要（每週五 18:00）"></a>5. 週報摘要（每週五 18:00）</h4><p>每週五下班前，一個 agentTurn 會把這一週的所有 daily memory 拉出來，濃縮成一份週報摘要。包括這週主要做了什麼、有哪些決策點、下週需要注意的事項。</p>
+<p>這份摘要對我每週的覆盤非常有幫助。人的記憶是不可靠的，一週過去之後你很可能已經忘了週二做的那個重要決定。有一份自動生成的週報，覆盤時就有素材可以參考。</p>
+<h3 id="踩坑經驗：血淚分享"><a href="#踩坑經驗：血淚分享" class="headerlink" title="踩坑經驗：血淚分享"></a>踩坑經驗：血淚分享</h3><p>用 cron job 的過程不是一帆風順的。以下是我踩過的幾個大坑：</p>
+<h4 id="坑-1：agentTurn-沒有上下文"><a href="#坑-1：agentTurn-沒有上下文" class="headerlink" title="坑 1：agentTurn 沒有上下文"></a>坑 1：agentTurn 沒有上下文</h4><p>這是最容易忘記的一點。agentTurn 啟動的是一個全新的 session，它不知道你之前聊了什麼、不知道你的慣用語、甚至不知道你最近在忙什麼——除非你在 prompt 裡明確告訴它。</p>
+<p>一開始我的 prompt 寫得很簡短，結果 AI 給出的東西完全不符合期望。後來我學到：<strong>agentTurn 的 prompt 要像在給一個新來的實習生交代任務一樣詳細。</strong> 目標是什麼、需要哪些資料、輸出格式是什麼、有什麼特殊要求——全部寫清楚。</p>
+<p>如果你的任務真的需要最近的對話脈絡，可以用 <code>contextMessages</code> 參數帶入一些近期訊息。但要注意 token 用量。</p>
+<h4 id="坑-2：時區問題"><a href="#坑-2：時區問題" class="headerlink" title="坑 2：時區問題"></a>坑 2：時區問題</h4><p>這個坑我踩得很痛。OpenClaw 的 cron job 有一個 <code>tz</code> 參數可以設定時區，但如果你忘了設，它會用系統預設時區。</p>
+<p>我的伺服器時區是 UTC，而我人在 UTC+8。結果本來應該早上八點執行的日報，凌晨十二點就跑了。半夜收到一封熱情洋溢的「早安！這是你今天的行程安排」，那個體驗非常超現實。</p>
+<p><strong>教訓：永遠顯式設定 <code>tz</code> 參數。</strong> 不要依賴系統預設值。</p>
+<h4 id="坑-3：排程衝突吃光-API-Quota"><a href="#坑-3：排程衝突吃光-API-Quota" class="headerlink" title="坑 3：排程衝突吃光 API Quota"></a>坑 3：排程衝突吃光 API Quota</h4><p>有一次我設了五個 cron job，其中三個都在早上五點整觸發。三個 agentTurn 同時啟動，三個 session 同時狂打 LLM API——然後我的 API rate limit 就爆了。</p>
+<p>解法很簡單：<strong>錯開排程時間</strong>。我現在把排程改成 05:00、05:10、05:20 這樣，避免同時觸發。看起來是小事，但遇到之前真的想不到。</p>
+<p>而且不只是 LLM API，如果你的 cron job 裡有打外部 API（像我的投資分析要打金融 API），同時觸發也可能觸碰到外部 API 的 rate limit。所以養成習慣：<strong>每個 cron job 之間至少間隔五到十分鐘。</strong></p>
+<h4 id="坑-4：systemEvent-vs-agentTurn-選錯"><a href="#坑-4：systemEvent-vs-agentTurn-選錯" class="headerlink" title="坑 4：systemEvent vs agentTurn 選錯"></a>坑 4：systemEvent vs agentTurn 選錯</h4><p>早期我很多任務都用 <code>systemEvent</code>，因為覺得「能看到上下文」比較好。但後來發現幾個問題：</p>
+<ol>
+<li>systemEvent 會打斷你正在進行的對話</li>
+<li>如果當時沒有 active session，systemEvent 的行為可能不符合預期</li>
+<li>多個 systemEvent 擠在同一個 session 裡，AI 可能會搞混優先順序</li>
+</ol>
+<p>現在我的原則是：<strong>除非任務明確需要延續主 session 的語境，否則一律用 agentTurn。</strong> 乾淨、獨立、不互相干擾。</p>
+<h4 id="坑-5：Prompt-裡沒有指定失敗行為"><a href="#坑-5：Prompt-裡沒有指定失敗行為" class="headerlink" title="坑 5：Prompt 裡沒有指定失敗行為"></a>坑 5：Prompt 裡沒有指定失敗行為</h4><p>這個是我後來才意識到的問題。如果 cron job 的任務失敗了（比如 API timeout、資料格式錯誤），AI 會怎麼做？預設行為可能是回一段很長的錯誤訊息到你的頻道，或者默默失敗什麼都不說。</p>
+<p>我現在的做法是在 prompt 裡加一段失敗處理指示，大概像這樣：</p>
+<blockquote>
+<p>如果任何 API 呼叫失敗或超時，不要重試超過兩次。如果最終還是失敗，推送一條簡短的失敗通知，包含錯誤原因，不要推送長篇大論的技術細節。</p>
+</blockquote>
+<p>這樣即使出問題，我收到的通知也是乾淨的，不會被一大堆 error stack 淹沒。</p>
+<h3 id="進階技巧"><a href="#進階技巧" class="headerlink" title="進階技巧"></a>進階技巧</h3><h4 id="deliver-參數：精準推送"><a href="#deliver-參數：精準推送" class="headerlink" title="deliver 參數：精準推送"></a>deliver 參數：精準推送</h4><p>agentTurn 的 <code>deliver</code> 參數可以指定結果要推送到哪個頻道。這個超好用。比如投資分析推送到投資頻道、工作日報推送到工作頻道，而不是全部混在一起。</p>
+<p>我甚至會根據任務結果的重要程度推送到不同頻道。比如日報是常規推送，但如果投資分析檢測到異常波動，就推送到一個高優先級的通知頻道。</p>
+<h4 id="善用-cron-expression"><a href="#善用-cron-expression" class="headerlink" title="善用 cron expression"></a>善用 cron expression</h4><p>如果你不熟悉 cron expression，推薦去 <a target="_blank" rel="noopener" href="https://crontab.guru/">crontab.guru</a> 測試。一些常用的：</p>
+<ul>
+<li><code>0 5 * * 1-5</code>：週一到五早上五點</li>
+<li><code>30 8 * * *</code>：每天早上八點半</li>
+<li><code>0 */4 * * *</code>：每四小時</li>
+<li><code>0 18 * * 5</code>：每週五下午六點</li>
+</ul>
+<h4 id="除錯技巧"><a href="#除錯技巧" class="headerlink" title="除錯技巧"></a>除錯技巧</h4><p>Cron job 出問題時，最有效的除錯方式是先用 <code>at</code> 類型設一個幾分鐘後的一次性排程，看它的輸出是不是符合預期。確認沒問題之後再改成定期排程。</p>
+<p>另一個技巧是在 prompt 最後加一句「在回覆的最後附上你使用了哪些工具和各自的執行結果摘要」。這樣你收到推送結果時，可以快速檢查每個步驟是否正常。相當於內建了一個 debug log。</p>
+<h4 id="成本控制"><a href="#成本控制" class="headerlink" title="成本控制"></a>成本控制</h4><p>每個 agentTurn 都是一次完整的 LLM 呼叫，是要花錢的。如果你設了十個每小時執行的 cron job，一天就是 240 次呼叫。加上每次呼叫裡面 agent 可能又呼叫了好幾次工具（每次工具呼叫都會產生新的 LLM turn），成本會比你想像的高。</p>
+<p>我的做法是：定期檢查每個 cron job 的實際用量，把不常用或 ROI 不高的排程頻率降低。比如某個分析報告我本來設每天跑，後來發現每週一次就夠了——一下子省了 6&#x2F;7 的成本。</p>
+<h3 id="結語：你的-AI-永遠不會忘記打卡"><a href="#結語：你的-AI-永遠不會忘記打卡" class="headerlink" title="結語：你的 AI 永遠不會忘記打卡"></a>結語：你的 AI 永遠不會忘記打卡</h3><p>設好 cron jobs 之後，最大的感受是：<strong>我真的多了一個助手。</strong></p>
+<p>它不是那種你要一直盯著、一直下指令的工具。它是那種你設好規則之後，就會自己默默做事的助手。你不需要每天早上花時間整理日報——它已經做好了。你不需要手動去查股票——分析已經推送到你的頻道了。你不需要擔心忘記某件事——heartbeat 會幫你記著。</p>
+<p>而且它永遠不會遲到、不會忘記、不會請假。（唯一的例外是你的伺服器掛了，但那是另一個問題。）</p>
+<p>如果你已經在用 OpenClaw 但還沒試過 cron jobs，我強烈建議你從一個簡單的每日日報開始。體驗過「醒來就看到 AI 自動做好的東西」之後，你就回不去了。</p>
+<p>自動化最大的價值不是節省時間，而是消除那些「我還有什麼事沒做」的焦慮。當你知道有一個不會忘事的助手在背後默默跑著，心裡那份安定感是很實在的。</p>
+<p>OpenClaw 文件裡有完整的 cron jobs 設定說明：<a target="_blank" rel="noopener" href="https://docs.openclaw.ai/">docs.openclaw.ai</a>。有問題也歡迎到 <a target="_blank" rel="noopener" href="https://discord.gg/clawd">Discord 社群</a> 討論。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/Cron/" rel="tag"># Cron</a>
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/%E6%8E%92%E7%A8%8B/" rel="tag"># 排程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020503/" rel="prev" title="打造個人 AI 投資分析團隊：用 LLM + 金融 API 實現自動化盯盤">
+      <i class="fa fa-chevron-left"></i> 打造個人 AI 投資分析團隊：用 LLM + 金融 API 實現自動化盯盤
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020504/" rel="next" title="讓 AI 當你的 PM：多層 Agent 角色分工實踐">
+      讓 AI 當你的 PM：多層 Agent 角色分工實踐 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A9%E7%A8%AE%E6%8E%92%E7%A8%8B%E6%A8%A1%E5%BC%8F%EF%BC%9A%E5%85%88%E6%90%9E%E6%B8%85%E6%A5%9A%E5%86%8D%E5%8B%95%E6%89%8B"><span class="nav-number">1.</span> <span class="nav-text">兩種排程模式：先搞清楚再動手</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#systemEvent%EF%BC%9A%E6%B3%A8%E5%85%A5%E4%B8%BB-session"><span class="nav-number">1.1.</span> <span class="nav-text">systemEvent：注入主 session</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#agentTurn%EF%BC%9A%E7%8D%A8%E7%AB%8B-session-%E5%9F%B7%E8%A1%8C"><span class="nav-number">1.2.</span> <span class="nav-text">agentTurn：獨立 session 執行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E7%A8%8B%E9%A1%9E%E5%9E%8B%EF%BC%9A%E4%B8%89%E7%A8%AE%E9%81%B8%E6%93%87"><span class="nav-number">2.</span> <span class="nav-text">排程類型：三種選擇</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A%E6%96%B9%E5%BC%8F%EF%BC%9Aconfig-yaml-%E7%AF%84%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">設定方式：config.yaml 範例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%A6%E6%88%B0%E6%A1%88%E4%BE%8B%EF%BC%9A%E6%88%91%E7%9A%84%E4%BA%94%E5%80%8B%E6%97%A5%E5%B8%B8-Cron-Job"><span class="nav-number">4.</span> <span class="nav-text">實戰案例：我的五個日常 Cron Job</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%AF%8F%E6%97%A5%E7%AB%99%E6%9C%83%E6%97%A5%E5%A0%B1%EF%BC%8805-00%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">1. 每日站會日報（05:00）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%8A%95%E8%B3%87%E5%88%86%E6%9E%90%E6%8E%A8%E9%80%81%EF%BC%8808-30%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">2. 投資分析推送（08:30）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%AF%8F%E6%97%A5%E8%A8%98%E6%86%B6%E6%95%B4%E7%90%86%EF%BC%8804-00%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">3. 每日記憶整理（04:00）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-Heartbeat-%E4%B8%BB%E5%8B%95%E9%97%9C%E5%BF%83%EF%BC%88%E6%AF%8F-4-%E5%B0%8F%E6%99%82%EF%BC%89"><span class="nav-number">4.4.</span> <span class="nav-text">4. Heartbeat 主動關心（每 4 小時）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E9%80%B1%E5%A0%B1%E6%91%98%E8%A6%81%EF%BC%88%E6%AF%8F%E9%80%B1%E4%BA%94-18-00%EF%BC%89"><span class="nav-number">4.5.</span> <span class="nav-text">5. 週報摘要（每週五 18:00）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B8%A9%E5%9D%91%E7%B6%93%E9%A9%97%EF%BC%9A%E8%A1%80%E6%B7%9A%E5%88%86%E4%BA%AB"><span class="nav-number">5.</span> <span class="nav-text">踩坑經驗：血淚分享</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%91-1%EF%BC%9AagentTurn-%E6%B2%92%E6%9C%89%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">5.1.</span> <span class="nav-text">坑 1：agentTurn 沒有上下文</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%91-2%EF%BC%9A%E6%99%82%E5%8D%80%E5%95%8F%E9%A1%8C"><span class="nav-number">5.2.</span> <span class="nav-text">坑 2：時區問題</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%91-3%EF%BC%9A%E6%8E%92%E7%A8%8B%E8%A1%9D%E7%AA%81%E5%90%83%E5%85%89-API-Quota"><span class="nav-number">5.3.</span> <span class="nav-text">坑 3：排程衝突吃光 API Quota</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%91-4%EF%BC%9AsystemEvent-vs-agentTurn-%E9%81%B8%E9%8C%AF"><span class="nav-number">5.4.</span> <span class="nav-text">坑 4：systemEvent vs agentTurn 選錯</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%91-5%EF%BC%9APrompt-%E8%A3%A1%E6%B2%92%E6%9C%89%E6%8C%87%E5%AE%9A%E5%A4%B1%E6%95%97%E8%A1%8C%E7%82%BA"><span class="nav-number">5.5.</span> <span class="nav-text">坑 5：Prompt 裡沒有指定失敗行為</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%B2%E9%9A%8E%E6%8A%80%E5%B7%A7"><span class="nav-number">6.</span> <span class="nav-text">進階技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#deliver-%E5%8F%83%E6%95%B8%EF%BC%9A%E7%B2%BE%E6%BA%96%E6%8E%A8%E9%80%81"><span class="nav-number">6.1.</span> <span class="nav-text">deliver 參數：精準推送</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%96%84%E7%94%A8-cron-expression"><span class="nav-number">6.2.</span> <span class="nav-text">善用 cron expression</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%99%A4%E9%8C%AF%E6%8A%80%E5%B7%A7"><span class="nav-number">6.3.</span> <span class="nav-text">除錯技巧</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%88%90%E6%9C%AC%E6%8E%A7%E5%88%B6"><span class="nav-number">6.4.</span> <span class="nav-text">成本控制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E%EF%BC%9A%E4%BD%A0%E7%9A%84-AI-%E6%B0%B8%E9%81%A0%E4%B8%8D%E6%9C%83%E5%BF%98%E8%A8%98%E6%89%93%E5%8D%A1"><span class="nav-number">7.</span> <span class="nav-text">結語：你的 AI 永遠不會忘記打卡</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

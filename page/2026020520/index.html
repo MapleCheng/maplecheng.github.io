@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="從實際專案經驗出發，探討 Monorepo 架構如何讓 AI coding agent 擁有完整的 context，實現更高效的跨 package 協作開發">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Monorepo 架構心得：為什麼它讓 AI 協作更順暢">
+<meta property="og:url" content="https://maplecheng.com/page/2026020520/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="從實際專案經驗出發，探討 Monorepo 架構如何讓 AI coding agent 擁有完整的 context，實現更高效的跨 package 協作開發">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-05T06:15:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Monorepo">
+<meta property="article:tag" content="Turborepo">
+<meta property="article:tag" content="pnpm">
+<meta property="article:tag" content="架構">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020520/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Monorepo 架構心得：為什麼它讓 AI 協作更順暢 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020520/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Monorepo 架構心得：為什麼它讓 AI 協作更順暢
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-05 14:15:00" itemprop="dateCreated datePublished" datetime="2026-02-05T14:15:00+08:00">2026-02-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">從實際專案經驗出發，探討 Monorepo 架構如何讓 AI coding agent 擁有完整的 context，實現更高效的跨 package 協作開發</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Monorepo vs Polyrepo 的辯論已經吵了很多年了。兩邊都有道理，選哪個通常取決於團隊規模、專案性質、個人偏好。我選 Monorepo 的理由一開始很單純 — 前後端經常要同步改動，放在一起比較方便。</p>
+<p>但最近我發現了一個新的理由，而且這個理由的權重越來越大：Monorepo 讓 AI coding agent 的工作效率高了不只一點。</p>
+<span id="more"></span>
+
+<h2 id="Monorepo-基本概念"><a href="#Monorepo-基本概念" class="headerlink" title="Monorepo 基本概念"></a>Monorepo 基本概念</h2><p>先快速講一下什麼是 Monorepo。</p>
+<p>簡單說就是把所有相關的 packages 放在同一個 Git repository 裡面。前端、後端、共用工具、腳本 — 全部在一個 repo。不是把所有 code 混在一起（那叫 monolith），而是在一個 repo 裡面用清楚的目錄結構來劃分不同的 packages，每個 package 有自己的 <code>package.json</code> 和獨立的職責。</p>
+<p>Monorepo 的優勢包括：共用 dependencies（不用每個 repo 各自裝一套）、共用 CI&#x2F;CD pipeline（一個 workflow 管全部）、共用 tooling（一套 linter 和 formatter 規則套用到所有 packages）。</p>
+<p>主流的 Monorepo 工具有幾個：<strong>pnpm workspace</strong> 處理依賴管理、<strong>Turborepo</strong> 處理 task 的排程和快取、<strong>Nx</strong> 功能更完整但學習曲線也更陡、<strong>Lerna</strong> 則是老牌工具但近年比較少新專案用了。我們團隊用的是 pnpm + Turborepo 的組合，輕量夠用。</p>
+<p>為什麼選這個組合？pnpm 的 symlink 機制讓 workspace 的 package 互相引用變得很自然，而且硬連結的設計省了很多磁碟空間。Turborepo 則是 task orchestration 做得最簡潔 — 設定檔少、概念直觀、效能也好。比起 Nx 那種「什麼都想管」的架構，Turborepo 的「你只需要告訴我 task 之間的依賴關係」更符合我的口味。</p>
+<h2 id="我的-Monorepo-結構"><a href="#我的-Monorepo-結構" class="headerlink" title="我的 Monorepo 結構"></a>我的 Monorepo 結構</h2><p>以我們目前在做的一個 TypeScript 全端專案為例（當然不能說是什麼專案），目錄結構大概長這樣：</p>
+<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">root/</span><br><span class="line">├── packages/</span><br><span class="line">│   ├── shared/      <span class="meta"># 共用型別、constants、utils</span></span><br><span class="line">│   ├── <span class="keyword">server</span>/      <span class="meta"># 後端 API（Express / Fastify）</span></span><br><span class="line">│   ├── <span class="keyword">client</span>/      <span class="meta"># 前端 UI（React）</span></span><br><span class="line">│   └── scripts/     <span class="meta"># 工具腳本（db migration、seed data 等）</span></span><br><span class="line">├── turbo.json</span><br><span class="line">├── pnpm-workspace.yaml</span><br><span class="line">├── tsconfig.base.json</span><br><span class="line">├── CLAUDE.md</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
+
+<p><code>packages/shared/</code> 是整個架構的核心。所有前後端共用的東西都放這裡 — TypeScript 的 interface 定義、enum、常數、utility functions。前後端都依賴這個 package，所以型別永遠是一致的。</p>
+<p>舉個具體的例子。假設有一個「訂單」的資料結構：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// packages/shared/src/types/order.ts</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">interface</span> <span class="title class_">Order</span> &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">customerId</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">items</span>: <span class="title class_">OrderItem</span>[];</span><br><span class="line">  <span class="attr">status</span>: <span class="title class_">OrderStatus</span>;</span><br><span class="line">  <span class="attr">createdAt</span>: <span class="title class_">Date</span>;</span><br><span class="line">  <span class="attr">updatedAt</span>: <span class="title class_">Date</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">interface</span> <span class="title class_">OrderItem</span> &#123;</span><br><span class="line">  <span class="attr">productId</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">quantity</span>: <span class="built_in">number</span>;</span><br><span class="line">  <span class="attr">unitPrice</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">enum</span> <span class="title class_">OrderStatus</span> &#123;</span><br><span class="line">  <span class="title class_">Draft</span> = <span class="string">&#x27;draft&#x27;</span>,</span><br><span class="line">  <span class="title class_">Confirmed</span> = <span class="string">&#x27;confirmed&#x27;</span>,</span><br><span class="line">  <span class="title class_">Shipped</span> = <span class="string">&#x27;shipped&#x27;</span>,</span><br><span class="line">  <span class="title class_">Delivered</span> = <span class="string">&#x27;delivered&#x27;</span>,</span><br><span class="line">  <span class="title class_">Cancelled</span> = <span class="string">&#x27;cancelled&#x27;</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>這個型別定義在 <code>shared</code> package 裡。Server 在回傳 API response 時用這個型別，Client 在接收和顯示時也用這個型別。如果有天要加一個新的 status（比如 <code>Processing</code>），只需要改 shared，TypeScript compiler 就會告訴你所有需要跟著改的地方。</p>
+<p><code>turbo.json</code> 定義了 task 的依賴關係和快取策略。比如 <code>build</code> 要先跑 <code>shared</code> 再跑 <code>server</code> 和 <code>client</code>，<code>test</code> 依賴 <code>build</code> 的結果。Turborepo 會根據這些定義自動決定執行順序和平行化。</p>
+<p><code>pnpm-workspace.yaml</code> 就很簡單：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">packages:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;packages/*&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>告訴 pnpm 哪些目錄是 workspace 的成員。</p>
+<h2 id="為什麼-Monorepo-讓-AI-更有效率"><a href="#為什麼-Monorepo-讓-AI-更有效率" class="headerlink" title="為什麼 Monorepo 讓 AI 更有效率"></a>為什麼 Monorepo 讓 AI 更有效率</h2><p>好，進入正題。為什麼我說 Monorepo 對 AI 友善？</p>
+<h3 id="1-完整的-context"><a href="#1-完整的-context" class="headerlink" title="1. 完整的 context"></a>1. 完整的 context</h3><p>這是最重要的一點。AI coding agent 在 Monorepo 裡工作時，可以一次看到前端和後端的 code。當它需要改一個 API endpoint 的時候，它同時能看到 client 端怎麼呼叫這個 API、用了什麼型別、UI 上怎麼呈現回傳的資料。</p>
+<p>結果就是：AI 改 API 的時候會同步改 client 的呼叫方式和型別定義。不會出現「API 改了但 client 沒跟上」的情況。</p>
+<p>在 Polyrepo 的架構下，AI 只能看到一個 repo 的 context。改 server repo 的時候不知道 client 怎麼用，改 client 的時候不知道 server 回什麼。產出的 code 很容易對不上。</p>
+<h3 id="2-型別共用"><a href="#2-型別共用" class="headerlink" title="2. 型別共用"></a>2. 型別共用</h3><p><code>shared</code> package 裡的 interface 是前後端的 single source of truth。當 AI 需要修改某個資料結構的時候，它改 <code>shared</code> 的型別定義，然後 TypeScript compiler 會自動告訴它所有使用這個型別的地方需要跟著改。</p>
+<p>這個回饋循環對 AI 來說太重要了。它不用猜「改了這個型別之後哪些地方會壞」，compiler 直接告訴它。然後 AI 就可以把所有相關的改動一次處理完。</p>
+<p>舉個實際的例子。有一次我讓 AI 在 Order 裡加一個 <code>discount</code> 欄位。它做的事情是：</p>
+<ol>
+<li>在 <code>shared/types/order.ts</code> 加上 <code>discount?: number</code></li>
+<li>跑 <code>turbo build</code>，看到 server 端有幾個地方的 type check 報錯</li>
+<li>去那些地方補上 discount 的處理邏輯</li>
+<li>跑 <code>turbo build</code> 確認 server 沒問題</li>
+<li>client 端的 type 自動更新（因為依賴 shared），但 UI 還沒顯示這個欄位</li>
+<li>在訂單詳情頁加上 discount 的顯示</li>
+<li>全部 build 通過，提 PR</li>
+</ol>
+<p>整個過程 AI 自己完成，我只需要 review。如果是 Polyrepo，步驟 2-4 和 5-6 會分成兩個 repo，AI 做不到這種「跨 repo 的改動追蹤」。</p>
+<h3 id="3-不用切-repo"><a href="#3-不用切-repo" class="headerlink" title="3. 不用切 repo"></a>3. 不用切 repo</h3><p>Polyrepo 的一個根本性問題是：AI 的 context window 是有限的。如果前後端分開兩個 repo，AI 要處理一個涉及前後端的 feature 時，它要嘛在兩個 repo 之間切換（很多工具不支援），要嘛只處理其中一端（產出不完整的改動）。</p>
+<p>Monorepo 沒有這個問題。一個 repo 就是全部。AI 開了這個 repo，所有需要的 code 都在手邊。</p>
+<h3 id="4-統一的-coding-conventions"><a href="#4-統一的-coding-conventions" class="headerlink" title="4. 統一的 coding conventions"></a>4. 統一的 coding conventions</h3><p>Monorepo 的一個天然優勢是所有 packages 共用同一套 ESLint 規則、同一套 Prettier 設定、同一套 tsconfig。AI 學一次你的 coding style，就能套用到整個 repo 的所有 packages。</p>
+<p>Polyrepo 的話，每個 repo 的設定可能有微妙的差異（是的，即使你覺得「都一樣」，實際上總會有一些不同步的地方）。AI 在不同 repo 之間切換時，可能會把 A repo 的風格帶到 B repo。</p>
+<h3 id="5-原子化-commit"><a href="#5-原子化-commit" class="headerlink" title="5. 原子化 commit"></a>5. 原子化 commit</h3><p>Monorepo 讓前後端的改動可以在同一個 PR 裡完成。AI 做一個完整的 feature — 後端 API + 前端 UI + 共用型別 — 全部在一個 commit 或 PR 裡。Reviewer 可以一次看到完整的改動，而不是在三個 repo 的三個 PR 之間跳來跳去。</p>
+<p>這對 code review 的效率也是很大的提升。你可以在同一個 PR 裡確認 API 的 response 格式和 client 的使用方式是不是匹配的，不用靠想像力。</p>
+<h2 id="搭配-AI-的-Monorepo-最佳實踐"><a href="#搭配-AI-的-Monorepo-最佳實踐" class="headerlink" title="搭配 AI 的 Monorepo 最佳實踐"></a>搭配 AI 的 Monorepo 最佳實踐</h2><p>光是用 Monorepo 還不夠，有一些實踐可以讓 AI 在 Monorepo 裡工作得更順暢。</p>
+<p><strong>根目錄放 onboarding 文件</strong>。我們在根目錄放了一份 <code>CLAUDE.md</code>（你也可以叫 <code>AGENTS.md</code> 或其他名字），描述整個 repo 的架構、packages 之間的關係、整體的技術決策。這份文件的目標讀者就是 AI — 讓它讀完就能理解這個 repo 的全貌。</p>
+<p>內容大概包括：</p>
+<ul>
+<li>架構概覽（哪些 packages、各自的職責）</li>
+<li>技術棧（用了什麼框架、什麼工具）</li>
+<li>Coding conventions（命名規則、檔案結構、常見 pattern）</li>
+<li>地雷區域（哪些地方不要亂改、哪些地方有已知的技術債）</li>
+<li>Build 和 test 指令</li>
+</ul>
+<p>一份簡化的 <code>CLAUDE.md</code> 範例：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># Project Overview</span></span><br><span class="line"></span><br><span class="line">This is a TypeScript monorepo with pnpm + Turborepo.</span><br><span class="line"></span><br><span class="line"><span class="section">## Packages</span></span><br><span class="line"><span class="bullet">-</span> <span class="code">`packages/shared`</span>: Common types, utils, constants</span><br><span class="line"><span class="bullet">-</span> <span class="code">`packages/server`</span>: Express API server</span><br><span class="line"><span class="bullet">-</span> <span class="code">`packages/client`</span>: React SPA</span><br><span class="line"></span><br><span class="line"><span class="section">## Commands</span></span><br><span class="line"><span class="bullet">-</span> <span class="code">`pnpm install`</span>: Install dependencies</span><br><span class="line"><span class="bullet">-</span> <span class="code">`turbo build`</span>: Build all packages</span><br><span class="line"><span class="bullet">-</span> <span class="code">`turbo test`</span>: Run tests</span><br><span class="line"><span class="bullet">-</span> <span class="code">`turbo dev`</span>: Start dev servers</span><br><span class="line"></span><br><span class="line"><span class="section">## Conventions</span></span><br><span class="line"><span class="bullet">-</span> Use named exports, not default exports</span><br><span class="line"><span class="bullet">-</span> API endpoints: <span class="code">`/api/v1/&#123;resource&#125;`</span></span><br><span class="line"><span class="bullet">-</span> Component files: PascalCase (e.g., <span class="code">`OrderList.tsx`</span>)</span><br><span class="line"><span class="bullet">-</span> Util files: camelCase (e.g., <span class="code">`formatDate.ts`</span>)</span><br><span class="line"></span><br><span class="line"><span class="section">## Dependencies between packages</span></span><br><span class="line">shared → (no deps)</span><br><span class="line">server → shared</span><br><span class="line">client → shared</span><br></pre></td></tr></table></figure>
+
+<p><strong>每個 package 也放自己的 README</strong>。根目錄的文件描述全貌，但每個 package 的細節放在各自的 README 裡。AI 可以按需讀取 — 如果只改 server 的 code，就讀 server 的 README；如果涉及跨 package 的改動，再去讀其他 package 的。不用一次把整個 repo 的所有文件都讀完。</p>
+<p><strong>shared types 是核心</strong>。把所有前後端共用的型別定義集中在 <code>shared</code> package，而且要嚴格執行。不要在 server 裡偷偷定義一個跟 shared 「差不多」的型別，也不要在 client 裡用 <code>any</code> 繞過型別檢查。shared types 是 AI 理解你的資料模型的入口，如果這裡混亂了，AI 的產出品質會直接下降。</p>
+<p><strong>Build pipeline 要可本地跑</strong>。<code>turbo build</code> 和 <code>turbo test</code> 要能在 local（或 DevContainer）裡直接跑。AI 改完 code 之後可以馬上驗證，不用等 CI。快速的回饋循環是 AI 高效工作的關鍵。</p>
+<p><strong>依賴關係要清晰</strong>。在 <code>turbo.json</code> 裡定義好 task 之間的 <code>dependsOn</code>。AI 需要知道：build shared → build server → build client 的順序。如果依賴關係沒定義清楚，AI 可能會在 shared 還沒 build 的情況下去 build client，然後看到一堆莫名其妙的 error。</p>
+<p>一份實際的 <code>turbo.json</code> 設定：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;$schema&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://turbo.build/schema.json&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;tasks&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;build&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;dependsOn&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;^build&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;outputs&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;dist/**&quot;</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;test&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;dependsOn&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;build&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;outputs&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;dev&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;cache&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;persistent&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;lint&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;outputs&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>&quot;^build&quot;</code> 表示「先 build 我依賴的 packages」。這樣 Turborepo 就會自動算出正確的 build 順序。</p>
+<h2 id="Monorepo-的痛點和解法"><a href="#Monorepo-的痛點和解法" class="headerlink" title="Monorepo 的痛點和解法"></a>Monorepo 的痛點和解法</h2><p>Monorepo 不是沒有缺點。誠實說，有些痛點還蠻煩的。</p>
+<p><strong>CI&#x2F;CD 速度</strong> 是最常被抱怨的問題。所有 packages 在同一個 repo，CI 要跑全部嗎？如果每次 push 都重新 build 和 test 所有 packages，CI 的時間會越來越長。</p>
+<p>解法是用 Turborepo 的 remote cache。Turborepo 會根據檔案的 hash 判斷哪些 packages 有改動，只 rebuild 有變的部分。搭配 remote cache，甚至可以跨 CI run 共用 cache — 如果某個 package 在上一次 CI 已經 build 過，而且 code 沒變，就直接用 cache。實際用下來，CI 時間從十幾分鐘降到了三四分鐘。</p>
+<p>設定 remote cache 的方式（用 Vercel 的服務）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npx turbo login</span><br><span class="line">npx turbo <span class="built_in">link</span></span><br></pre></td></tr></table></figure>
+
+<p>然後在 CI 裡設定 <code>TURBO_TOKEN</code> 和 <code>TURBO_TEAM</code> 環境變數就可以了。</p>
+<p><strong>Repo 太大</strong>。隨著時間推移，repo 會越來越大。Git clone 的時間變長、IDE 的索引時間變長。可以用 <code>git sparse-checkout</code> 只 checkout 你需要的 packages，或是善用 <code>.gitignore</code> 排除不必要的檔案。但老實說，以我們的規模（幾個 packages、不到十萬行 code），還沒遇到 repo 太大的問題。大型開源專案那種百萬行 code 的 Monorepo 才會比較明顯。</p>
+<p><strong>IDE 效能</strong>。VS Code 在大型 TypeScript Monorepo 裡的語言服務可能會變慢 — IntelliSense 反應遲鈍、型別檢查跑很久。解法是用 TypeScript 的 project references（<code>tsconfig.json</code> 裡的 <code>references</code> 欄位），讓 TypeScript compiler 可以增量編譯，不用每次都重新分析整個 repo。</p>
+<p><strong>權限控制</strong>。如果不同的 packages 由不同的團隊負責，你可能需要控制誰能改什麼。GitHub 的 <code>CODEOWNERS</code> 檔案可以做到這點 — 定義哪些目錄的改動需要哪些人 review。不過以小團隊來說，這個問題不太嚴重，大家都會改到所有地方（笑）。</p>
+<h2 id="從-Polyrepo-遷移到-Monorepo"><a href="#從-Polyrepo-遷移到-Monorepo" class="headerlink" title="從 Polyrepo 遷移到 Monorepo"></a>從 Polyrepo 遷移到 Monorepo</h2><p>如果你現有的專案是 Polyrepo，想遷移到 Monorepo，這裡分享一個實際的遷移經驗。</p>
+<p><strong>第一步：選一個「主 repo」</strong>。通常是後端或是最活躍的那個 repo。在這個 repo 裡建立 <code>packages/</code> 目錄結構，把原本的 code 移進去（比如 <code>packages/server/</code>）。</p>
+<p><strong>第二步：用 <code>git subtree</code> 合併其他 repo</strong>。這樣可以保留完整的 git history。命令大概是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git subtree add --prefix=packages/client git@github.com:your-org/client-repo.git main</span><br></pre></td></tr></table></figure>
+
+<p><strong>第三步：建立 shared package</strong>。把原本分散在 server 和 client 裡的共用型別抽出來。這一步通常最花時間，因為你會發現兩邊的型別定義「差不多但不完全一樣」，需要決定以哪邊為準。</p>
+<p><strong>第四步：設定 workspace 和 Turborepo</strong>。加上 <code>pnpm-workspace.yaml</code>、<code>turbo.json</code>、根目錄的 <code>package.json</code>。</p>
+<p><strong>第五步：調整 import path</strong>。原本 client 裡寫 <code>import { Order } from &#39;../types&#39;</code> 的地方，改成 <code>import { Order } from &#39;@your-org/shared&#39;</code>。這步驟很機械化，但很容易漏。建議用 search &amp; replace 一次處理，然後跑 build 看哪裡還有錯。</p>
+<p><strong>第六步：更新 CI&#x2F;CD</strong>。原本兩個 repo 各自的 CI workflow 要合併成一個。</p>
+<p>整個遷移大概花了我們一週的時間（包括處理 merge conflict 和修正 type error）。遷移完的第一個感覺是「終於不用在兩個 repo 之間切來切去了」。</p>
+<h2 id="和-Polyrepo-的實際比較"><a href="#和-Polyrepo-的實際比較" class="headerlink" title="和 Polyrepo 的實際比較"></a>和 Polyrepo 的實際比較</h2><p>最後來做個比較，用列表的方式比較清楚：</p>
+<ul>
+<li><strong>Context 完整度</strong>：Monorepo 高，AI 可以看到所有 packages 的 code &#x2F; Polyrepo 低，AI 只能看到目前所在的 repo</li>
+<li><strong>型別同步</strong>：Monorepo 自動，改 shared types 全 repo 立刻生效 &#x2F; Polyrepo 要手動發 npm 版本，client 要更新依賴才能拿到新型別</li>
+<li><strong>AI 改動範圍</strong>：Monorepo 可以跨 package 做完整 feature &#x2F; Polyrepo 限制在單一 repo，跨 repo 的改動需要人工協調</li>
+<li><strong>CI 複雜度</strong>：Monorepo 需要 task pipeline 工具（Turborepo&#x2F;Nx）&#x2F; Polyrepo 各 repo 獨立，比較簡單</li>
+<li><strong>初始設定</strong>：Monorepo 比較高，需要設定 workspace、turbo、shared packages &#x2F; Polyrepo 低，各 repo 獨立</li>
+<li><strong>PR Review</strong>：Monorepo 可以在一個 PR 看到完整改動 &#x2F; Polyrepo 要在多個 repo 的 PR 之間跳來跳去</li>
+<li><strong>版本管理</strong>：Monorepo 所有 packages 同步演進 &#x2F; Polyrepo 各自版本獨立，但同步成本高</li>
+</ul>
+<p>Polyrepo 在某些場景下仍然是合理的選擇 — 比如 packages 之間真的完全獨立、不同團隊不同節奏、或是 repo 規模大到 Monorepo 工具撐不住。但對於前後端緊密耦合的專案（大多數的全端 web app 都是），Monorepo 的優勢是很明顯的。</p>
+<p>再加上 AI 協作這個維度，Monorepo 的「完整 context」優勢就更重要了。</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>Monorepo 不是萬能的。它有學習曲線、有工具設定的成本、有些場景不適用。</p>
+<p>但在 AI 參與開發的時代，「讓 AI 能看到全貌」這個優勢變得越來越重要。當 AI 可以在一個 repo 裡看到前端、後端、共用型別、build pipeline、coding conventions — 它的產出品質和效率會遠高於只能看到片段的情況。</p>
+<p>如果你的專案前後端經常要同步改動（老實說，大部分 web app 都是這樣），如果你的團隊正在開始使用 AI coding agent，如果你希望 AI 能做出完整的 feature 而不是片段的 code — 認真考慮一下 Monorepo 吧。</p>
+<p>初始設定確實要花點時間。但這個投資回報率，在 AI 時代只會越來越高。</p>
+<p>用一句話總結：你讓 AI 看到的 context 越完整，它給你的產出就越好。Monorepo 就是讓 AI 看到全貌最直接的方式。而且這個道理不只適用於 AI — 對人類開發者來說，能在一個地方看到所有相關的 code，一樣會讓工作更順暢。Monorepo 的好處是普遍的，只是 AI 讓這個好處變得更明顯而已。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/Monorepo/" rel="tag"># Monorepo</a>
+              <a href="/tags/%E6%9E%B6%E6%A7%8B/" rel="tag"># 架構</a>
+              <a href="/tags/pnpm/" rel="tag"># pnpm</a>
+              <a href="/tags/Turborepo/" rel="tag"># Turborepo</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020519/" rel="prev" title="DevContainer 實戰：打造 AI 友善的開發環境">
+      <i class="fa fa-chevron-left"></i> DevContainer 實戰：打造 AI 友善的開發環境
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020521/" rel="next" title="一個早上，AI 幫我寫了 20 篇部落格：我學到的事">
+      一個早上，AI 幫我寫了 20 篇部落格：我學到的事 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Monorepo-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">Monorepo 基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E7%9A%84-Monorepo-%E7%B5%90%E6%A7%8B"><span class="nav-number">2.</span> <span class="nav-text">我的 Monorepo 結構</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC-Monorepo-%E8%AE%93-AI-%E6%9B%B4%E6%9C%89%E6%95%88%E7%8E%87"><span class="nav-number">3.</span> <span class="nav-text">為什麼 Monorepo 讓 AI 更有效率</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%8C%E6%95%B4%E7%9A%84-context"><span class="nav-number">3.1.</span> <span class="nav-text">1. 完整的 context</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%9E%8B%E5%88%A5%E5%85%B1%E7%94%A8"><span class="nav-number">3.2.</span> <span class="nav-text">2. 型別共用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%B8%8D%E7%94%A8%E5%88%87-repo"><span class="nav-number">3.3.</span> <span class="nav-text">3. 不用切 repo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%B5%B1%E4%B8%80%E7%9A%84-coding-conventions"><span class="nav-number">3.4.</span> <span class="nav-text">4. 統一的 coding conventions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%8E%9F%E5%AD%90%E5%8C%96-commit"><span class="nav-number">3.5.</span> <span class="nav-text">5. 原子化 commit</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%AD%E9%85%8D-AI-%E7%9A%84-Monorepo-%E6%9C%80%E4%BD%B3%E5%AF%A6%E8%B8%90"><span class="nav-number">4.</span> <span class="nav-text">搭配 AI 的 Monorepo 最佳實踐</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Monorepo-%E7%9A%84%E7%97%9B%E9%BB%9E%E5%92%8C%E8%A7%A3%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">Monorepo 的痛點和解法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%9E-Polyrepo-%E9%81%B7%E7%A7%BB%E5%88%B0-Monorepo"><span class="nav-number">6.</span> <span class="nav-text">從 Polyrepo 遷移到 Monorepo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%92%8C-Polyrepo-%E7%9A%84%E5%AF%A6%E9%9A%9B%E6%AF%94%E8%BC%83"><span class="nav-number">7.</span> <span class="nav-text">和 Polyrepo 的實際比較</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">8.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

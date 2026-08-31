@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="LLM 最大的痛點就是沒有記憶。這篇分享 OpenClaw 如何用三層記憶架構解決這個問題，以及我在設計和維護 AI 記憶系統過程中學到的經驗和踩過的坑。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="打造 AI 的長期記憶：OpenClaw Memory System 設計心得">
+<meta property="og:url" content="https://maplecheng.com/page/2026020507/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="LLM 最大的痛點就是沒有記憶。這篇分享 OpenClaw 如何用三層記憶架構解決這個問題，以及我在設計和維護 AI 記憶系統過程中學到的經驗和踩過的坑。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-05T03:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.339Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Memory">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="知識管理">
+<meta property="article:tag" content="記憶系統">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020507/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>打造 AI 的長期記憶：OpenClaw Memory System 設計心得 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020507/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          打造 AI 的長期記憶：OpenClaw Memory System 設計心得
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-05 11:00:00" itemprop="dateCreated datePublished" datetime="2026-02-05T11:00:00+08:00">2026-02-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">LLM 最大的痛點就是沒有記憶。這篇分享 OpenClaw 如何用三層記憶架構解決這個問題，以及我在設計和維護 AI 記憶系統過程中學到的經驗和踩過的坑。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>「你昨天才跟我說過你不喜歡吃香菜，怎麼今天又推薦我香菜料理了？」</p>
+<p>如果你常用 AI 助理，一定遇過這種讓人翻白眼的情境。不管你用的是 ChatGPT、Claude 還是其他 LLM 服務，每次開新對話都是一張白紙。你得重新介紹自己、重新解釋背景、重新說明偏好。這不是「助理」，這是每天換一個新的實習生。</p>
+<p>這大概是驅動我認真研究 AI 記憶系統的最大動力。而 <a target="_blank" rel="noopener" href="https://github.com/openclaw/openclaw">OpenClaw</a> 的 Memory System 是我目前看過設計得最實用的解法之一。用了幾個月之後，我想分享一些設計心得和踩坑經驗。</p>
+<span id="more"></span>
+
+<h3 id="為什麼-LLM-原生的記憶不夠用？"><a href="#為什麼-LLM-原生的記憶不夠用？" class="headerlink" title="為什麼 LLM 原生的記憶不夠用？"></a>為什麼 LLM 原生的記憶不夠用？</h3><p>先釐清一個技術背景：LLM 本身沒有「記憶」。它有的是 context window——每次對話時餵進去的文字量。對話越長，context 越滿，最後超出限制就得截斷或壓縮。</p>
+<p>一些平台推出了 memory 功能，讓 AI「記住」跨對話的資訊。但實際體驗下來，那些記憶系統通常很淺——它可能記得你的名字和職業，但不會記得你上週三跟它討論的那個架構決策細節。</p>
+<p>更根本的問題是：<strong>你對記憶的控制權很低。</strong> 它記了什麼、怎麼組織、什麼時候會忘記、哪些資訊會被優先想起——這些你幾乎無法控制。</p>
+<p>OpenClaw 的做法完全不同。它把記憶系統建立在<strong>純文字檔案</strong>之上，給你完整的控制權。你隨時可以打開檔案看 AI 記了什麼、手動編輯不對的地方、刪掉過時的內容。這種透明度在其他 AI 記憶系統裡幾乎找不到。</p>
+<h3 id="三層記憶架構"><a href="#三層記憶架構" class="headerlink" title="三層記憶架構"></a>三層記憶架構</h3><p>OpenClaw 的記憶系統有三個層次，各自扮演不同的角色。我用一個比喻來說明：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            graph TB
+    subgraph "第一層：身份證（每次載入）"
+        A[SOUL.md] 
+        B[USER.md]
+    end
+    subgraph "第二層：筆記本（精煉長期記憶）"
+        C[MEMORY.md]
+    end
+    subgraph "第三層：日記（每日原始紀錄）"
+        D["memory/2026-02-09.md"]
+        E["memory/2026-02-10.md"]
+        F["..."]
+    end
+    D -.->|定期蒸餾| C
+    E -.->|定期蒸餾| C
+    G["🔍 memory_search<br/>語意搜尋"] --> D
+    G --> E
+    G --> C
+          </pre>
+
+<h4 id="第一層：Workspace-Files（身份證）"><a href="#第一層：Workspace-Files（身份證）" class="headerlink" title="第一層：Workspace Files（身份證）"></a>第一層：Workspace Files（身份證）</h4><p>包括 <code>SOUL.md</code>、<code>USER.md</code>、<code>IDENTITY.md</code> 等核心檔案。這些檔案<strong>每次 session 啟動都會載入</strong>，定義了 AI 最基本的設定：</p>
+<ul>
+<li><strong>SOUL.md</strong>：AI 的人格和行為準則。它是誰、怎麼說話、什麼該做什麼不該做</li>
+<li><strong>USER.md</strong>：使用者的基本資訊。你是誰、做什麼、有什麼偏好</li>
+<li><strong>IDENTITY.md</strong>：AI 的身份標識</li>
+</ul>
+<p>這些就像一個人的「身份證」——不管什麼情境，這些基本資料都隨身攜帶。你不需要每次見面都重新自我介紹。</p>
+<h4 id="第二層：MEMORY-md（筆記本）"><a href="#第二層：MEMORY-md（筆記本）" class="headerlink" title="第二層：MEMORY.md（筆記本）"></a>第二層：MEMORY.md（筆記本）</h4><p>這是精煉過的長期記憶，像是 AI 的「筆記本」。裡面放的是經過整理、仍然有效的重要資訊。比如：</p>
+<ul>
+<li>你最近在忙的專案及其現況</li>
+<li>過去做的重要決策和原因</li>
+<li>你提過的偏好和習慣</li>
+<li>之前踩過的坑、學到的教訓</li>
+</ul>
+<p>MEMORY.md 不是什麼都放的垃圾場。它是<strong>精煉過的精華</strong>——只有持續相關的資訊才應該留在裡面。過時的內容要定期清理掉。</p>
+<h4 id="第三層：Daily-Memory（日記）"><a href="#第三層：Daily-Memory（日記）" class="headerlink" title="第三層：Daily Memory（日記）"></a>第三層：Daily Memory（日記）</h4><p><code>memory/YYYY-MM-DD.md</code> 格式的每日記錄，像是 AI 的「日記」。每天一個檔案，記錄當天對話中的重要事項。</p>
+<p>跟 MEMORY.md 不同，daily memory 記的是原始的、細粒度的資訊。哪個任務完成了、討論了什麼決策、遇到了什麼問題——都是未經過度整理的第一手紀錄。</p>
+<h3 id="語意搜尋：memory-search"><a href="#語意搜尋：memory-search" class="headerlink" title="語意搜尋：memory_search"></a>語意搜尋：memory_search</h3><p>除了靜態的檔案層級，OpenClaw 還提供 <code>memory_search</code> 工具，讓 AI 用自然語言搜尋過去的記憶。</p>
+<p>這比 grep 好用太多了。你不需要記得精確的用詞。問「上次我們討論資料庫遷移是什麼時候？」，memory_search 可以找到相關的段落，即使原文用的是「DB migration」或「搬資料庫」。</p>
+<p>不過語意搜尋也不是完美的。它偶爾會找到語意相近但其實不相關的結果，也可能漏掉用詞差異很大但確實相關的段落。我的經驗是：搜尋品質跟你 daily memory 寫得好不好有很大關係。如果每天的紀錄都是結構清晰、有明確標題的，搜尋結果就會好很多。</p>
+<h3 id="實際運作流程"><a href="#實際運作流程" class="headerlink" title="實際運作流程"></a>實際運作流程</h3><p>了解架構之後，來看看實際上 AI 是怎麼使用這套記憶系統的。</p>
+<h4 id="Session-啟動時"><a href="#Session-啟動時" class="headerlink" title="Session 啟動時"></a>Session 啟動時</h4><p>每次新 session 開始，OpenClaw 會依序載入：</p>
+<ol>
+<li><code>SOUL.md</code> → 確定自己是誰、怎麼行為</li>
+<li><code>USER.md</code> → 確定對方是誰</li>
+<li>今天和昨天的 <code>memory/YYYY-MM-DD.md</code> → 知道最近發生了什麼</li>
+<li><code>MEMORY.md</code> → 載入長期重要資訊</li>
+</ol>
+<p>這個載入順序是有講究的。SOUL 和 USER 是最基本的，所以先載入。Daily memory 載最近兩天的，因為大部分問題都跟近期有關。MEMORY.md 放最後，作為長期知識的補充。</p>
+<p>這裡有個 token 經濟學的考量：所有這些檔案加起來不能太大，不然光是載入記憶就吃掉太多 context window，留給實際對話的空間就不夠了。我自己的經驗是，全部加起來控制在三到五千字以內是比較好的平衡點。</p>
+<h4 id="回答有關過去的問題時"><a href="#回答有關過去的問題時" class="headerlink" title="回答有關過去的問題時"></a>回答有關過去的問題時</h4><p>當你問 AI 一個跟過去有關的問題，比如「上個月那個效能問題最後怎麼解決的？」，AI 的處理流程是：</p>
+<ol>
+<li>先用 <code>memory_search</code> 搜尋相關的記憶段落</li>
+<li>從搜尋結果中拉出完整的上下文（<code>memory_get</code>）</li>
+<li>結合當前載入的記憶，組成完整的回答</li>
+</ol>
+<p>因為有語意搜尋，AI 不需要把所有記憶都載入 context window。它可以按需查找，大幅節省 token 用量。</p>
+<h4 id="Session-結束或-context-壓縮前"><a href="#Session-結束或-context-壓縮前" class="headerlink" title="Session 結束或 context 壓縮前"></a>Session 結束或 context 壓縮前</h4><p>當一個 session 結束、或者 context window 快滿需要壓縮的時候，AI 會自動把重要的資訊寫入當天的 daily memory。</p>
+<p>這個「自動歸檔」的行為非常關鍵。它確保了即使 session 被中斷或 context 被壓縮，重要的資訊不會遺失。</p>
+<h3 id="設計哲學：Text-Brain"><a href="#設計哲學：Text-Brain" class="headerlink" title="設計哲學：Text &gt; Brain"></a>設計哲學：Text &gt; Brain</h3><p>OpenClaw 記憶系統的核心哲學可以用一句話概括：<strong>Text &gt; Brain。</strong></p>
+<p>意思是：所有重要的東西都要寫下來。不要依賴 AI 的 context window 來「記住」東西，因為 context 隨時可能被清掉。只有寫進檔案的東西才是安全的。</p>
+<p>這個哲學其實跟人類的知識管理一模一樣。你不會把所有重要的事情都記在腦子裡——你會寫筆記、建文件、做紀錄。AI 也應該一樣。</p>
+<p>另一個設計哲學是<strong>分層記憶</strong>。不是所有資訊都同等重要：</p>
+<ul>
+<li>「我們專案用的是 PostgreSQL 16」→ 這是長期有效的事實，放 MEMORY.md</li>
+<li>「今天花了三小時 debug 一個 N+1 query 問題」→ 這是當日事件，放 daily memory</li>
+<li>「你喜歡直接給結論，不要先講一堆前情提要」→ 這是使用者偏好，放 USER.md</li>
+</ul>
+<p>把對的資訊放在對的層級，記憶系統才能高效運作。</p>
+<h3 id="我的踩坑經驗"><a href="#我的踩坑經驗" class="headerlink" title="我的踩坑經驗"></a>我的踩坑經驗</h3><h4 id="坑-1：MEMORY-md-無限膨脹"><a href="#坑-1：MEMORY-md-無限膨脹" class="headerlink" title="坑 1：MEMORY.md 無限膨脹"></a>坑 1：MEMORY.md 無限膨脹</h4><p>一開始我讓 AI 自由地往 MEMORY.md 寫東西，結果三個月後那個檔案已經肥到快破萬字了。載入時就吃掉一大堆 token，而且裡面一堆已經過時的資訊。</p>
+<p><strong>解法：定期 prune。</strong> 我現在大約每兩週會讓 AI 做一次 MEMORY.md 的大掃除——把已經不相關的項目移除，把可以合併的資訊濃縮。有點像整理你的筆記 app，過時的備忘錄就該刪掉。</p>
+<p>我自己的經驗是 MEMORY.md 控制在兩三千字以內效果最好。太短會遺漏重要資訊，太長會浪費 token 而且 AI 反而不容易找到關鍵內容。</p>
+<h4 id="坑-2：Daily-Memory-格式不一致"><a href="#坑-2：Daily-Memory-格式不一致" class="headerlink" title="坑 2：Daily Memory 格式不一致"></a>坑 2：Daily Memory 格式不一致</h4><p>這個問題一開始不明顯，但用了一兩個月就會浮現。如果你沒有給 AI 一個 daily memory 的寫作模板，它每天寫的格式可能都不一樣——有時候用 bullet list，有時候用段落，有時候有標題有時候沒有。</p>
+<p>格式不一致會直接影響語意搜尋的效果，因為搜尋引擎會依據文本結構來判斷段落的邊界和主題。</p>
+<p>我後來在 SOUL.md 裡加了一段 daily memory 的寫作指引：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">## Daily Memory 格式</span></span><br><span class="line">每天的記憶紀錄用以下格式：</span><br><span class="line"><span class="section">### 重要事件</span></span><br><span class="line"><span class="bullet">-</span> 事件描述（附時間和相關人員代號）</span><br><span class="line"><span class="section">### 決策紀錄</span></span><br><span class="line"><span class="bullet">-</span> 決策內容和原因</span><br><span class="line"><span class="section">### 待追蹤</span></span><br><span class="line"><span class="bullet">-</span> 尚未完成但需要追蹤的事項</span><br></pre></td></tr></table></figure>
+
+<p>加了這個之後，搜尋品質明顯提升。結構化的好處就是可預測性高，不管是人去讀還是 AI 去搜，都能很快找到想要的資訊。</p>
+<h4 id="坑-3：記憶洩漏的安全問題"><a href="#坑-3：記憶洩漏的安全問題" class="headerlink" title="坑 3：記憶洩漏的安全問題"></a>坑 3：記憶洩漏的安全問題</h4><p>這個坑比較隱微，但很重要。如果你的 AI 助理同時在私人頻道和群組頻道工作，你不會想讓群組裡的其他人透過 AI 存取你的私人記憶。</p>
+<p>OpenClaw 的處理方式是：<strong>MEMORY.md 只在主 session（私人對話）中載入，群聊 session 不載入。</strong> 這個設計很聰明，從源頭就防止了記憶洩漏。</p>
+<p>但這也意味著你在群聊裡問 AI 有關過去的問題，它可能答不出來。這是安全和便利的 trade-off，我覺得偏安全這邊是對的。</p>
+<h4 id="坑-4：記憶衝突"><a href="#坑-4：記憶衝突" class="headerlink" title="坑 4：記憶衝突"></a>坑 4：記憶衝突</h4><p>這個是用久了才會遇到的微妙問題。有時候 MEMORY.md 裡記的資訊跟 daily memory 裡的不一致——比如 MEMORY.md 寫著「專案 A 用 Redis 做快取」，但三天前的 daily memory 記錄了「決定把 Redis 換成 Memcached」。</p>
+<p>如果 AI 沒有同時看到這兩段記憶，它可能會給出過時的資訊。解決方法還是回到定期整理：當你做了重要的技術決策，記得更新 MEMORY.md 裡的對應項目。或者在 daily memory 裡用醒目的標記（比如 <code>[更新]</code>）來標示這是一個覆蓋既有知識的變更。</p>
+<h3 id="SOUL-md-的哲學"><a href="#SOUL-md-的哲學" class="headerlink" title="SOUL.md 的哲學"></a>SOUL.md 的哲學</h3><p>雖然 SOUL.md 嚴格來說不算記憶系統的一部分，但它是整個記憶架構的基石，值得特別聊聊。</p>
+<p>大部分人設定 AI 的方式是寫一堆規則：「你不可以 XXX」、「你必須 YYY」、「遇到 ZZZ 的時候要這樣做」。這種方式短期有效，但規則一多就開始互相矛盾，AI 也會開始鑽漏洞。</p>
+<p>SOUL.md 的哲學不一樣。它不是一份規則清單，而是<strong>人格描述</strong>。你不是在告訴 AI「做什麼」和「不做什麼」，而是在描述它<strong>是什麼樣的人</strong>。</p>
+<p>比如，與其寫「回答問題時不要過度道歉」，不如寫「你是一個自信、直接的助理，會坦率地表達觀點，不需要為自己的建議道歉」。</p>
+<p>與其寫「不要產生不正確的資訊」，不如寫「Be genuinely helpful, not performatively helpful. 如果你不確定，就說不確定。」</p>
+<p>這個差異看起來很微妙，但效果差很多。基於規則的 AI 會在邊界情況出錯；基於人格的 AI 會用「這符不符合我的價值觀」來做判斷，彈性和一致性都更好。</p>
+<p>我花了不少時間迭代我的 SOUL.md，就像在跟一個新同事磨合一樣。剛開始會有很多需要調整的地方，但三四週之後，AI 的行為模式就會穩定下來，真的很像有了自己的個性。</p>
+<h3 id="Daily-→-MEMORY-md-的蒸餾流程"><a href="#Daily-→-MEMORY-md-的蒸餾流程" class="headerlink" title="Daily → MEMORY.md 的蒸餾流程"></a>Daily → MEMORY.md 的蒸餾流程</h3><p>最後分享一個我覺得很重要的實務：daily memory 和 MEMORY.md 之間的蒸餾流程。</p>
+<p>每天的 daily memory 會自動累積原始紀錄。但這些原始紀錄不能直接搬進 MEMORY.md——資訊量太大，而且很多是短期有效的瑣事。</p>
+<p>我的做法是定期（大約每週或兩週）做一次蒸餾：</p>
+<ol>
+<li>回顧這段時間的 daily memory</li>
+<li>找出仍然相關的重要資訊</li>
+<li>把這些資訊整理、濃縮後寫入 MEMORY.md</li>
+<li>同時把 MEMORY.md 中已經過時的內容移除</li>
+</ol>
+<p>這個過程可以讓 AI 自己做，也可以你手動來。我通常是讓 AI 先做一版，然後我快速看過確認。畢竟你最清楚哪些資訊對你來說仍然重要。</p>
+<p>有時候我也會設一個 cron job 來自動做這件事，但我發現人工介入的品質還是比較好，至少在目前的 LLM 能力下。AI 在判斷「什麼仍然重要」這件事上偶爾會出錯——它可能覺得某個技術細節過時了，但你知道下個月要用到；或者它覺得某個專案還在進行中，但其實已經取消了。</p>
+<h3 id="跟其他記憶方案的比較"><a href="#跟其他記憶方案的比較" class="headerlink" title="跟其他記憶方案的比較"></a>跟其他記憶方案的比較</h3><p>如果你用過其他 AI 記憶方案，可能會好奇 OpenClaw 的做法有什麼不同。簡單說幾個我觀察到的差異：</p>
+<ul>
+<li><strong>ChatGPT Memory</strong>：自動摘取，你幾乎無法控制它記了什麼。方便但不精確。OpenClaw 需要更多手動維護，但控制權完全在你手上</li>
+<li><strong>RAG（Retrieval Augmented Generation）</strong>：通常需要 embedding database 和向量搜尋。OpenClaw 的方式更輕量，不需要額外的基礎設施，就是純文字檔</li>
+<li><strong>MemGPT &#x2F; Letta</strong>：有更複雜的記憶管理機制（自動分頁、壓縮等）。OpenClaw 的方式更簡單直覺，trade-off 是自動化程度較低</li>
+</ul>
+<p>沒有哪個方案是完美的。選擇取決於你的需求：如果你想要「設好就不用管」，ChatGPT Memory 或 MemGPT 可能更適合。如果你想要完全掌控記憶的每個細節，OpenClaw 的純文字方式是目前最透明的做法。</p>
+<h3 id="結語：從陌生人到夥伴"><a href="#結語：從陌生人到夥伴" class="headerlink" title="結語：從陌生人到夥伴"></a>結語：從陌生人到夥伴</h3><p>回到開頭的場景：你跟 AI 說了一件事，隔天它就忘了。</p>
+<p>有了 OpenClaw 的記憶系統之後，這個問題幾乎不存在了。AI 會記得你上週的決策、上個月的專案進度、你反覆提過的偏好。它不會每次見面都像個陌生人，而是像一個跟你共事已久的同事——了解你的脈絡、知道你的風格、記得你的歷史。</p>
+<p>這個轉變聽起來可能不那麼戲劇性，但日積月累下來，差異是巨大的。你不再需要花時間「暖身」——把背景資訊重新餵一遍。你可以直接從上次中斷的地方繼續，就像跟真人同事一樣。</p>
+<p>而且說真的，維護 AI 的記憶系統這件事本身也讓我反思了自己的知識管理。如果連 AI 都需要一套系統來管理記憶，我自己是不是也該更認真地做筆記、寫紀錄？答案顯然是肯定的。</p>
+<p>如果你對 OpenClaw 的記憶系統有興趣，完整的文件在 <a target="_blank" rel="noopener" href="https://docs.openclaw.ai/">docs.openclaw.ai</a>，程式碼在 <a target="_blank" rel="noopener" href="https://github.com/openclaw/openclaw">GitHub</a>。社群 <a target="_blank" rel="noopener" href="https://discord.gg/clawd">Discord</a> 也歡迎來交流。</p>
+<p>記憶，是把 AI 從工具變成夥伴的那條線。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/%E8%A8%98%E6%86%B6%E7%B3%BB%E7%B5%B1/" rel="tag"># 記憶系統</a>
+              <a href="/tags/Memory/" rel="tag"># Memory</a>
+              <a href="/tags/%E7%9F%A5%E8%AD%98%E7%AE%A1%E7%90%86/" rel="tag"># 知識管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020504/" rel="prev" title="讓 AI 當你的 PM：多層 Agent 角色分工實踐">
+      <i class="fa fa-chevron-left"></i> 讓 AI 當你的 PM：多層 Agent 角色分工實踐
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020508/" rel="next" title="Notion API 雙 Workspace 踩坑記：Token 搞混、批量操作與去重實戰">
+      Notion API 雙 Workspace 踩坑記：Token 搞混、批量操作與去重實戰 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC-LLM-%E5%8E%9F%E7%94%9F%E7%9A%84%E8%A8%98%E6%86%B6%E4%B8%8D%E5%A4%A0%E7%94%A8%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">為什麼 LLM 原生的記憶不夠用？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E5%B1%A4%E8%A8%98%E6%86%B6%E6%9E%B6%E6%A7%8B"><span class="nav-number">2.</span> <span class="nav-text">三層記憶架構</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%A4%EF%BC%9AWorkspace-Files%EF%BC%88%E8%BA%AB%E4%BB%BD%E8%AD%89%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">第一層：Workspace Files（身份證）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%A4%EF%BC%9AMEMORY-md%EF%BC%88%E7%AD%86%E8%A8%98%E6%9C%AC%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">第二層：MEMORY.md（筆記本）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%A4%EF%BC%9ADaily-Memory%EF%BC%88%E6%97%A5%E8%A8%98%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">第三層：Daily Memory（日記）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AA%9E%E6%84%8F%E6%90%9C%E5%B0%8B%EF%BC%9Amemory-search"><span class="nav-number">3.</span> <span class="nav-text">語意搜尋：memory_search</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%A6%E9%9A%9B%E9%81%8B%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">實際運作流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Session-%E5%95%9F%E5%8B%95%E6%99%82"><span class="nav-number">4.1.</span> <span class="nav-text">Session 啟動時</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E7%AD%94%E6%9C%89%E9%97%9C%E9%81%8E%E5%8E%BB%E7%9A%84%E5%95%8F%E9%A1%8C%E6%99%82"><span class="nav-number">4.2.</span> <span class="nav-text">回答有關過去的問題時</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Session-%E7%B5%90%E6%9D%9F%E6%88%96-context-%E5%A3%93%E7%B8%AE%E5%89%8D"><span class="nav-number">4.3.</span> <span class="nav-text">Session 結束或 context 壓縮前</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E8%A8%88%E5%93%B2%E5%AD%B8%EF%BC%9AText-Brain"><span class="nav-number">5.</span> <span class="nav-text">設計哲學：Text &gt; Brain</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E7%9A%84%E8%B8%A9%E5%9D%91%E7%B6%93%E9%A9%97"><span class="nav-number">6.</span> <span class="nav-text">我的踩坑經驗</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%91-1%EF%BC%9AMEMORY-md-%E7%84%A1%E9%99%90%E8%86%A8%E8%84%B9"><span class="nav-number">6.1.</span> <span class="nav-text">坑 1：MEMORY.md 無限膨脹</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%91-2%EF%BC%9ADaily-Memory-%E6%A0%BC%E5%BC%8F%E4%B8%8D%E4%B8%80%E8%87%B4"><span class="nav-number">6.2.</span> <span class="nav-text">坑 2：Daily Memory 格式不一致</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%91-3%EF%BC%9A%E8%A8%98%E6%86%B6%E6%B4%A9%E6%BC%8F%E7%9A%84%E5%AE%89%E5%85%A8%E5%95%8F%E9%A1%8C"><span class="nav-number">6.3.</span> <span class="nav-text">坑 3：記憶洩漏的安全問題</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%91-4%EF%BC%9A%E8%A8%98%E6%86%B6%E8%A1%9D%E7%AA%81"><span class="nav-number">6.4.</span> <span class="nav-text">坑 4：記憶衝突</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SOUL-md-%E7%9A%84%E5%93%B2%E5%AD%B8"><span class="nav-number">7.</span> <span class="nav-text">SOUL.md 的哲學</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Daily-%E2%86%92-MEMORY-md-%E7%9A%84%E8%92%B8%E9%A4%BE%E6%B5%81%E7%A8%8B"><span class="nav-number">8.</span> <span class="nav-text">Daily → MEMORY.md 的蒸餾流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%9F%E5%85%B6%E4%BB%96%E8%A8%98%E6%86%B6%E6%96%B9%E6%A1%88%E7%9A%84%E6%AF%94%E8%BC%83"><span class="nav-number">9.</span> <span class="nav-text">跟其他記憶方案的比較</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E%EF%BC%9A%E5%BE%9E%E9%99%8C%E7%94%9F%E4%BA%BA%E5%88%B0%E5%A4%A5%E4%BC%B4"><span class="nav-number">10.</span> <span class="nav-text">結語：從陌生人到夥伴</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

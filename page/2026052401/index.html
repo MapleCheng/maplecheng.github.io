@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近看智慧製造與企業 AI 的趨勢，我越來越覺得真正困難的不是模型能力，而是工廠現場的人機交接、權限、資料語意與異常處理。AI 可以很聰明，但如果沒有流程邊界，最後只會把混亂自動化。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="智慧製造不是把 AI 接上去，而是先設計好人機交接">
+<meta property="og:url" content="https://maplecheng.com/page/2026052401/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近看智慧製造與企業 AI 的趨勢，我越來越覺得真正困難的不是模型能力，而是工廠現場的人機交接、權限、資料語意與異常處理。AI 可以很聰明，但如果沒有流程邊界，最後只會把混亂自動化。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-05-23T21:01:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.343Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="MES">
+<meta property="article:tag" content="智慧製造">
+<meta property="article:tag" content="系統設計">
+<meta property="article:tag" content="資料治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026052401/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>智慧製造不是把 AI 接上去，而是先設計好人機交接 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026052401/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          智慧製造不是把 AI 接上去，而是先設計好人機交接
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-05-24 05:01:00" itemprop="dateCreated datePublished" datetime="2026-05-24T05:01:00+08:00">2026-05-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近看智慧製造與企業 AI 的趨勢，我越來越覺得真正困難的不是模型能力，而是工廠現場的人機交接、權限、資料語意與異常處理。AI 可以很聰明，但如果沒有流程邊界，最後只會把混亂自動化。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看到一堆智慧製造、Physical AI、工業機器人、企業 Agent 平台的消息，第一反應其實不是「哇，好先進」，而是有點職業病地冒出一句：好，那它出錯時誰接手？</p>
+<p>這問題聽起來很掃興。人家在講 AI 工廠、自主決策、機器人協作，我卻在想例外流程、權限、稽核 log、人工交接 SOP。對，技術主管就是這麼不浪漫。但做企業系統久了會知道，真正讓系統能上線的，常常不是 demo 裡最炫的那段，而是 demo 沒演的那段：當資料不完整、設備回報異常、工單狀態卡住、現場人員說「可是今天情況不一樣」的時候，系統要怎麼活下來。</p>
+<span id="more"></span>
+
+<h3 id="AI-工廠不是一條魔法管線"><a href="#AI-工廠不是一條魔法管線" class="headerlink" title="AI 工廠不是一條魔法管線"></a>AI 工廠不是一條魔法管線</h3><p>很多人在談智慧製造時，會很自然地把它想成一條漂亮的自動化管線：訂單進來，系統排程，MES 派工，設備執行，機器人搬運，品質資料回寫，最後 ERP 結案。聽起來很順，畫成圖也很漂亮。</p>
+<p>大概像這樣：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            graph LR
+    A[訂單 / 需求] --> B[排程]
+    B --> C[MES 派工]
+    C --> D[設備 / 機器人執行]
+    D --> E[品質檢驗]
+    E --> F[ERP / 報表回寫]
+          </pre>
+
+<p>這張圖沒有錯，但它太乾淨了。真實工廠不是這樣跑的。</p>
+<p>真實情況是：料還沒到、設備暫停、品檢抽到異常、工單臨時插單、現場師傅依經驗調整參數、條碼掃不到、半成品被移到另一區、主管口頭說先做這批。更麻煩的是，這些事情很多都不是「錯誤」，而是工廠每天都會發生的正常變化。</p>
+<p>如果 AI 只會看標準流程，它會把這些變化全部當成雜訊；如果 AI 太自由，它又可能把人類多年累積出來的安全邊界當成阻礙。兩邊都很危險。</p>
+<h3 id="真正要設計的是「交接點」"><a href="#真正要設計的是「交接點」" class="headerlink" title="真正要設計的是「交接點」"></a>真正要設計的是「交接點」</h3><p>我現在看 AI 進製造現場，最在意的不是模型能不能回答問題，也不是機器人動作有多漂亮，而是每一個關鍵節點有沒有設計交接點。</p>
+<p>所謂交接點，不只是畫一個「人工確認」按鈕而已。它至少包含幾件事：</p>
+<ul>
+<li>AI 為什麼做這個判斷？依據哪些資料？</li>
+<li>它有沒有權限直接執行？還是只能建議？</li>
+<li>如果資料缺漏，它是停下來，還是猜一個答案？</li>
+<li>人接手後，系統狀態怎麼記？</li>
+<li>後續追查時，看不看得到當時發生什麼事？</li>
+</ul>
+<p>這些問題很土，但很救命。</p>
+<p>我常覺得企業系統有一種很殘酷的特性：你越想把它做得「聰明」，就越不能省略那些看起來笨笨的紀錄。因為聰明系統一旦開始替人做決策，事後就一定會有人問：它為什麼這樣做？誰允許的？當時資料對不對？人有沒有確認？</p>
+<p>沒有這些答案，AI 就算真的做對九十九次，第一百次出事時還是會被整組拔掉。</p>
+<h3 id="MES、WMS、ERP-不是資料庫名稱，是責任邊界"><a href="#MES、WMS、ERP-不是資料庫名稱，是責任邊界" class="headerlink" title="MES、WMS、ERP 不是資料庫名稱，是責任邊界"></a>MES、WMS、ERP 不是資料庫名稱，是責任邊界</h3><p>做製造系統時，很容易把 MES、WMS、ERP、設備資料平台看成不同資料來源。欄位串起來、API 接起來、事件丟出去，好像就完成整合了。</p>
+<p>但從 CTO 視角看，我更傾向把它們視為責任邊界。</p>
+<p>ERP 管的是商業承諾：訂單、成本、庫存、帳務。MES 管的是現場執行：工單、製程、報工、品質。WMS 管的是物料流動：入庫、出庫、儲位、搬運。設備系統管的是機台事實：參數、狀態、警報、產出。</p>
+<p>AI 要跨系統工作時，麻煩的不是「讀資料」，而是「改變哪個責任邊界裡的事實」。</p>
+<p>例如 AI 發現某批料可能不適合繼續生產，它可以做什麼？</p>
+<p>它可以提醒？可以自動停工？可以改派另一台機器？可以凍結庫存？可以通知採購？可以改交期？</p>
+<p>每往後一步，影響範圍就放大一圈。這不是 prompt 寫得嚴謹就能解決的問題，而是系統設計要先講清楚：哪些動作屬於建議、哪些需要審批、哪些可以自動執行、哪些永遠不能由 AI 單獨決定。</p>
+<h3 id="資料語意比模型更早決定上限"><a href="#資料語意比模型更早決定上限" class="headerlink" title="資料語意比模型更早決定上限"></a>資料語意比模型更早決定上限</h3><p>還有一個常被低估的點：資料語意。</p>
+<p>AI 很會整理文字，也很會從大量資料裡找 pattern。但如果底層資料的語意本來就混亂，它只是把混亂包裝得比較像答案。</p>
+<p>同一個「完成」狀態，在不同系統裡可能代表完全不同的事情：</p>
+<ul>
+<li>ERP 的完成，可能是訂單可結案。</li>
+<li>MES 的完成，可能是某製程報工完成。</li>
+<li>品質系統的完成，可能是檢驗流程完成。</li>
+<li>現場人員口中的完成，可能只是「這批先放旁邊」。</li>
+</ul>
+<p>如果沒有語意模型，AI 看到「完成」兩個字就很容易誤判。更慘的是，它會用很有自信的語氣誤判。</p>
+<p>所以我越來越覺得，智慧製造的前置工程不是先買一個很大的 AI 平台，而是把那些大家以為早就懂、其實每個部門理解都不一樣的詞重新定義一次。工單狀態、批號狀態、設備狀態、品質判定、庫存可用性、異常類型，這些老派名詞，才是 AI 能不能可靠工作的地基。</p>
+<h3 id="不要把混亂自動化"><a href="#不要把混亂自動化" class="headerlink" title="不要把混亂自動化"></a>不要把混亂自動化</h3><p>技術人很容易愛上自動化。看到重複工作就想寫腳本，看到人工判斷就想做 Agent，看到流程卡住就想接 API。這個衝動我完全懂，因為我也一樣。</p>
+<p>但這幾年做下來，我反而會先問一個很煩的問題：這件事現在是因為「人做太慢」，還是因為「規則本來就不清楚」？</p>
+<p>如果是前者，自動化很有價值。如果是後者，直接上 AI 只會把不清楚的規則放大。原本一個人一天只會做錯三筆，變成 Agent 一分鐘可以做錯三百筆。效率是提升了，災難也是。</p>
+<p>所以在我心裡，比較健康的智慧製造路線應該是這樣：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            graph TD
+    A[釐清流程責任] --> B[定義資料語意]
+    B --> C[建立權限與審批]
+    C --> D[設計異常交接]
+    D --> E[導入 AI 建議]
+    E --> F[逐步開放自動執行]
+    F --> G[持續稽核與回滾]
+          </pre>
+
+<p>也就是先讓系統知道邊界，再讓 AI 在邊界裡變聰明。</p>
+<h3 id="最後還是那句老話：AI-也是系統"><a href="#最後還是那句老話：AI-也是系統" class="headerlink" title="最後還是那句老話：AI 也是系統"></a>最後還是那句老話：AI 也是系統</h3><p>我不悲觀。相反地，我覺得 AI 進製造業會很有戲，尤其在排程輔助、異常摘要、維修知識庫、品質分析、跨系統查詢、現場操作引導這些場景，價值都很明顯。</p>
+<p>但我不太相信「接上 AI，工廠就自動變智慧」這種說法。工廠不是聊天視窗，製造現場也不是 demo 舞台。它有設備、有料、有交期、有安全、有責任歸屬，還有一堆看起來很土但非常真實的例外狀況。</p>
+<p>AI 如果要進來，就不能只當一個會回答問題的模型。它必須被放進一套完整的系統設計裡：資料從哪裡來、語意怎麼定義、權限怎麼切、誰能覆核、怎麼回滾、出了事怎麼追。</p>
+<p>聽起來一點都不性感。可是企業系統很多時候就是這樣，真正可靠的東西，通常都長得不性感。</p>
+<p>如果哪天大家談智慧製造時，不只討論模型多強、機器人多靈活，也開始認真討論人機交接、異常處理、稽核紀錄和資料語意，那我會覺得這波 AI 工廠才真的開始接近落地。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88/" rel="tag"># 系統設計</a>
+              <a href="/tags/%E8%B3%87%E6%96%99%E6%B2%BB%E7%90%86/" rel="tag"># 資料治理</a>
+              <a href="/tags/MES/" rel="tag"># MES</a>
+              <a href="/tags/%E6%99%BA%E6%85%A7%E8%A3%BD%E9%80%A0/" rel="tag"># 智慧製造</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026052301/" rel="prev" title="月營收 API 的日期陷阱：不是所有資料都適合用「最近幾天」查">
+      <i class="fa fa-chevron-left"></i> 月營收 API 的日期陷阱：不是所有資料都適合用「最近幾天」查
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026052601/" rel="next" title="別把 runtime state 放進雲端同步資料夾">
+      別把 runtime state 放進雲端同步資料夾 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#AI-%E5%B7%A5%E5%BB%A0%E4%B8%8D%E6%98%AF%E4%B8%80%E6%A2%9D%E9%AD%94%E6%B3%95%E7%AE%A1%E7%B7%9A"><span class="nav-number">1.</span> <span class="nav-text">AI 工廠不是一條魔法管線</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E8%A6%81%E8%A8%AD%E8%A8%88%E7%9A%84%E6%98%AF%E3%80%8C%E4%BA%A4%E6%8E%A5%E9%BB%9E%E3%80%8D"><span class="nav-number">2.</span> <span class="nav-text">真正要設計的是「交接點」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MES%E3%80%81WMS%E3%80%81ERP-%E4%B8%8D%E6%98%AF%E8%B3%87%E6%96%99%E5%BA%AB%E5%90%8D%E7%A8%B1%EF%BC%8C%E6%98%AF%E8%B2%AC%E4%BB%BB%E9%82%8A%E7%95%8C"><span class="nav-number">3.</span> <span class="nav-text">MES、WMS、ERP 不是資料庫名稱，是責任邊界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B3%87%E6%96%99%E8%AA%9E%E6%84%8F%E6%AF%94%E6%A8%A1%E5%9E%8B%E6%9B%B4%E6%97%A9%E6%B1%BA%E5%AE%9A%E4%B8%8A%E9%99%90"><span class="nav-number">4.</span> <span class="nav-text">資料語意比模型更早決定上限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E8%A6%81%E6%8A%8A%E6%B7%B7%E4%BA%82%E8%87%AA%E5%8B%95%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">不要把混亂自動化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%BE%8C%E9%82%84%E6%98%AF%E9%82%A3%E5%8F%A5%E8%80%81%E8%A9%B1%EF%BC%9AAI-%E4%B9%9F%E6%98%AF%E7%B3%BB%E7%B5%B1"><span class="nav-number">6.</span> <span class="nav-text">最後還是那句老話：AI 也是系統</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

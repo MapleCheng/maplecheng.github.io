@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="為什麼我在正式專案裡全面棄用 Foreign Key、Index、Unique Constraint？這不是偷懶，而是踩過無數坑後的務實選擇。從部署災難到效能瓶頸，聊聊「純表設計」的理由與取捨。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我的資料庫不用 Foreign Key——一個技術主管的實戰心得">
+<meta property="og:url" content="https://maplecheng.com/page/2026021301/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="為什麼我在正式專案裡全面棄用 Foreign Key、Index、Unique Constraint？這不是偷懶，而是踩過無數坑後的務實選擇。從部署災難到效能瓶頸，聊聊「純表設計」的理由與取捨。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-12T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="Database">
+<meta property="article:tag" content="SQL Server">
+<meta property="article:tag" content="實務經驗">
+<meta property="article:tag" content="架構設計">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026021301/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>我的資料庫不用 Foreign Key——一個技術主管的實戰心得 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026021301/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          我的資料庫不用 Foreign Key——一個技術主管的實戰心得
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-13 05:00:00" itemprop="dateCreated datePublished" datetime="2026-02-13T05:00:00+08:00">2026-02-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">為什麼我在正式專案裡全面棄用 Foreign Key、Index、Unique Constraint？這不是偷懶，而是踩過無數坑後的務實選擇。從部署災難到效能瓶頸，聊聊「純表設計」的理由與取捨。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>前幾天在整理一個專案的資料庫 Schema 文件，突然想到一件事：我們團隊的所有專案，資料庫裡沒有任何一條 Foreign Key。</p>
+<p>不是忘了加。是刻意不加的。</p>
+<span id="more"></span>
+
+<h3 id="「你瘋了嗎？」"><a href="#「你瘋了嗎？」" class="headerlink" title="「你瘋了嗎？」"></a>「你瘋了嗎？」</h3><p>我知道，這句話大概是很多人看到標題的第一反應。資料庫課本第三章就教你正規化、建立關聯、加上 FK 確保參照完整性。這是基本功，怎麼能不用？</p>
+<p>好，讓我先承認一件事：<strong>課本說的沒錯。</strong> FK 在理論上是保護資料完整性的好工具。但理論跟實務之間，隔著一道叫做「部署」的鬼門關。</p>
+<h3 id="踩坑的開始"><a href="#踩坑的開始" class="headerlink" title="踩坑的開始"></a>踩坑的開始</h3><p>故事要從幾年前說起。那時候我還很乖，每張表都規規矩矩地建 FK、加 Index、設 Unique Constraint。資料庫設計得漂漂亮亮，ER Diagram 拿出來簡直是藝術品。</p>
+<p>然後災難就開始了。</p>
+<p>第一次部署更新的時候，我需要改一張表的結構。但這張表被三張子表用 FK 指著，其中一張子表又被另外兩張表指著。結果呢？一個欄位的異動，我得按照特定順序先解除 FK、改完再重建，整個 migration script 寫了快一百行，就為了加一個欄位。</p>
+<p>更慘的是，客戶端環境。我們的系統跑在客戶的 Windows Server 上，每家客戶的資料庫狀態都不一樣。有人手動改過表、有人塞過髒資料、有人的 FK 早就因為某次意外被 disable 了但沒人知道。每次部署都像拆炸彈。</p>
+<h3 id="全世界都在禁用-FK"><a href="#全世界都在禁用-FK" class="headerlink" title="全世界都在禁用 FK"></a>全世界都在禁用 FK</h3><p>後來我開始研究，發現這不只是我的問題。很多大規模系統早就不用 FK 了：</p>
+<ul>
+<li><strong>微服務架構</strong>：資料分散在不同服務的資料庫裡，跨庫 FK 本來就不可能</li>
+<li><strong>高流量系統</strong>：FK 的檢查在大量寫入時會變成效能瓶頸</li>
+<li><strong>頻繁部署的產品</strong>：Schema migration 被 FK 綁住，部署速度直接砍半</li>
+<li><strong>多租戶 SaaS</strong>：每個租戶的資料狀態不同，FK 約束反而製造更多部署問題</li>
+</ul>
+<p>這不是什麼前衛的想法。這是被現實打臉之後的集體共識。</p>
+<h3 id="我的「純表設計」原則"><a href="#我的「純表設計」原則" class="headerlink" title="我的「純表設計」原則"></a>我的「純表設計」原則</h3><p>經過幾年的演化，我們團隊現在的資料庫設計原則很簡單，我叫它「純表設計」：</p>
+<p><strong>不用 FK。</strong> 關聯邏輯全部在程式端處理。應用層本來就要驗證資料，多一層 FK 檢查只是多一個出問題的地方。</p>
+<p><strong>不建 Index。</strong> 先別急著罵我。我的意思是：不在建表時預設加 Index。等系統上線、有了真實的查詢模式，再根據實際的慢查詢去加。盲目加 Index 不但浪費空間，還會拖慢寫入速度。</p>
+<p><strong>不設 Unique Constraint。</strong> 唯一性檢查同樣由程式處理。原因跟 FK 一樣——部署時少一個要處理的東西。</p>
+<p><strong>不用 Default Value。</strong> 框架會處理預設值。string 類型永遠非 nullable，框架自動帶空字串。所有欄位一律 <code>NOT NULL</code>。</p>
+<p><strong>decimal 一律 <code>DECIMAL(19,9)</code>。</strong> 不想每次都在猜這個欄位要幾位小數。統一規格，省心。</p>
+<p><strong>時間用 <code>DATETIME</code>。</strong> 不是 <code>DATETIME2</code>。夠用就好，不需要奈秒級精度。</p>
+<h3 id="「那資料完整性怎麼辦？」"><a href="#「那資料完整性怎麼辦？」" class="headerlink" title="「那資料完整性怎麼辦？」"></a>「那資料完整性怎麼辦？」</h3><p>這是最常被問的問題。我的回答是：<strong>資料完整性本來就不該只靠資料庫。</strong></p>
+<p>想想看，你的 API 會不會在收到 request 的時候，不做任何驗證就直接塞進資料庫？不會吧。你一定會在 Controller 層或 Service 層檢查：這筆訂單的客戶存不存在？這個料號有沒有在主檔裡？數量是不是正數？</p>
+<p>既然程式端已經在做這些檢查了，FK 就變成了雙重保險。雙重保險聽起來很好，但它的代價是：</p>
+<ul>
+<li>每次 INSERT&#x2F;UPDATE 都多一次查詢</li>
+<li>Migration 複雜度暴增</li>
+<li>部署風險提高</li>
+<li>除錯時要同時考慮程式邏輯和 DB 約束</li>
+</ul>
+<p>對我們這種要在幾十個客戶端部署的產品來說，<strong>簡單就是可靠</strong>。</p>
+<h3 id="但我不是說-FK-沒用"><a href="#但我不是說-FK-沒用" class="headerlink" title="但我不是說 FK 沒用"></a>但我不是說 FK 沒用</h3><p>這裡要說清楚：我不是在宣揚「FK 是邪惡的」。</p>
+<p>如果你在做一個內部系統，資料庫只有一套，團隊對 Schema 有完全的掌控權，部署頻率不高——用 FK 完全沒問題，甚至應該用。FK 能在最後一道防線幫你擋住程式 bug 造成的髒資料。</p>
+<p>但如果你跟我一樣，面對的是：</p>
+<ul>
+<li>產品要部署到幾十個客戶端</li>
+<li>每個客戶的環境都不一樣</li>
+<li>需要頻繁更新 Schema</li>
+<li>團隊規模不大，沒有專職 DBA</li>
+</ul>
+<p>那「純表設計」可能值得你認真考慮。</p>
+<h3 id="關聯怎麼追蹤？"><a href="#關聯怎麼追蹤？" class="headerlink" title="關聯怎麼追蹤？"></a>關聯怎麼追蹤？</h3><p>沒有 FK 不代表沒有關聯。我們的做法是：</p>
+<p><strong>文件先行。</strong> 每個專案都有完整的 Schema 文件，每張表的每個欄位都標注它關聯到哪張表。格式大概長這樣：</p>
+<figure class="highlight tp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">🔑 PK: <span class="keyword">TA</span><span class="number">001</span> + <span class="keyword">TA</span><span class="number">002</span></span><br><span class="line">- <span class="keyword">TA</span><span class="number">001</span>: 單別（→ CMSMQ.MQ<span class="number">001</span>）</span><br><span class="line">- <span class="keyword">TA</span><span class="number">002</span>: 單號</span><br><span class="line">- <span class="keyword">TA</span><span class="number">003</span>: 客戶代號（→ COPMA.MA<span class="number">001</span>）</span><br></pre></td></tr></table></figure>
+
+<p>文件跟程式碼一起版控，改了表就改文件，PR review 時一起看。</p>
+<p><strong>命名慣例。</strong> 我們的欄位命名有固定規則，看到欄位名就知道它對應哪張表。這比隱藏在 DB metadata 裡的 FK 關係直觀多了。</p>
+<p><strong>ERD 用 Mermaid。</strong> 關聯圖直接寫在 Markdown 裡，跟文件一起維護。不需要額外的工具，git diff 就能看出改了什麼。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            erDiagram
+    ORDER ||--o{ ORDER_DETAIL : contains
+    ORDER }o--|| CUSTOMER : belongs_to
+    ORDER_DETAIL }o--|| PRODUCT : references
+          </pre>
+
+<h3 id="實際的效果"><a href="#實際的效果" class="headerlink" title="實際的效果"></a>實際的效果</h3><p>這套做法我們跑了幾年，結果是：</p>
+<p><strong>部署速度快了很多。</strong> Migration script 從動輒上百行變成幾行 ALTER TABLE，部署一個新版本從半小時縮短到幾分鐘。</p>
+<p><strong>除錯更單純。</strong> 問題不是在程式就是在資料，不會有「FK violation 但我不知道是哪個 constraint」的鬼打牆。</p>
+<p><strong>新人上手更快。</strong> 不用先搞懂複雜的 FK 關係圖，看文件就知道表跟表之間的關聯。</p>
+<p><strong>代價呢？</strong> 偶爾會有髒資料跑進去。但說實話，有 FK 的時候也會有——只是錯誤訊息從「FK violation」變成業務邏輯上的不一致。處理方式都一樣：找到 bug、修掉、清資料。</p>
+<h3 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h3><p>資料庫設計沒有銀彈。FK 不是萬能的，不用 FK 也不是萬能的。</p>
+<p>我的建議是：<strong>根據你的部署模式來決定</strong>。如果你的系統是「build once, deploy once」，FK 是好朋友。如果你的系統是「build once, deploy everywhere」，認真考慮把約束邏輯搬到程式端。</p>
+<p>這不是偷懶，這是務實。</p>
+<p>如果你也在多客戶端部署的路上掙扎過，希望這篇能給你一點不同的思路。畢竟，我們的血淚不該白流 😂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88/" rel="tag"># 架構設計</a>
+              <a href="/tags/Database/" rel="tag"># Database</a>
+              <a href="/tags/SQL-Server/" rel="tag"># SQL Server</a>
+              <a href="/tags/%E5%AF%A6%E5%8B%99%E7%B6%93%E9%A9%97/" rel="tag"># 實務經驗</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026021101/" rel="prev" title="AI Coding Agent 的幻覺問題：當它無中生有了不存在的資料庫欄位">
+      <i class="fa fa-chevron-left"></i> AI Coding Agent 的幻覺問題：當它無中生有了不存在的資料庫欄位
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026022001/" rel="next" title="用 Git Submodule 管理 AI Coding Agent 的設定檔，跨專案共用不再複製貼上">
+      用 Git Submodule 管理 AI Coding Agent 的設定檔，跨專案共用不再複製貼上 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E3%80%8C%E4%BD%A0%E7%98%8B%E4%BA%86%E5%97%8E%EF%BC%9F%E3%80%8D"><span class="nav-number">1.</span> <span class="nav-text">「你瘋了嗎？」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B8%A9%E5%9D%91%E7%9A%84%E9%96%8B%E5%A7%8B"><span class="nav-number">2.</span> <span class="nav-text">踩坑的開始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A8%E4%B8%96%E7%95%8C%E9%83%BD%E5%9C%A8%E7%A6%81%E7%94%A8-FK"><span class="nav-number">3.</span> <span class="nav-text">全世界都在禁用 FK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E7%9A%84%E3%80%8C%E7%B4%94%E8%A1%A8%E8%A8%AD%E8%A8%88%E3%80%8D%E5%8E%9F%E5%89%87"><span class="nav-number">4.</span> <span class="nav-text">我的「純表設計」原則</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E3%80%8C%E9%82%A3%E8%B3%87%E6%96%99%E5%AE%8C%E6%95%B4%E6%80%A7%E6%80%8E%E9%BA%BC%E8%BE%A6%EF%BC%9F%E3%80%8D"><span class="nav-number">5.</span> <span class="nav-text">「那資料完整性怎麼辦？」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%86%E6%88%91%E4%B8%8D%E6%98%AF%E8%AA%AA-FK-%E6%B2%92%E7%94%A8"><span class="nav-number">6.</span> <span class="nav-text">但我不是說 FK 沒用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%9C%E8%81%AF%E6%80%8E%E9%BA%BC%E8%BF%BD%E8%B9%A4%EF%BC%9F"><span class="nav-number">7.</span> <span class="nav-text">關聯怎麼追蹤？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%A6%E9%9A%9B%E7%9A%84%E6%95%88%E6%9E%9C"><span class="nav-number">8.</span> <span class="nav-text">實際的效果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">9.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

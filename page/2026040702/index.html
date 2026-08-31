@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近我為了查一個看似不起眼的欄位，從資料結構一路追到前後端流程，最後再次確認一件事：在 ERP 或大型商業系統裡，欄位名稱從來不只是欄位名稱，它常常是藏起來的業務規格。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="看起來像備註，其實是業務開關：我怎麼追一個欄位追到流程真相">
+<meta property="og:url" content="https://maplecheng.com/page/2026040702/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近我為了查一個看似不起眼的欄位，從資料結構一路追到前後端流程，最後再次確認一件事：在 ERP 或大型商業系統裡，欄位名稱從來不只是欄位名稱，它常常是藏起來的業務規格。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-04-06T21:12:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="ERP">
+<meta property="article:tag" content="architecture">
+<meta property="article:tag" content="code reading">
+<meta property="article:tag" content="debugging">
+<meta property="article:tag" content="domain knowledge">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026040702/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>看起來像備註，其實是業務開關：我怎麼追一個欄位追到流程真相 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026040702/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          看起來像備註，其實是業務開關：我怎麼追一個欄位追到流程真相
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-04-07 05:12:00" itemprop="dateCreated datePublished" datetime="2026-04-07T05:12:00+08:00">2026-04-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近我為了查一個看似不起眼的欄位，從資料結構一路追到前後端流程，最後再次確認一件事：在 ERP 或大型商業系統裡，欄位名稱從來不只是欄位名稱，它常常是藏起來的業務規格。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近我做了一件很技術主管日常、但也很容易讓人懷疑人生的事：追一個欄位。</p>
+<p>不是追什麼超帥的演算法，也不是追效能瓶頸，就是一個欄位。一個看名字很普通、甚至有點像附屬資訊的欄位。乍看之下你會以為它只是資料表裡多放一個值，頂多拿來顯示、查詢、報表備用。結果真追下去才發現，事情完全不是這樣。</p>
+<p>那一刻我又被提醒一次：在 ERP 這種商業系統裡，最可怕的從來不是你看不懂的複雜模組，而是你以為自己看懂了，結果其實沒有。</p>
+<span id="more"></span>
+
+<p>很多工程師，包括以前的我，看到欄位時都會先做一個快速分類：</p>
+<ul>
+<li>主鍵、外鍵，很重要</li>
+<li>狀態欄位，很重要</li>
+<li>金額、數量，很重要</li>
+<li>幾個看起來像補充說明的欄位，大概沒那麼重要</li>
+</ul>
+<p>問題是，商業系統根本不照這套邏輯長。</p>
+<p>在真實世界裡，一個不起眼的欄位，可能控制的是：</p>
+<ul>
+<li>計算基準</li>
+<li>流程分支</li>
+<li>前端顯示邏輯</li>
+<li>最後一筆資料怎麼收尾</li>
+<li>例外情境怎麼處理</li>
+</ul>
+<p>也就是說，它不是 metadata，而是 business rule switch。</p>
+<h3 id="欄位名稱不等於欄位地位"><a href="#欄位名稱不等於欄位地位" class="headerlink" title="欄位名稱不等於欄位地位"></a>欄位名稱不等於欄位地位</h3><p>這是我最近最有感的一句話。</p>
+<p>我們很容易被欄位名稱誤導，尤其當命名不是特別直觀、歷史包袱又很重的時候。看起來像代碼表欄位、像補充欄位、像延伸欄位，不代表它真的只是陪襯。</p>
+<p>大型商業系統常常是這樣演化出來的：</p>
+<ul>
+<li>先有第一版流程</li>
+<li>後來遇到新需求</li>
+<li>不想大改架構，就先加一個欄位</li>
+<li>再後來這個欄位被更多地方引用</li>
+<li>最後它變成隱性樞紐，但名字還停留在最初那個樸素樣子</li>
+</ul>
+<p>於是你今天看到它時，會產生一種錯覺：這應該不重要吧？</p>
+<p>然後災難就開始了。</p>
+<h3 id="真正有效的追法，不是只查資料表"><a href="#真正有效的追法，不是只查資料表" class="headerlink" title="真正有效的追法，不是只查資料表"></a>真正有效的追法，不是只查資料表</h3><p>我以前遇到這種問題，第一反應通常是：</p>
+<ul>
+<li>找 schema</li>
+<li>看資料型別</li>
+<li>搜欄位在哪些 SQL 出現</li>
+</ul>
+<p>這些都沒錯，但老實說，只做到這一步通常不夠。</p>
+<p>因為你查到的只是「它存在」，不是「它怎麼影響系統」。</p>
+<p>後來我比較固定的追法，會像這樣：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[找到欄位定義] --> B[搜尋後端 DTO / API]
+    B --> C[搜尋 service / 計算邏輯]
+    C --> D[搜尋前端顯示與互動]
+    D --> E[比對不同值對流程的影響]
+    E --> F[還原真正的業務規則]
+          </pre>
+
+<p>這個順序的重點是：不要停在資料層，要一路追到使用層。</p>
+<p>因為很多欄位的意義，不是寫在註解裡，而是寫在 if else 裡。</p>
+<p>這句話有點悲哀，但很真實。你想知道一個欄位在幹嘛，最準的地方往往不是文件，而是看它在什麼條件下改變了哪一個計算結果、切換了哪一個 UI 分支、影響了哪一個收尾邏輯。</p>
+<h3 id="商業規則最常藏在「最後一段例外處理」"><a href="#商業規則最常藏在「最後一段例外處理」" class="headerlink" title="商業規則最常藏在「最後一段例外處理」"></a>商業規則最常藏在「最後一段例外處理」</h3><p>我這幾年看 ERP、MES、流程系統，有一個很穩定的觀察：最關鍵的業務知識，常常不是藏在主流程，而是藏在最後那幾段「特殊情況處理」。</p>
+<p>比如說：</p>
+<ul>
+<li>最後一次分攤怎麼算</li>
+<li>不足量怎麼補</li>
+<li>多領料時怎麼扣</li>
+<li>狀態已變更但資料未同步時，UI 怎麼呈現</li>
+</ul>
+<p>這些地方在 code review 裡最容易被略過，因為大家看完前面主流程就覺得差不多懂了。但系統真正的性格，往往就在這裡。</p>
+<p>你會發現，某個欄位之所以重要，不是因為它出現很多次，而是因為它一旦是某個值，整個計算基準就變了。</p>
+<p>這種欄位超危險，因為它很像一顆小小的開關：</p>
+<ul>
+<li>平常安靜地躺在資料裡</li>
+<li>一碰到特定條件就影響結果</li>
+<li>還不一定有人記得它存在</li>
+</ul>
+<p>如果團隊對它沒有共同理解，後面就很容易出現這種場景：</p>
+<ul>
+<li>PM 以為那只是顯示欄位</li>
+<li>工程師以為改名無所謂</li>
+<li>前端以為只是選項文案</li>
+<li>顧問以為只是設定值</li>
+</ul>
+<p>結果每個人都只錯一點點，系統就一起歪掉。</p>
+<h3 id="技術主管該做的，是把隱性規格翻成團隊能理解的語言"><a href="#技術主管該做的，是把隱性規格翻成團隊能理解的語言" class="headerlink" title="技術主管該做的，是把隱性規格翻成團隊能理解的語言"></a>技術主管該做的，是把隱性規格翻成團隊能理解的語言</h3><p>我覺得這種時候，技術主管的價值不只是把答案找出來，而是把那個答案翻譯成團隊聽得懂的版本。</p>
+<p>因為「這個欄位在某個 component 裡會影響某段 quantity allocation logic」這種說法，對很多非開發角色其實沒有幫助。真正有用的是你能不能把它講成：</p>
+<ul>
+<li>這不是備註欄位</li>
+<li>它控制的是哪一種計算基準</li>
+<li>一旦設成某個值，整個分攤方式會切換</li>
+<li>所以改它、忽略它、誤解它，最後影響的是實際結果</li>
+</ul>
+<p>這種翻譯能力，比單純找到程式碼位置還重要。</p>
+<p>因為在商業系統裡，最稀缺的從來不是「有人看得懂 code」，而是「有人能把 code 裡的規則轉譯成可協作的知識」。</p>
+<h3 id="文件真正該補的，不是欄位說明，而是決策說明"><a href="#文件真正該補的，不是欄位說明，而是決策說明" class="headerlink" title="文件真正該補的，不是欄位說明，而是決策說明"></a>文件真正該補的，不是欄位說明，而是決策說明</h3><p>很多系統文件愛寫成這樣：</p>
+<ul>
+<li>Field A：型別 nvarchar(10)</li>
+<li>Field B：型別 decimal(18,6)</li>
+<li>Field C：是否啟用某模式</li>
+</ul>
+<p>這種文件不是沒用，但坦白說，對排錯幫助有限。</p>
+<p>如果一個欄位真的會改變流程，文件應該補的是：</p>
+<ul>
+<li>它在哪些情境會被判斷</li>
+<li>不同值代表什麼業務語意</li>
+<li>會影響哪些後端計算</li>
+<li>會連動哪些前端行為</li>
+<li>哪些例外情況特別依賴它</li>
+</ul>
+<p>也就是說，文件不是只寫「欄位是什麼」，而是寫「系統為什麼在意它」。</p>
+<p>這件事我現在愈來愈有感。因為團隊擴大之後，很多誤會不是來自技術不夠，而是來自語意沒有被保存。欄位還在、程式還在、資料也都還在，但知道它真正用途的人可能已經不在了。</p>
+<p>那時候，你就只能靠追 code 考古。</p>
+<h3 id="結語：別小看任何一個你覺得「應該只是順便」的欄位"><a href="#結語：別小看任何一個你覺得「應該只是順便」的欄位" class="headerlink" title="結語：別小看任何一個你覺得「應該只是順便」的欄位"></a>結語：別小看任何一個你覺得「應該只是順便」的欄位</h3><p>這次追欄位的過程，讓我再次確定一件事：商業系統裡沒有真正無辜的欄位，只有你還沒追到它的影響範圍。</p>
+<p>尤其在 ERP 這種活很多年、需求一路疊上去的系統裡，很多歷史決策都不會大聲寫在架構圖上。它們就靜靜躲在欄位值、條件判斷、例外處理、前端分支裡。</p>
+<p>如果你最近也遇到某個欄位看起來很普通，但大家又反覆問它到底在幹嘛，我的建議很簡單：不要猜，不要只看資料表，也不要只問單一角色。一路從資料、API、計算、UI、例外流程全部追完，你才會看到它真正的地位。</p>
+<p>說到底，系統最難懂的地方，從來不是那些名字很可怕的模組，而是那些名字看起來很普通、但其實偷偷掌控全局的小東西。</p>
+<p>如果這篇能讓你下次少說一句「這欄位應該沒差吧」，那我這次追欄位追到快懷疑人生，至少也算值得了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ERP/" rel="tag"># ERP</a>
+              <a href="/tags/debugging/" rel="tag"># debugging</a>
+              <a href="/tags/domain-knowledge/" rel="tag"># domain knowledge</a>
+              <a href="/tags/code-reading/" rel="tag"># code reading</a>
+              <a href="/tags/architecture/" rel="tag"># architecture</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026040701/" rel="prev" title="AI 例行報告別押單一模型：我把失敗當成系統設計的一部分">
+      <i class="fa fa-chevron-left"></i> AI 例行報告別押單一模型：我把失敗當成系統設計的一部分
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026041403/" rel="next" title="重做型任務最怕直接開幹，先拆規劃與架構才不會重做第二次">
+      重做型任務最怕直接開幹，先拆規劃與架構才不會重做第二次 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AC%84%E4%BD%8D%E5%90%8D%E7%A8%B1%E4%B8%8D%E7%AD%89%E6%96%BC%E6%AC%84%E4%BD%8D%E5%9C%B0%E4%BD%8D"><span class="nav-number">1.</span> <span class="nav-text">欄位名稱不等於欄位地位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E6%9C%89%E6%95%88%E7%9A%84%E8%BF%BD%E6%B3%95%EF%BC%8C%E4%B8%8D%E6%98%AF%E5%8F%AA%E6%9F%A5%E8%B3%87%E6%96%99%E8%A1%A8"><span class="nav-number">2.</span> <span class="nav-text">真正有效的追法，不是只查資料表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%95%86%E6%A5%AD%E8%A6%8F%E5%89%87%E6%9C%80%E5%B8%B8%E8%97%8F%E5%9C%A8%E3%80%8C%E6%9C%80%E5%BE%8C%E4%B8%80%E6%AE%B5%E4%BE%8B%E5%A4%96%E8%99%95%E7%90%86%E3%80%8D"><span class="nav-number">3.</span> <span class="nav-text">商業規則最常藏在「最後一段例外處理」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E4%B8%BB%E7%AE%A1%E8%A9%B2%E5%81%9A%E7%9A%84%EF%BC%8C%E6%98%AF%E6%8A%8A%E9%9A%B1%E6%80%A7%E8%A6%8F%E6%A0%BC%E7%BF%BB%E6%88%90%E5%9C%98%E9%9A%8A%E8%83%BD%E7%90%86%E8%A7%A3%E7%9A%84%E8%AA%9E%E8%A8%80"><span class="nav-number">4.</span> <span class="nav-text">技術主管該做的，是把隱性規格翻成團隊能理解的語言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%9C%9F%E6%AD%A3%E8%A9%B2%E8%A3%9C%E7%9A%84%EF%BC%8C%E4%B8%8D%E6%98%AF%E6%AC%84%E4%BD%8D%E8%AA%AA%E6%98%8E%EF%BC%8C%E8%80%8C%E6%98%AF%E6%B1%BA%E7%AD%96%E8%AA%AA%E6%98%8E"><span class="nav-number">5.</span> <span class="nav-text">文件真正該補的，不是欄位說明，而是決策說明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E%EF%BC%9A%E5%88%A5%E5%B0%8F%E7%9C%8B%E4%BB%BB%E4%BD%95%E4%B8%80%E5%80%8B%E4%BD%A0%E8%A6%BA%E5%BE%97%E3%80%8C%E6%87%89%E8%A9%B2%E5%8F%AA%E6%98%AF%E9%A0%86%E4%BE%BF%E3%80%8D%E7%9A%84%E6%AC%84%E4%BD%8D"><span class="nav-number">6.</span> <span class="nav-text">結語：別小看任何一個你覺得「應該只是順便」的欄位</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

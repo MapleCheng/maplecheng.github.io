@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="寫給完全沒經驗的人看的 OpenClaw Windows 安裝教學。從開啟 PowerShell、安裝 Node.js、跑 Wizard 設定，到用 PM2 讓 AI 助手在背景 24 小時運行，一條龍照著做就好。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在 Windows 上安裝 OpenClaw：從零開始到 PM2 背景運行完整教學">
+<meta property="og:url" content="https://maplecheng.com/page/2026030601/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="寫給完全沒經驗的人看的 OpenClaw Windows 安裝教學。從開啟 PowerShell、安裝 Node.js、跑 Wizard 設定，到用 PM2 讓 AI 助手在背景 24 小時運行，一條龍照著做就好。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-03-06T09:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="PM2">
+<meta property="article:tag" content="Windows">
+<meta property="article:tag" content="安裝教學">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026030601/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>在 Windows 上安裝 OpenClaw：從零開始到 PM2 背景運行完整教學 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026030601/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在 Windows 上安裝 OpenClaw：從零開始到 PM2 背景運行完整教學
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-03-06 17:00:00" itemprop="dateCreated datePublished" datetime="2026-03-06T17:00:00+08:00">2026-03-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">寫給完全沒經驗的人看的 OpenClaw Windows 安裝教學。從開啟 PowerShell、安裝 Node.js、跑 Wizard 設定，到用 PM2 讓 AI 助手在背景 24 小時運行，一條龍照著做就好。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>這篇寫給「什麼是終端機？」等級的讀者。不會有「方法 A 還是方法 B 自己選」這種東西，就是一條路，從頭到尾照著貼指令就好。</p>
+<p>目標：在 Windows 上把 OpenClaw 裝好、設定完、用 PM2 讓它在背景 24 小時跑，關掉視窗也不會斷。</p>
+<span id="more"></span>
+
+<h3 id="OpenClaw-是什麼？"><a href="#OpenClaw-是什麼？" class="headerlink" title="OpenClaw 是什麼？"></a>OpenClaw 是什麼？</h3><p>OpenClaw 是一個跑在你自己電腦上的 AI 助手。你可以把它接上 Discord、Telegram、WhatsApp 這些聊天軟體，然後直接用傳訊息的方式跟 AI 對話。</p>
+<p>跟 ChatGPT 網頁版不同的是：資料在你自己的電腦上、模型自己選、它還能幫你讀檔案、跑腳本、瀏覽網頁。設定好之後，用手機傳訊息就能叫它做事。</p>
+<h3 id="你需要準備什麼"><a href="#你需要準備什麼" class="headerlink" title="你需要準備什麼"></a>你需要準備什麼</h3><ul>
+<li>一台 Windows 10 或 11 的電腦</li>
+<li>網路連線</li>
+<li>AI 模型的使用權（API Key 或 Claude 訂閱都行，等一下會教）</li>
+</ul>
+<h3 id="Step-1：打開-Windows-Terminal"><a href="#Step-1：打開-Windows-Terminal" class="headerlink" title="Step 1：打開 Windows Terminal"></a>Step 1：打開 Windows Terminal</h3><p>按鍵盤上的 <strong>Win 鍵</strong>，打字輸入 <code>terminal</code>，點「<strong>以系統管理員身分執行</strong>」。</p>
+<p>跳出來問你「是否允許此應用程式變更您的裝置」→ 點<strong>是</strong>。</p>
+<p>你會看到一個深色背景的視窗，上面寫著 <code>PS C:\Users\你的名字&gt;</code>。這就是 PowerShell。接下來所有指令都在這裡打——複製、貼上、按 Enter。</p>
+<p>第一件事，允許執行腳本：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Set-ExecutionPolicy</span> <span class="literal">-Scope</span> CurrentUser RemoteSigned <span class="literal">-Force</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Step-2：安裝-Node-js"><a href="#Step-2：安裝-Node-js" class="headerlink" title="Step 2：安裝 Node.js"></a>Step 2：安裝 Node.js</h3><p>OpenClaw 需要 Node.js 這個東西才能跑。貼上這行：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">winget install OpenJS.NodeJS.LTS <span class="literal">--accept-source-agreements</span> <span class="literal">--accept-package-agreements</span></span><br></pre></td></tr></table></figure>
+
+<p>等它跑完。</p>
+<p><strong>⚠️ 裝完之後，關掉 Windows Terminal，重新打開一個新的。</strong> 這次不用系統管理員了，直接打開就好。</p>
+<p>舊的視窗不會知道你裝了新東西。很多人卡在這一步——裝了 Node 但打指令說找不到，就是因為沒開新的 Terminal。</p>
+<p>開新的 Terminal 之後，確認一下：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node <span class="literal">-v</span></span><br></pre></td></tr></table></figure>
+
+<p>看到 <code>v22.x.x</code> 或更高的版號就對了。</p>
+<h3 id="Step-3：安裝-OpenClaw"><a href="#Step-3：安裝-OpenClaw" class="headerlink" title="Step 3：安裝 OpenClaw"></a>Step 3：安裝 OpenClaw</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install <span class="literal">-g</span> openclaw</span><br></pre></td></tr></table></figure>
+
+<p>等它跑完（大約 1-2 分鐘），確認裝好了：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw <span class="literal">--version</span></span><br></pre></td></tr></table></figure>
+
+<p>有版號出來就行。</p>
+<p>如果跳出紅字說找不到 <code>openclaw</code>——跑這行看你的 npm 裝東西的路徑在哪：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm prefix <span class="literal">-g</span></span><br></pre></td></tr></table></figure>
+
+<p>它會吐出一個路徑，像是 <code>C:\Users\你的名字\AppData\Roaming\npm</code>。把這串加到系統的 PATH 裡：</p>
+<ol>
+<li>按 <strong>Win 鍵</strong>，搜尋「環境變數」</li>
+<li>點「編輯系統環境變數」→ 點「環境變數」按鈕</li>
+<li>在<strong>使用者變數</strong>裡找到 <code>Path</code>，雙擊它</li>
+<li>點「新增」，貼上剛才那串路徑</li>
+<li>一路確定關掉</li>
+<li><strong>重新打開</strong> Terminal</li>
+</ol>
+<h3 id="Step-4：跑-Onboarding-Wizard"><a href="#Step-4：跑-Onboarding-Wizard" class="headerlink" title="Step 4：跑 Onboarding Wizard"></a>Step 4：跑 Onboarding Wizard</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw onboard</span><br></pre></td></tr></table></figure>
+
+<p>它會一步一步問你問題。照著回答：</p>
+<p><strong>QuickStart 還是 Advanced？</strong> → 選 <strong>QuickStart</strong>。</p>
+<p><strong>AI Provider？</strong> → 看你有什麼訂閱：</p>
+<p>如果你有 ChatGPT Plus &#x2F; Pro &#x2F; Codex 訂閱（大多數人應該有），選 <code>OpenAI (Codex subscription)</code>。Wizard 會跳出瀏覽器叫你登入 ChatGPT 帳號，授權完就搞定了。你的 OpenClaw 會直接用你的訂閱額度，不用額外花錢。</p>
+<p>如果你有 Claude Pro &#x2F; Max 訂閱，選 <code>Anthropic token (paste setup-token)</code>。你需要先裝 Claude Code CLI 來產生 token：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install <span class="literal">-g</span> @anthropic<span class="literal">-ai</span>/claude<span class="literal">-code</span></span><br><span class="line">claude setup<span class="literal">-token</span></span><br></pre></td></tr></table></figure>
+
+<p>它會跳出瀏覽器叫你登入 Anthropic 帳號，授權完會吐出一串 token，複製貼到 Wizard 裡。</p>
+<p>兩個都沒有？去 <a target="_blank" rel="noopener" href="https://platform.openai.com/">OpenAI Platform</a> 或 <a target="_blank" rel="noopener" href="https://console.anthropic.com/">Anthropic Console</a> 申請 API Key，選對應的 API key 選項貼上。用多少付多少，沒有月費。</p>
+<p><strong>Workspace 位置？</strong> → 直接按 <strong>Enter</strong>（用預設的）。</p>
+<p><strong>Gateway Port？</strong> → 直接按 <strong>Enter</strong>（預設 18789）。</p>
+<p><strong>要不要裝聊天通道？</strong> → 先跳過，按 <strong>Enter</strong>。</p>
+<p><strong>要不要安裝背景服務？</strong> → 選<strong>不要</strong>。我們等一下用 PM2，比較好管。</p>
+<p>跑完之後，先試一下 Gateway 能不能動：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw gateway</span><br></pre></td></tr></table></figure>
+
+<p>看到 <code>Gateway running on http://127.0.0.1:18789</code> → 成功。按 <strong>Ctrl + C</strong> 停掉它。</p>
+<p>接著打開 OpenClaw 的 Control UI：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw dashboard</span><br></pre></td></tr></table></figure>
+
+<p>它會自動幫你開瀏覽器。看到 OpenClaw 的畫面就代表你的 AI 助手已經活了。</p>
+<h3 id="Step-5：安裝-PM2，讓-OpenClaw-不會斷"><a href="#Step-5：安裝-PM2，讓-OpenClaw-不會斷" class="headerlink" title="Step 5：安裝 PM2，讓 OpenClaw 不會斷"></a>Step 5：安裝 PM2，讓 OpenClaw 不會斷</h3><p>到上一步，OpenClaw 已經能用了。但你一關掉 Terminal，它就斷了。</p>
+<p>PM2 是一個專門讓程式在背景跑的工具。裝上之後，關掉視窗、登出帳號，OpenClaw 都還是繼續跑。</p>
+<p><strong>安裝 PM2：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install <span class="literal">-g</span> pm2</span><br></pre></td></tr></table></figure>
+
+<p><strong>用 PM2 啟動 OpenClaw：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 <span class="built_in">start</span> openclaw <span class="literal">--name</span> <span class="string">&quot;openclaw&quot;</span> <span class="literal">--</span> gateway</span><br></pre></td></tr></table></figure>
+
+<p>跑完之後，看一下狀態：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 list</span><br></pre></td></tr></table></figure>
+
+<p>看到 <code>openclaw</code> 狀態是 <code>online</code> → 正在跑了。</p>
+<p><strong>存檔 + 開機自啟動：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pm2 save</span><br><span class="line">pm2<span class="literal">-startup</span> install</span><br></pre></td></tr></table></figure>
+
+<p>如果它吐出一行叫你複製貼上的指令，照做。</p>
+<p><strong>驗證：</strong> 關掉 Terminal，重新打開一個，跑 <code>openclaw dashboard</code>。畫面正常打開 → PM2 在背景跑著，成功。</p>
+<p><strong>以後會用到的 PM2 指令：</strong></p>
+<ul>
+<li><code>pm2 list</code> → 看狀態</li>
+<li><code>pm2 logs openclaw</code> → 看 log（出問題時用）</li>
+<li><code>pm2 restart openclaw</code> → 重啟</li>
+<li><code>pm2 stop openclaw</code> → 停掉</li>
+</ul>
+<h3 id="Step-6：接上-Discord"><a href="#Step-6：接上-Discord" class="headerlink" title="Step 6：接上 Discord"></a>Step 6：接上 Discord</h3><p>到這裡你已經可以在瀏覽器裡跟 AI 聊天了。如果你想用 Discord 來操作，繼續往下。</p>
+<p>去 <a target="_blank" rel="noopener" href="https://discord.com/developers/applications">Discord Developer Portal</a>，點 <strong>New Application</strong>，取個名字。</p>
+<p>左邊選 <strong>Bot</strong>，設定 Username（它在 Discord 裡顯示的名字）。</p>
+<p>往下捲到 <strong>Privileged Gateway Intents</strong>，打開這兩個：</p>
+<ul>
+<li>✅ <strong>Message Content Intent</strong></li>
+<li>✅ <strong>Server Members Intent</strong></li>
+</ul>
+<p>捲回上面，點 <strong>Reset Token</strong>。複製那串 Token，<strong>存好，它只顯示一次</strong>。</p>
+<p>左邊選 <strong>OAuth2</strong>，往下捲到 <strong>OAuth2 URL Generator</strong>，勾 <code>bot</code> 和 <code>applications.commands</code>。</p>
+<p>下面的 <strong>Bot Permissions</strong> 勾這幾個：View Channels、Send Messages、Read Message History、Embed Links、Attach Files。</p>
+<p>最下面會產生一個 URL，複製它，貼到瀏覽器，選你的 Server，確認邀請。</p>
+<p>回到 Windows Terminal，把 Token 設進 OpenClaw：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">openclaw config <span class="built_in">set</span> channels.discord.token <span class="string">&#x27;&quot;貼上你的TOKEN&quot;&#x27;</span> <span class="literal">--json</span></span><br><span class="line">openclaw config <span class="built_in">set</span> channels.discord.enabled true <span class="literal">--json</span></span><br><span class="line">pm2 restart openclaw</span><br></pre></td></tr></table></figure>
+
+<p>注意 Token 外面是<strong>單引號包雙引號</strong>（<code>&#39;&quot;像這樣&quot;&#39;</code>）。不是打錯，PowerShell 要這樣寫。</p>
+<p>打開 Discord，<strong>私訊你的 Bot</strong>。它會回一個 pairing code。</p>
+<p>回到 Terminal：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw pairing approve discord 那串CODE</span><br></pre></td></tr></table></figure>
+
+<p>完成。現在你在 Discord 裡傳訊息給 Bot，AI 就會回你了。</p>
+<h3 id="常見問題"><a href="#常見問題" class="headerlink" title="常見問題"></a>常見問題</h3><p><strong>指令打了說找不到？</strong></p>
+<p>關掉 Terminal 重開一個新的。還是不行的話，回去看 Step 3 加 PATH 那段。</p>
+<p><strong>Gateway 起不來？</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw doctor</span><br></pre></td></tr></table></figure>
+
+<p><strong>想換 AI 模型？</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw configure <span class="literal">--section</span> auth</span><br></pre></td></tr></table></figure>
+
+<p><strong>API Key &#x2F; Token 安全嗎？</strong></p>
+<p>不管是 API Key 還是訂閱的 OAuth token，都存在你自己電腦的設定檔裡。OpenClaw 直接拿它去呼叫 AI Provider 的 API，沒有中間人，不會經過 OpenClaw 的伺服器。</p>
+<p><strong>訂閱的 Token 過期了怎麼辦？</strong></p>
+<p>OpenAI Codex 的 token 通常會自動刷新。如果 Claude 的 token 過期了，重新跑一次 <code>claude setup-token</code>，然後：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openclaw models auth paste<span class="literal">-token</span> <span class="literal">--provider</span> anthropic</span><br><span class="line">pm2 restart openclaw</span><br></pre></td></tr></table></figure>
+
+<h3 id="回顧"><a href="#回顧" class="headerlink" title="回顧"></a>回顧</h3><p>你剛剛做了這些事：</p>
+<ol>
+<li>裝了 Node.js</li>
+<li>裝了 OpenClaw</li>
+<li>跑了 Wizard（設定 API Key）</li>
+<li>用 PM2 讓它在背景 24 小時跑</li>
+<li>接上了 Discord</li>
+</ol>
+<p>現在你有一個跑在自己電腦上的 AI 助手。關掉視窗不會斷、重開機會自動啟動、資料全在自己手上。</p>
+<p>打開 Discord，傳個訊息給你的 Bot 吧。比起在網頁上用 ChatGPT，從自己平常用的聊天軟體叫出 AI、而且它跑在自己的電腦上——那種「這東西是我的」的感覺，真的不一樣。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/Windows/" rel="tag"># Windows</a>
+              <a href="/tags/PM2/" rel="tag"># PM2</a>
+              <a href="/tags/%E5%AE%89%E8%A3%9D%E6%95%99%E5%AD%B8/" rel="tag"># 安裝教學</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026030401/" rel="prev" title="當你的 AI 供應商連掛兩天：多模型 Fallback Chain 實戰筆記">
+      <i class="fa fa-chevron-left"></i> 當你的 AI 供應商連掛兩天：多模型 Fallback Chain 實戰筆記
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026030701/" rel="next" title="撲克位置理論與股票交易：為什麼你不該在開盤就追">
+      撲克位置理論與股票交易：為什麼你不該在開盤就追 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#OpenClaw-%E6%98%AF%E4%BB%80%E9%BA%BC%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">OpenClaw 是什麼？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%A0%E9%9C%80%E8%A6%81%E6%BA%96%E5%82%99%E4%BB%80%E9%BA%BC"><span class="nav-number">2.</span> <span class="nav-text">你需要準備什麼</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-1%EF%BC%9A%E6%89%93%E9%96%8B-Windows-Terminal"><span class="nav-number">3.</span> <span class="nav-text">Step 1：打開 Windows Terminal</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-2%EF%BC%9A%E5%AE%89%E8%A3%9D-Node-js"><span class="nav-number">4.</span> <span class="nav-text">Step 2：安裝 Node.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-3%EF%BC%9A%E5%AE%89%E8%A3%9D-OpenClaw"><span class="nav-number">5.</span> <span class="nav-text">Step 3：安裝 OpenClaw</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-4%EF%BC%9A%E8%B7%91-Onboarding-Wizard"><span class="nav-number">6.</span> <span class="nav-text">Step 4：跑 Onboarding Wizard</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-5%EF%BC%9A%E5%AE%89%E8%A3%9D-PM2%EF%BC%8C%E8%AE%93-OpenClaw-%E4%B8%8D%E6%9C%83%E6%96%B7"><span class="nav-number">7.</span> <span class="nav-text">Step 5：安裝 PM2，讓 OpenClaw 不會斷</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-6%EF%BC%9A%E6%8E%A5%E4%B8%8A-Discord"><span class="nav-number">8.</span> <span class="nav-text">Step 6：接上 Discord</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A6%8B%E5%95%8F%E9%A1%8C"><span class="nav-number">9.</span> <span class="nav-text">常見問題</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E9%A1%A7"><span class="nav-number">10.</span> <span class="nav-text">回顧</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

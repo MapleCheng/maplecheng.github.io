@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="企業開始用多模型路由分配 AI 任務後，模型選擇可以依能力、延遲與成本改變，但資料權限、工具範圍、審批規則與稽核責任不能跟著漂移。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="換了模型，不能順便換掉權限">
+<meta property="og:url" content="https://maplecheng.com/page/2026080101/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="企業開始用多模型路由分配 AI 任務後，模型選擇可以依能力、延遲與成本改變，但資料權限、工具範圍、審批規則與稽核責任不能跟著漂移。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-07-31T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.346Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="企業架構">
+<meta property="article:tag" content="多模型路由">
+<meta property="article:tag" content="技術管理">
+<meta property="article:tag" content="權限治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026080101/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>換了模型，不能順便換掉權限 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026080101/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          換了模型，不能順便換掉權限
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-08-01 05:00:00" itemprop="dateCreated datePublished" datetime="2026-08-01T05:00:00+08:00">2026-08-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI-%E8%88%87%E4%BC%81%E6%A5%AD%E7%B3%BB%E7%B5%B1/" itemprop="url" rel="index"><span itemprop="name">AI 與企業系統
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">企業開始用多模型路由分配 AI 任務後，模型選擇可以依能力、延遲與成本改變，但資料權限、工具範圍、審批規則與稽核責任不能跟著漂移。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近企業 AI 平台有一個很明顯的方向：不再把所有工作綁在單一模型上。簡單摘要交給便宜快速的模型，複雜推理交給能力較強的模型，圖片、語音或程式再分流到各自擅長的服務。遇到供應商異常，系統還能自動 fallback，不必讓整條流程停下來。</p>
+<p>這在成本與可靠性上都很合理。但從技術主管的角度，我更在意另一件事：<strong>任務可以換模型，權限不能跟著換一套。</strong>如果路由層只知道哪個模型比較快、比較便宜，卻不知道這個人能看什麼、這筆資料能去哪裡、這個動作需要誰核准，那它不是智慧調度，而是一條新的權限繞道。</p>
+<span id="more"></span>
+
+<h2 id="模型路由不是單純的效能最佳化"><a href="#模型路由不是單純的效能最佳化" class="headerlink" title="模型路由不是單純的效能最佳化"></a>模型路由不是單純的效能最佳化</h2><p>很多團隊第一次做 model routing，規則通常很直覺：依任務類型、context 長度、品質要求、延遲與 token 價格選模型。這些指標沒有錯，但它們只描述「哪個引擎適合做」，沒有回答「這次工作可不可以交給它做」。</p>
+<p>例如同樣是摘要，一份公開文件與一份內部人事資料，能力需求可能完全一樣，資料邊界卻完全不同。同樣是查詢訂單，一個模型只負責閱讀，另一個 Agent 還能呼叫工具修改交期。若路由層只看到「這是摘要」或「這是高難度推理」，就可能把敏感內容送到不允許的供應商、區域或保存政策之下，也可能讓原本只能產草稿的工作，在切換執行路徑後取得送出權限。</p>
+<p>所以我會把路由判斷拆成兩個問題。第一個是能力選擇：哪個模型做得好、成本合理、延遲可接受？第二個是政策選擇：在目前使用者、資料、環境與動作範圍下，哪些執行路徑根本不應成為候選？</p>
+<p>順序很重要。應該先用政策把不合格的路徑排除，再從合格集合裡做效能與成本最佳化，而不是先挑出最便宜的模型，最後才祈禱它符合規範。</p>
+<h2 id="權限應該附著在任務，不是模型名稱"><a href="#權限應該附著在任務，不是模型名稱" class="headerlink" title="權限應該附著在任務，不是模型名稱"></a>權限應該附著在任務，不是模型名稱</h2><p>我不喜歡用「高階模型可以做更多事」來設計企業 Agent。模型能力與業務授權是兩條不同的軸。模型變聰明，不代表它自動取得更多資料；模型比較便宜，也不代表它只能處理低風險工作。</p>
+<p>真正應該跟著任務一路傳遞的，是一份可執行的政策上下文，至少包含：</p>
+<ul>
+<li>發起者與代理身份，以及代誰執行；</li>
+<li>可讀取的資料範圍、欄位與保存限制；</li>
+<li>允許使用的工具、動作層級與目標環境；</li>
+<li>是否只能建議或產生草稿，能否提交、核准或執行；</li>
+<li>哪些步驟需要人工審批，審批後的授權能使用多久；</li>
+<li>輸出可以回寫到哪裡，以及必須保留哪些稽核資訊。</li>
+</ul>
+<p>這份上下文不應只寫在 prompt 裡。Prompt 可以提醒模型遵守規則，卻不是強制邊界。真正的限制要落在資料存取、工具 gateway、憑證 scope、網路邊界與流程狀態上。模型可以被替換，這些控制仍然要生效。</p>
+<p>換句話說，路由層可以決定由誰思考，但不能單方面決定它能碰什麼。</p>
+<h2 id="Fallback-最容易把安全悄悄降級"><a href="#Fallback-最容易把安全悄悄降級" class="headerlink" title="Fallback 最容易把安全悄悄降級"></a>Fallback 最容易把安全悄悄降級</h2><p>多模型架構最吸引人的功能之一是 fallback。主要服務 timeout、額度用完或區域故障時，自動換另一個模型繼續跑，使用者甚至不一定會察覺。</p>
+<p>可惜，越無感的 fallback，越容易藏住安全降級。備援模型可能位於不同區域，資料保留條款不同；它可能不支援原本的結構化輸出或工具授權機制；原路徑使用企業身份登入，備援路徑卻共用一把服務憑證；甚至原模型只能閱讀資料，fallback Agent 卻預設掛載更多工具。</p>
+<p>因此，fallback 不應該只是模型清單，而應該是經過驗證的相容矩陣。每條備援路徑都要回答：資料可以送嗎？工具能力一致嗎？審批語意會不會遺失？輸出格式能否被後續系統正確驗證？稽核事件是否仍能串回同一個任務？</p>
+<p>如果答案不完整，我寧可讓任務明確失敗或降級成只讀、只產草稿，也不要為了維持「服務看起來正常」，偷偷把治理標準放低。</p>
+<h2 id="稽核要記錄路由決策，不只記最後答案"><a href="#稽核要記錄路由決策，不只記最後答案" class="headerlink" title="稽核要記錄路由決策，不只記最後答案"></a>稽核要記錄路由決策，不只記最後答案</h2><p>當同一個工作可能經過不同模型、供應商與工具鏈，出了問題只保存最終輸出是不夠的。團隊需要知道當時有哪些候選路徑、為何選中這一條、套用了哪版政策、是否發生 fallback、哪些資料被送出，以及最後由哪個身份執行工具。</p>
+<p>這些紀錄不只是資安稽核。它也直接影響品質與成本管理。某類案件為什麼常被送到昂貴模型？某個 fallback 的人工覆判率是否特別高？特定資料範圍是否經常因政策不符而沒有可用模型？如果路由決策不可觀測，團隊只能看到帳單變化與偶發錯誤，卻無法改善架構。</p>
+<p>我會把一次 Agent 任務想成一條有政策約束的執行軌跡，而不是一個 API request。模型只是軌跡中的一個可替換節點；身份、權限、審批、資料血緣與責任才是整條軌跡不能斷掉的骨架。</p>
+<h2 id="多模型的價值，是保留選擇，不是製造例外"><a href="#多模型的價值，是保留選擇，不是製造例外" class="headerlink" title="多模型的價值，是保留選擇，不是製造例外"></a>多模型的價值，是保留選擇，不是製造例外</h2><p>企業採用多模型並沒有錯。它能避免供應商綁定，也能讓不同工作取得更好的品質、速度與成本平衡。真正的問題，是團隊有沒有把「模型可替換」與「政策不可漂移」分開設計。</p>
+<p>我現在評估一個多模型 Agent 平台，會先問幾個很務實的問題：路由前是否先做政策判斷？權限能否跨模型一致執行？fallback 失去能力時會 fail closed，還是默默放寬？高風險操作是否仍回到同一套預覽、審批與 rollback？路由決策能否被查詢、重現與解釋？</p>
+<p>如果這些問題沒有答案，多模型只會把原本集中在單一服務的風險，分散到更多看不見的角落。</p>
+<p>技術上，我們當然希望系統能自動選到最適合的模型。但企業真正需要的，不是每次都選到最聰明的那一個，而是不論選到誰，都不能越過同一條業務邊界。</p>
+<p>模型可以換，供應商可以換，成本策略也可以換。不能跟著一起換掉的，是誰能做什麼，以及出了事由誰說明。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+              <a href="/tags/%E6%AC%8A%E9%99%90%E6%B2%BB%E7%90%86/" rel="tag"># 權限治理</a>
+              <a href="/tags/%E5%A4%9A%E6%A8%A1%E5%9E%8B%E8%B7%AF%E7%94%B1/" rel="tag"># 多模型路由</a>
+              <a href="/tags/%E4%BC%81%E6%A5%AD%E6%9E%B6%E6%A7%8B/" rel="tag"># 企業架構</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026073101/" rel="prev" title="當 AI 寫進業務欄位，它就不再只是一段回答">
+      <i class="fa fa-chevron-left"></i> 當 AI 寫進業務欄位，它就不再只是一段回答
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026080201/" rel="next" title="Prompt 說「不能上網」，不代表 Agent 真的被隔離">
+      Prompt 說「不能上網」，不代表 Agent 真的被隔離 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E8%B7%AF%E7%94%B1%E4%B8%8D%E6%98%AF%E5%96%AE%E7%B4%94%E7%9A%84%E6%95%88%E8%83%BD%E6%9C%80%E4%BD%B3%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">模型路由不是單純的效能最佳化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AC%8A%E9%99%90%E6%87%89%E8%A9%B2%E9%99%84%E8%91%97%E5%9C%A8%E4%BB%BB%E5%8B%99%EF%BC%8C%E4%B8%8D%E6%98%AF%E6%A8%A1%E5%9E%8B%E5%90%8D%E7%A8%B1"><span class="nav-number">2.</span> <span class="nav-text">權限應該附著在任務，不是模型名稱</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fallback-%E6%9C%80%E5%AE%B9%E6%98%93%E6%8A%8A%E5%AE%89%E5%85%A8%E6%82%84%E6%82%84%E9%99%8D%E7%B4%9A"><span class="nav-number">3.</span> <span class="nav-text">Fallback 最容易把安全悄悄降級</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%BD%E6%A0%B8%E8%A6%81%E8%A8%98%E9%8C%84%E8%B7%AF%E7%94%B1%E6%B1%BA%E7%AD%96%EF%BC%8C%E4%B8%8D%E5%8F%AA%E8%A8%98%E6%9C%80%E5%BE%8C%E7%AD%94%E6%A1%88"><span class="nav-number">4.</span> <span class="nav-text">稽核要記錄路由決策，不只記最後答案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%83%B9%E5%80%BC%EF%BC%8C%E6%98%AF%E4%BF%9D%E7%95%99%E9%81%B8%E6%93%87%EF%BC%8C%E4%B8%8D%E6%98%AF%E8%A3%BD%E9%80%A0%E4%BE%8B%E5%A4%96"><span class="nav-number">5.</span> <span class="nav-text">多模型的價值，是保留選擇，不是製造例外</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

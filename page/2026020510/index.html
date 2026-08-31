@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="比較 AI Agent 的兩種工具擴展方式 MCP 和 Skills 的優缺點、適用場景與決策框架，分享實際選擇經驗與混合使用策略">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MCP vs Skills：AI Agent 工具擴展的兩條路，我怎麼選？">
+<meta property="og:url" content="https://maplecheng.com/page/2026020510/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="比較 AI Agent 的兩種工具擴展方式 MCP 和 Skills 的優缺點、適用場景與決策框架，分享實際選擇經驗與混合使用策略">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-05T03:45:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.339Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="MCP">
+<meta property="article:tag" content="Skills">
+<meta property="article:tag" content="工具擴展">
+<meta property="article:tag" content="架構設計">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020510/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>MCP vs Skills：AI Agent 工具擴展的兩條路，我怎麼選？ | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020510/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MCP vs Skills：AI Agent 工具擴展的兩條路，我怎麼選？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-05 11:45:00" itemprop="dateCreated datePublished" datetime="2026-02-05T11:45:00+08:00">2026-02-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">比較 AI Agent 的兩種工具擴展方式 MCP 和 Skills 的優缺點、適用場景與決策框架，分享實際選擇經驗與混合使用策略</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>AI Agent 要真的有用，光會聊天是不夠的。它得能操作工具——查資料、呼叫 API、讀寫檔案、跑腳本。但「怎麼讓 AI 使用工具」這件事，目前有不同的做法，而且各有各的哲學。最近我在幫自己的 AI 助理擴充功能的時候，反覆在兩種方式之間掙扎：<strong>MCP（Model Context Protocol）</strong> 和 <strong>Skills</strong>。這篇來聊聊我的思考和實際選擇。</p>
+<span id="more"></span>
+
+<h2 id="什麼是-MCP（Model-Context-Protocol）"><a href="#什麼是-MCP（Model-Context-Protocol）" class="headerlink" title="什麼是 MCP（Model Context Protocol）"></a>什麼是 MCP（Model Context Protocol）</h2><p>MCP 是由 Anthropic 提出的一個標準化協議，目標是建立 AI model 和外部工具之間的通用溝通方式。你可以把它想像成 AI 世界的 USB——不管什麼設備，只要符合 USB 規格就能接上電腦用。</p>
+<p>架構上大概長這樣：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AI Agent ↔ MCP <span class="built_in">Client</span> ↔ MCP <span class="built_in">Server</span> ↔ 外部服務（API、DB、檔案系統等）</span><br></pre></td></tr></table></figure>
+
+<p>MCP Server 是一個獨立的 process，它把外部服務封裝成 MCP 協議定義的 tool、resource、prompt 等介面。AI Agent 透過 MCP Client 跟 MCP Server 溝通，不需要知道外部服務的實作細節。</p>
+<h3 id="優點"><a href="#優點" class="headerlink" title="優點"></a>優點</h3><ul>
+<li><strong>標準化</strong>：不同的 AI client（Cursor、Claude Desktop、OpenClaw 等）都可以用同一個 MCP Server，寫一次就到處用</li>
+<li><strong>社群生態</strong>：因為是開放協議，社群已經有大量現成的 MCP Server——GitHub、Slack、Google Calendar、各種資料庫…幾乎你想得到的服務都有人做了</li>
+<li><strong>即時雙向通訊</strong>：MCP 支援 WebSocket 連線，可以做到 server push 和 streaming，不是傳統的 request-response</li>
+</ul>
+<h3 id="缺點"><a href="#缺點" class="headerlink" title="缺點"></a>缺點</h3><ul>
+<li><strong>需要跑 MCP Server process</strong>：多了一個要管理的服務。要啟動、要監控、crash 了要重啟</li>
+<li><strong>多一層抽象</strong>：AI → MCP Client → MCP Server → 外部服務。多了一層就多了一個可能出問題的地方</li>
+<li><strong>Debug 比較複雜</strong>：問題可能出在 AI 理解 tool 的方式、MCP Client 的實作、MCP Server 的邏輯、或外部服務本身。四層裡面要找到 bug 在哪，有時候蠻頭痛的</li>
+</ul>
+<h2 id="什麼是-Skills"><a href="#什麼是-Skills" class="headerlink" title="什麼是 Skills"></a>什麼是 Skills</h2><p>Skills 是另一種讓 AI Agent 使用工具的方式。以 OpenClaw 為例，一個 Skill 就是一個資料夾，裡面包含：</p>
+<ul>
+<li><strong>SKILL.md</strong>：說明書，用自然語言描述這個 skill 是什麼、怎麼用、有哪些參數</li>
+<li>**scripts&#x2F;**：實際執行的腳本（shell script、Python、Node.js 都行）</li>
+<li>**references&#x2F;**：參考資料（API 文件、dataset 說明等）</li>
+</ul>
+<p>運作方式很直覺：AI 讀了 SKILL.md 就知道這個工具能幹嘛，需要的時候就呼叫 scripts 裡面的腳本來執行。</p>
+<p>比如一個「查股票」的 Skill 可能長這樣：</p>
+<figure class="highlight graphql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">skills/stock-<span class="keyword">query</span>/</span><br><span class="line">├── SKILL.md          <span class="comment"># 說明怎麼查股票、支援哪些參數</span></span><br><span class="line">├── scripts/</span><br><span class="line">│   ├── <span class="keyword">query</span>.sh      <span class="comment"># 呼叫股票 API 的腳本</span></span><br><span class="line">│   └── market-scan.py  <span class="comment"># 市場掃描腳本</span></span><br><span class="line">└── references/</span><br><span class="line">    └── datasets.md   <span class="comment"># 支援的 dataset 列表和欄位說明</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="優點-1"><a href="#優點-1" class="headerlink" title="優點"></a>優點</h3><ul>
+<li><strong>簡單直覺</strong>：就是檔案和腳本，沒有什麼協議要學，沒有 server 要管</li>
+<li><strong>不需要額外 process</strong>：AI 直接讀檔 + 跑腳本，不需要另一個持續運行的服務</li>
+<li><strong>AI 可以直接讀腳本理解邏輯</strong>：這一點很關鍵。如果 AI 不確定某個 skill 做了什麼，它可以直接讀 script 的 source code。這比 MCP 的 tool description 提供的資訊多很多</li>
+<li><strong>快速迭代</strong>：改個 shell script 就生效，不需要重新建構或部署任何東西</li>
+</ul>
+<h3 id="缺點-1"><a href="#缺點-1" class="headerlink" title="缺點"></a>缺點</h3><ul>
+<li><strong>和特定 agent 框架耦合</strong>：OpenClaw 的 Skills 格式跟 Cursor 不一樣、跟其他框架也不一樣。你在 OpenClaw 建的 Skill，不能直接搬到其他地方用</li>
+<li><strong>不同 client 要重複設定</strong>：如果你想在兩個不同的 AI agent 裡用同一個功能，可能要各設一次</li>
+<li><strong>沒有標準化的雙向通訊</strong>：Skills 本質上是「AI 呼叫腳本 → 腳本回傳結果」，不支援 server push 或 streaming</li>
+</ul>
+<h2 id="我的決策框架"><a href="#我的決策框架" class="headerlink" title="我的決策框架"></a>我的決策框架</h2><pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    START[需要新工具] --> Q1{多個 AI Client<br/>都要用？}
+    Q1 -->|是| Q2{需要即時<br/>雙向通訊？}
+    Q1 -->|否| Q3{需要快速<br/>prototype？}
+    Q2 -->|是| MCP[✅ 用 MCP]
+    Q2 -->|否| Q4{維護成本<br/>可接受？}
+    Q4 -->|是| MCP
+    Q4 -->|否| SKILL_WRAP["✅ Skill 包裝 MCP"]
+    Q3 -->|是| SKILL[✅ 用 Skills]
+    Q3 -->|否| SKILL
+          </pre>
+
+<p>面對「要用 MCP 還是 Skills」這個問題，我不覺得有標準答案。但經過一段時間的實作，我整理出了一個自己的決策框架：</p>
+<h3 id="場景一：只在一個-agent-裡用"><a href="#場景一：只在一個-agent-裡用" class="headerlink" title="場景一：只在一個 agent 裡用"></a>場景一：只在一個 agent 裡用</h3><p>如果這個工具只有一個 AI agent 會用到，<strong>Skills 夠了</strong>。</p>
+<p>理由很簡單：少了 MCP Server 要管、設定更簡單、debug 更直覺。除非有其他原因需要 MCP，否則何必多一層抽象？</p>
+<p>比如我的 AI 助理需要查台股資料，目前只有這一個 agent 需要這個功能。那我就建個 Skill：寫個 <code>query.sh</code> 呼叫 API、寫個 <code>SKILL.md</code> 說明怎麼用，五分鐘搞定。</p>
+<h3 id="場景二：多個-client-都要用同一個工具"><a href="#場景二：多個-client-都要用同一個工具" class="headerlink" title="場景二：多個 client 都要用同一個工具"></a>場景二：多個 client 都要用同一個工具</h3><p>這時候 <strong>MCP 的價值就出來了</strong>。</p>
+<p>比如你想讓 Cursor IDE 和你的 AI 助理都能查詢同一個內部 API。如果用 Skills，你得在兩邊各設一次。但如果用 MCP，跑一個 MCP Server，兩邊都連上去就好了。</p>
+<p>不過，我目前的實際經驗是：<strong>這種場景沒有想像中常見</strong>。大部分時候，不同的 client 需要的工具是不一樣的，或者雖然看起來一樣但細節不同（比如 Cursor 需要的 codebase 查詢和 AI 助理需要的 codebase 查詢，prompt 和回傳格式可能不同）。</p>
+<h3 id="場景三：快速-prototype"><a href="#場景三：快速-prototype" class="headerlink" title="場景三：快速 prototype"></a>場景三：快速 prototype</h3><p>毫無疑問選 <strong>Skills</strong>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p skills/my-tool/scripts</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;#!/bin/bash\ncurl -s &quot;https://api.example.com/$1&quot;&#x27;</span> &gt; skills/my-tool/scripts/query.sh</span><br><span class="line"><span class="built_in">chmod</span> +x skills/my-tool/scripts/query.sh</span><br></pre></td></tr></table></figure>
+
+<p>再寫個 SKILL.md，一個新工具就能用了。從零到可用可能不到十分鐘。</p>
+<p>MCP 的話，你得寫 server code、定義 tool schema、設定連線、測試連線……最快也要半小時以上。</p>
+<h3 id="場景四：需要即時雙向通訊"><a href="#場景四：需要即時雙向通訊" class="headerlink" title="場景四：需要即時雙向通訊"></a>場景四：需要即時雙向通訊</h3><p>這是 <strong>MCP 的強項</strong>。</p>
+<p>如果你的工具需要 push notification（比如監控告警）、streaming response（比如即時數據流）、或長時間運行的操作回報進度，MCP 的 WebSocket 連線模式比 Skills 的 request-response 模式更適合。</p>
+<p>Skills 要做到類似的效果也不是不行，但會比較 hacky（比如用 polling 或寫暫存檔）。</p>
+<h2 id="實際案例"><a href="#實際案例" class="headerlink" title="實際案例"></a>實際案例</h2><p>講完框架，來說說我實際的選擇。</p>
+<h3 id="金融-API-查詢-→-Skills"><a href="#金融-API-查詢-→-Skills" class="headerlink" title="金融 API 查詢 → Skills"></a>金融 API 查詢 → Skills</h3><p>目前只有我的 AI 助理需要查股票和財報資料。用 Skill 來實作：一個 <code>query.sh</code> 負責打 API、一個 <code>market-scan.py</code> 負責做市場掃描、一個 <code>datasets.md</code> 列出支援的 dataset 和欄位。</p>
+<p>整個 Skill 建好之後，AI 助理可以自然地回答「最近某檔股票的融資融券變化」這類問題。不需要額外的 server，不需要複雜的設定。</p>
+<h3 id="Codebase-查詢-→-目前不需要-MCP"><a href="#Codebase-查詢-→-目前不需要-MCP" class="headerlink" title="Codebase 查詢 → 目前不需要 MCP"></a>Codebase 查詢 → 目前不需要 MCP</h3><p>理論上，codebase 查詢是一個「多個 client 都需要」的場景——Cursor IDE 能查、AI 助理也想查。按照決策框架應該用 MCP。</p>
+<p>但實際上，我目前的做法是讓 AI 助理在需要查 codebase 的時候呼叫 cursor-agent 的 ask mode（上一篇有聊到）。這個做法雖然不優雅，但<strong>夠用</strong>。等到真的有瓶頸了再考慮抽成 MCP Server。</p>
+<h3 id="天氣查詢、圖片生成-→-社群現成的"><a href="#天氣查詢、圖片生成-→-社群現成的" class="headerlink" title="天氣查詢、圖片生成 → 社群現成的"></a>天氣查詢、圖片生成 → 社群現成的</h3><p>這類常見功能，社群通常已經有現成的 Skill 可以直接裝。不需要自己從頭寫，也不需要搞 MCP。</p>
+<h2 id="混合使用的可能性"><a href="#混合使用的可能性" class="headerlink" title="混合使用的可能性"></a>混合使用的可能性</h2><p>有一點我覺得很重要：<strong>MCP 和 Skills 不是非此即彼的選擇</strong>。</p>
+<p>你完全可以在一個 Skill 的 script 裡面呼叫 MCP server。比如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># skills/my-tool/scripts/query.sh</span></span><br><span class="line"><span class="comment"># 這個 skill 的腳本裡面呼叫了一個 MCP server 來取得資料</span></span><br><span class="line">mcp-client call my-mcp-server query --params <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>這樣 AI agent 看到的還是一個 Skill（簡單的 SKILL.md + script），但底層已經透過 MCP 去跟外部服務溝通了。</p>
+<p>我認為比較健康的演進路徑是：</p>
+<ol>
+<li><strong>先用 Skills 快速實作</strong>，驗證需求和流程</li>
+<li>如果發現多個 client 真的都需要同一個工具 → <strong>再抽成 MCP Server</strong></li>
+<li>原本的 Skill script 改成呼叫 MCP server 就好，SKILL.md 不用大改</li>
+</ol>
+<p>這個漸進式的做法比一開始就 over-engineer 一個 MCP Server 要務實得多。</p>
+<h2 id="MCP-vs-Skills-快速對比"><a href="#MCP-vs-Skills-快速對比" class="headerlink" title="MCP vs Skills 快速對比"></a>MCP vs Skills 快速對比</h2><p>用列表整理一下兩者的差異（各有優劣，沒有絕對好壞）：</p>
+<ul>
+<li><strong>設定複雜度</strong>：Skills 低，建個資料夾寫幾個檔案就好 &#x2F; MCP 中高，需要寫 server code 並管理 process</li>
+<li><strong>跨 client 重用</strong>：Skills 低，每個 client 框架格式不同 &#x2F; MCP 高，標準化協議讓不同 client 都能用</li>
+<li><strong>Debug 容易度</strong>：Skills 高，就是檔案和腳本，直接 cat 和 bash -x 就能 debug &#x2F; MCP 中等，要分辨問題在 client、server 還是外部服務</li>
+<li><strong>社群生態</strong>：Skills 看框架，OpenClaw 的生態跟 Cursor 的不一樣 &#x2F; MCP 快速成長，主流服務幾乎都有 MCP Server 了</li>
+<li><strong>即時通訊</strong>：Skills 不支援，本質是 request-response &#x2F; MCP 支援，WebSocket 連線可以做 push 和 streaming</li>
+<li><strong>學習曲線</strong>：Skills 低，會寫 shell script 就會寫 Skill &#x2F; MCP 中等，要理解協議概念和 server 開發</li>
+<li><strong>維運成本</strong>：Skills 幾乎為零，就是檔案 &#x2F; MCP 要管一個 server process</li>
+</ul>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>AI Agent 的工具擴展沒有銀彈。MCP 和 Skills 各有擅長的場景，硬要說哪個比較好是不公平的。</p>
+<p>我自己的原則很簡單：</p>
+<blockquote>
+<p>能用 Script 解決的不用 Server，能用 Skill 解決的不開 MCP。</p>
+</blockquote>
+<p>大部分的日常需求，一個 Skill 就搞定了。Shell script + SKILL.md，五分鐘上線，出問題了直接 <code>cat</code> 腳本就能 debug。只有當「跨 client 重用」的需求明確出現時，才值得花時間去建 MCP Server。</p>
+<p>而且，因為 Skills 可以呼叫 MCP server，所以從 Skill 遷移到 MCP 的成本其實不高。先用 Skill 快速驗證，確定流程和需求都穩定了，再考慮抽成 MCP 也不遲。</p>
+<p>過早抽象是萬惡之源，在 AI 工具擴展這個領域也一樣。先讓東西能動、好用，再來想要不要標準化。畢竟，你的 AI 助理不會因為你用的是 Skill 而不是 MCP 就罷工——它只在乎你給的工具能不能幫它完成任務 🙂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MCP/" rel="tag"># MCP</a>
+              <a href="/tags/Skills/" rel="tag"># Skills</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88/" rel="tag"># 架構設計</a>
+              <a href="/tags/%E5%B7%A5%E5%85%B7%E6%93%B4%E5%B1%95/" rel="tag"># 工具擴展</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020509/" rel="prev" title="Cursor Agent CLI 深度探索：不只是 IDE 裡的 AI，它還能在終端機裡跑">
+      <i class="fa fa-chevron-left"></i> Cursor Agent CLI 深度探索：不只是 IDE 裡的 AI，它還能在終端機裡跑
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020511/" rel="next" title="用 Sub-Agent 解決長任務：AI 多工處理的設計模式">
+      用 Sub-Agent 解決長任務：AI 多工處理的設計模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-MCP%EF%BC%88Model-Context-Protocol%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">什麼是 MCP（Model Context Protocol）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%84%AA%E9%BB%9E"><span class="nav-number">1.1.</span> <span class="nav-text">優點</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E9%BB%9E"><span class="nav-number">1.2.</span> <span class="nav-text">缺點</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Skills"><span class="nav-number">2.</span> <span class="nav-text">什麼是 Skills</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%84%AA%E9%BB%9E-1"><span class="nav-number">2.1.</span> <span class="nav-text">優點</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E9%BB%9E-1"><span class="nav-number">2.2.</span> <span class="nav-text">缺點</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E7%9A%84%E6%B1%BA%E7%AD%96%E6%A1%86%E6%9E%B6"><span class="nav-number">3.</span> <span class="nav-text">我的決策框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%B4%E6%99%AF%E4%B8%80%EF%BC%9A%E5%8F%AA%E5%9C%A8%E4%B8%80%E5%80%8B-agent-%E8%A3%A1%E7%94%A8"><span class="nav-number">3.1.</span> <span class="nav-text">場景一：只在一個 agent 裡用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%B4%E6%99%AF%E4%BA%8C%EF%BC%9A%E5%A4%9A%E5%80%8B-client-%E9%83%BD%E8%A6%81%E7%94%A8%E5%90%8C%E4%B8%80%E5%80%8B%E5%B7%A5%E5%85%B7"><span class="nav-number">3.2.</span> <span class="nav-text">場景二：多個 client 都要用同一個工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%B4%E6%99%AF%E4%B8%89%EF%BC%9A%E5%BF%AB%E9%80%9F-prototype"><span class="nav-number">3.3.</span> <span class="nav-text">場景三：快速 prototype</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%B4%E6%99%AF%E5%9B%9B%EF%BC%9A%E9%9C%80%E8%A6%81%E5%8D%B3%E6%99%82%E9%9B%99%E5%90%91%E9%80%9A%E8%A8%8A"><span class="nav-number">3.4.</span> <span class="nav-text">場景四：需要即時雙向通訊</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%A6%E9%9A%9B%E6%A1%88%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">實際案例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%91%E8%9E%8D-API-%E6%9F%A5%E8%A9%A2-%E2%86%92-Skills"><span class="nav-number">4.1.</span> <span class="nav-text">金融 API 查詢 → Skills</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Codebase-%E6%9F%A5%E8%A9%A2-%E2%86%92-%E7%9B%AE%E5%89%8D%E4%B8%8D%E9%9C%80%E8%A6%81-MCP"><span class="nav-number">4.2.</span> <span class="nav-text">Codebase 查詢 → 目前不需要 MCP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%A9%E6%B0%A3%E6%9F%A5%E8%A9%A2%E3%80%81%E5%9C%96%E7%89%87%E7%94%9F%E6%88%90-%E2%86%92-%E7%A4%BE%E7%BE%A4%E7%8F%BE%E6%88%90%E7%9A%84"><span class="nav-number">4.3.</span> <span class="nav-text">天氣查詢、圖片生成 → 社群現成的</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E4%BD%BF%E7%94%A8%E7%9A%84%E5%8F%AF%E8%83%BD%E6%80%A7"><span class="nav-number">5.</span> <span class="nav-text">混合使用的可能性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MCP-vs-Skills-%E5%BF%AB%E9%80%9F%E5%B0%8D%E6%AF%94"><span class="nav-number">6.</span> <span class="nav-text">MCP vs Skills 快速對比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">7.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

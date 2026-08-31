@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="從 AI agent、AMR 與人形機器人進入製造現場談起：企業系統要從「給人看的工單」走向「機器也能執行的工作契約」，把條件、邊界、驗收與例外處理設計清楚。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="當機器人進工廠，ERP 和 MES 不能只會派工給人">
+<meta property="og:url" content="https://maplecheng.com/page/2026063001/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="從 AI agent、AMR 與人形機器人進入製造現場談起：企業系統要從「給人看的工單」走向「機器也能執行的工作契約」，把條件、邊界、驗收與例外處理設計清楚。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-06-29T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.344Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="CTO 筆記">
+<meta property="article:tag" content="ERP">
+<meta property="article:tag" content="MES">
+<meta property="article:tag" content="智慧製造">
+<meta property="article:tag" content="自動化">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026063001/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>當機器人進工廠，ERP 和 MES 不能只會派工給人 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026063001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          當機器人進工廠，ERP 和 MES 不能只會派工給人
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-06-30 05:00:00" itemprop="dateCreated datePublished" datetime="2026-06-30T05:00:00+08:00">2026-06-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">從 AI agent、AMR 與人形機器人進入製造現場談起：企業系統要從「給人看的工單」走向「機器也能執行的工作契約」，把條件、邊界、驗收與例外處理設計清楚。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看製造業 AI 的消息，我越來越覺得一件事正在靠近：工廠裡的系統不能再只假設「最後執行的人一定是人」。當 AI agent、AMR、自動倉儲，甚至人形機器人開始接近現場流程，ERP 和 MES 面對的問題就不只是多接一個設備 API，而是原本給人看的派工、領料、補料、檢驗與異常處理，要不要重新整理成機器也能安全執行的工作契約。</p>
+<span id="more"></span>
+
+<p>過去談智慧製造，很容易把焦點放在看板、預測、排程最佳化。這些都重要，但它們多半還停在「幫人做判斷」或「讓主管看得更快」的層次。系統告訴你今天哪一張工單可能延遲、哪一個批號風險高、哪一台設備稼動率低，最後還是人去決定要不要插單、換線、調料或通知倉庫。</p>
+<p>可是當現場開始有更多可以自主移動、可以接任務、可以回報狀態的設備時，系統就會從「建議」慢慢往「行動」靠近。這時候，如果 ERP&#x2F;MES 還停留在把資料印成表格、把工單顯示給人看的設計，會很快遇到瓶頸。</p>
+<p>人類操作員很厲害的一點，是會自動補完很多系統沒寫清楚的脈絡。工單上寫著要領某個料號，他會知道這批料如果外箱破損要先問誰；倉位顯示在 A 區，但他可能知道那一排最近常被暫放品塞住，要繞另一邊；主管口頭說「這張先趕」，他也會理解不是所有相關檢驗都可以跳過。這些判斷散在經驗、默契和現場文化裡。</p>
+<p>機器沒有這種默契。AI agent 也好，AMR 也好，人形機器人也好，它們需要的是明確的任務描述、允許範圍、前置條件、驗收標準和例外處理。換句話說，未來的派工不該只是「請把這批料送到產線」，而要像一份 contract：什麼料、從哪裡拿、送到哪裡、在什麼時間窗內完成、途中可以經過哪些區域、遇到缺料或盤點差異時要停在哪一步、需要誰核准才能改路線或改數量。</p>
+<p>這就是我最近對 ERP&#x2F;MES 比較在意的地方：系統要從 record of work 走向 contract of work。前者記錄工作發生了什麼，後者定義工作可以怎麼被執行。</p>
+<p>對人來說，一張工單常常夠用，因為人會問、會猜、會看現場狀況，也會在不確定時停下來找主管。但對自動化設備來說，「不確定時怎麼辦」本身就必須被設計。是原地等待？退回安全區？通知產線？建立異常單？改由人工接手？如果這些沒有寫進流程，機器的效率越高，風險也越高。它可能很快地把錯誤的料送到正確的位置，或把正確的料送到錯誤的時間點。</p>
+<p>很多企業系統過去不需要把這些邊界寫得太細，是因為人類吸收了系統模糊帶來的成本。主管、現場人員、倉管、品保，每天用大量溝通把流程補起來。這在小規模或變動多的環境很自然，但當 AI 和機器人進場，這些口頭補丁就會變成自動化的天花板。</p>
+<p>我會把「機器可執行的工作契約」拆成幾個層次來看。</p>
+<p>第一是任務語意。不是只有工單號碼和料號，而是任務類型到底是領料、補料、移庫、退料、抽驗、配送還是回收。不同任務背後的風險不同，允許的自動化程度也不同。補一箱標準耗材，和移動一批需要品質判定的半成品，不應該用同一種派工模型處理。</p>
+<p>第二是條件與邊界。任務可以在什麼狀態下啟動？庫存需要先鎖定嗎？批號需要先通過放行嗎？目的地如果忙線或暫停收料怎麼辦？機器能不能自行改找替代倉位？如果沒有這些條件，自動化就會把原本靠人腦擋下來的灰色地帶全部攤開。</p>
+<p>第三是驗收與回報。人做完任務，常常一句「送到了」就結束；機器做完任務，系統應該知道它怎麼判定完成。是掃碼確認、重量確認、影像確認、定位確認，還是需要人員二次簽收？沒有驗收定義，資料就只是漂亮地被更新，現場卻未必真的完成。</p>
+<p>第四是例外處理。這通常才是最難的。正常流程大家都會畫，真正決定系統成熟度的是異常：找不到料、數量不符、路線封閉、設備電量不足、產線臨時停機、任務互相衝突、權限不足。這些不能全部丟給「請聯絡管理員」。如果每個例外都回到人工群組求救，自動化很快會變成另一種噪音來源。</p>
+<p>從 CTO 或技術主管的角度，我不會建議團隊一開始就追求全自動工廠。那很容易變成昂貴又脆弱的展示案。比較務實的路線，是先挑那些任務邊界清楚、錯誤成本可控、驗收方法明確的流程，整理出可執行的工作契約。像是固定路線補料、標準容器搬運、低風險物料配送、倉儲盤點協助。先讓系統學會把任務說清楚，再談更複雜的自主決策。</p>
+<p>這件事也會改變 ERP&#x2F;MES 的設計重點。以前我們常問的是：「使用者在畫面上看不看得到這個欄位？」未來還要問：「非人類執行者能不能理解這個狀態？」「它能不能知道下一步允許做什麼？」「它失敗時能不能留下可追蹤、可接手、可回復的紀錄？」</p>
+<p>講白一點，AI 和機器人不會讓爛流程自動變好。它們只會把流程裡沒有定義清楚的地方放大。人可以靠經驗繞過模糊，機器需要你把模糊變成規則。這也是為什麼我覺得製造業導入 AI agent，第一步不一定是買最厲害的模型或最炫的機器人，而是盤點現場工作到底哪些可以被明確描述、哪些需要人類判斷、哪些絕對不能自動越權。</p>
+<p>未來的企業系統如果要接住這波變化，不能只是多幾張 API 表、多幾個 webhook。它要能描述任務、限制任務、觀測任務、驗收任務，也要能在任務失敗時把控制權平順交回給人。</p>
+<p>當機器人真的走進工廠，最重要的問題可能不是它走得穩不穩，而是系統有沒有把「要它做什麼」講得夠清楚。派工給人，靠的是指令加默契；派工給機器，靠的是契約加邊界。這一步補不上，再聰明的自動化都只能停在展示間裡。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/ERP/" rel="tag"># ERP</a>
+              <a href="/tags/MES/" rel="tag"># MES</a>
+              <a href="/tags/%E6%99%BA%E6%85%A7%E8%A3%BD%E9%80%A0/" rel="tag"># 智慧製造</a>
+              <a href="/tags/CTO-%E7%AD%86%E8%A8%98/" rel="tag"># CTO 筆記</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026062901/" rel="prev" title="AI Coding 需要的不是更多 Prompt，而是可讀的設計上下文">
+      <i class="fa fa-chevron-left"></i> AI Coding 需要的不是更多 Prompt，而是可讀的設計上下文
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026070101/" rel="next" title="低成本基礎設施不是省錢，而是保留選擇權">
+      低成本基礎設施不是省錢，而是保留選擇權 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

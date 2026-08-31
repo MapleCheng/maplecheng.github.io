@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="從一組運動數據的整理經驗，反思企業系統如何區分原始量測、推導結果與模型估計；技術主管真正該治理的，不只是公式正不正確，而是指標有沒有足夠證據成立。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="系統算得出來，不代表這個指標就存在">
+<meta property="og:url" content="https://maplecheng.com/page/2026082101/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="從一組運動數據的整理經驗，反思企業系統如何區分原始量測、推導結果與模型估計；技術主管真正該治理的，不只是公式正不正確，而是指標有沒有足夠證據成立。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-08-20T21:10:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.346Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI 系統">
+<meta property="article:tag" content="可觀測性">
+<meta property="article:tag" content="技術管理">
+<meta property="article:tag" content="指標設計">
+<meta property="article:tag" content="資料治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026082101/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>系統算得出來，不代表這個指標就存在 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026082101/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          系統算得出來，不代表這個指標就存在
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-08-21 05:10:00" itemprop="dateCreated datePublished" datetime="2026-08-21T05:10:00+08:00">2026-08-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">從一組運動數據的整理經驗，反思企業系統如何區分原始量測、推導結果與模型估計；技術主管真正該治理的，不只是公式正不正確，而是指標有沒有足夠證據成立。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近整理一組運動紀錄時，我做了一個看似有點浪費的決定：把畫面上那些算得很完整、看起來也很專業的數字刪掉。原因不是公式一定錯，而是我手上根本沒有對應的量測設備。系統可以估計，但估計值一旦和原始量測並排，久了就很容易被當成同一種事實。</p>
+<p>這件小事讓我想到企業系統裡更常見的問題：我們很在意數字算得準不準，卻不一定先問，這個數字究竟有沒有資格被算出來。</p>
+<span id="more"></span>
+
+<h2 id="有公式，不等於有測量"><a href="#有公式，不等於有測量" class="headerlink" title="有公式，不等於有測量"></a>有公式，不等於有測量</h2><p>現在的軟體很擅長補齊資料。只要有速度、時間、位置、心率或操作紀錄，就能再推導出效率、負荷、風險、產能與各種綜合分數。生成式 AI 加進來之後，連原本需要分析師解讀的資料，也能迅速變成一段結論。</p>
+<p>問題是，推導鏈愈長，畫面通常愈完整，使用者卻愈難看見中間用了哪些假設。</p>
+<p>以設備資料為例，系統可能沒有直接量測某個物理量，而是根據速度、環境與預設參數估算。公式本身也許合理，但只要實際條件和預設值不同，結果就會偏移。更麻煩的是，下游又可能拿這個估算值計算另一個區間、分數或建議。最後呈現的數字有小數點、有圖表、有排名，看起來比原始資料更科學，證據基礎卻更薄。</p>
+<p>企業系統也一樣。沒有正式工時，卻用登入時間估算投入；沒有實際完工紀錄，卻用最後一次狀態更新推算進度；沒有完整成本，卻用單價乘數量當作毛利判斷；沒有品質結果，卻用檢查次數當成品質改善。這些代理指標不是不能用，但不能忘記它們回答的是「可能如何」，不是「實際發生什麼」。</p>
+<h2 id="我會把指標分成三個證據層級"><a href="#我會把指標分成三個證據層級" class="headerlink" title="我會把指標分成三個證據層級"></a>我會把指標分成三個證據層級</h2><p>現在看到一個新指標，我會先把它放進三個層級，而不是立刻討論圖表怎麼畫。</p>
+<p>第一層是<strong>直接量測或正式交易事實</strong>。例如感測器原始值、簽核完成時間、實際入出庫、正式付款、測試結果。這類資料仍可能有校正或輸入錯誤，但它至少有明確來源，也能回到原始紀錄查核。</p>
+<p>第二層是<strong>可重現的推導結果</strong>。例如由開始與結束時間計算週期、由數量與標準單位換算重量。這一層要保留公式、輸入版本、單位與計算時間，讓同一組輸入可以得到同一個結果。只要任一來源失效，衍生結果也應跟著標記過期或重算。</p>
+<p>第三層是<strong>模型估計或代理指標</strong>。它可能來自統計模型、規則、AI 判斷或缺值補齊，價值在於輔助決策，不在於取代事實。這類結果至少要揭露估計方法、適用條件、信心與限制，並避免用過度精確的小數讓人誤以為它是儀器直接量到的。</p>
+<p>這三層都能有用，真正危險的是把它們用相同字體、相同顏色、相同排序放在同一張表裡，卻不說彼此的證據強度不同。</p>
+<h2 id="缺資料時，產品不該急著把洞補滿"><a href="#缺資料時，產品不該急著把洞補滿" class="headerlink" title="缺資料時，產品不該急著把洞補滿"></a>缺資料時，產品不該急著把洞補滿</h2><p>很多產品團隊害怕空值。畫面出現「無資料」，好像代表功能沒做完；因此我們會加入預設值、沿用上一筆、套用同類平均，或請模型補一個合理答案。</p>
+<p>但從技術主管的角度，我寧可讓系統誠實地說「目前無法判定」。空值有時不是 UX 缺陷，而是重要的營運訊號：設備沒裝、流程沒有留下事件、主檔維護不完整，或資料契約根本還沒建立。把洞補掉，會讓真正該改善的基礎設施永遠沒有優先級。</p>
+<p>當然，不是所有估計都該被禁止。排程預測、需求預測、風險分數，本來就不可能等到事實發生後才有價值。重點是產品必須讓人知道自己正在看預測，並且把預測和後續實績對帳。若系統只持續產生估計，卻不追蹤估計偏差，它就不是決策系統，只是一台很會製造數字的機器。</p>
+<h2 id="AI-更需要一份「可用指標清單」"><a href="#AI-更需要一份「可用指標清單」" class="headerlink" title="AI 更需要一份「可用指標清單」"></a>AI 更需要一份「可用指標清單」</h2><p>人看儀表板時，還可能憑經驗發現某個數字不合理；Agent 則很容易把所有能讀到的欄位都當成同等可信的上下文。只要 API 回傳一個名稱像「效率分數」的欄位，模型就可能引用它產生建議，甚至再交給下一個流程執行。</p>
+<p>因此，給 AI 的資料介面不能只有欄位名稱與型別。我會希望每個重要指標還帶著來源類型、量測或估計方式、更新時間、有效條件、資料品質狀態，以及允許的用途。某個估計值可以用來排序待查案件，不代表它可以直接觸發獎懲、停機或財務決策。</p>
+<p>這其實是一種用途治理：同一筆資料在探索分析裡可以接受，在正式交易裡未必可以；拿來提醒人可以，拿來自動執行則需要更強的證據。與其要求 Agent 自己理解所有資料限制，不如讓限制成為資料契約的一部分。</p>
+<h2 id="刪掉一個數字，有時比新增一張圖更專業"><a href="#刪掉一個數字，有時比新增一張圖更專業" class="headerlink" title="刪掉一個數字，有時比新增一張圖更專業"></a>刪掉一個數字，有時比新增一張圖更專業</h2><p>技術工作常有一種誘惑：資料既然拿得到，就應該充分利用；欄位既然算得出來，就應該呈現。可是成熟的系統不是數字最多的系統，而是能清楚交代每個數字從哪裡來、能證明到哪裡、不能拿來做什麼。</p>
+<p>我現在評估指標，會先問四件事：它是直接量測、可重現推導，還是模型估計？輸入缺失或條件改變時，系統會失效、警告，還是悄悄補值？下游決策知道它的限制嗎？我們有沒有用後來的實績檢查它？</p>
+<p>如果這些問題答不出來，我寧可先不顯示。因為一個空白欄位最多讓人多問一次；一個精緻但沒有證據基礎的數字，卻可能讓整個組織很有信心地往錯的方向走。</p>
+<p>系統算得出來，只代表計算可以完成。這個指標是否真的存在，仍然要由量測、來源與用途共同證明。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%B3%87%E6%96%99%E6%B2%BB%E7%90%86/" rel="tag"># 資料治理</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+              <a href="/tags/%E5%8F%AF%E8%A7%80%E6%B8%AC%E6%80%A7/" rel="tag"># 可觀測性</a>
+              <a href="/tags/%E6%8C%87%E6%A8%99%E8%A8%AD%E8%A8%88/" rel="tag"># 指標設計</a>
+              <a href="/tags/AI-%E7%B3%BB%E7%B5%B1/" rel="tag"># AI 系統</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026082001/" rel="prev" title="企業系統升級最缺的，通常不是 Release Notes，而是自己的依賴圖">
+      <i class="fa fa-chevron-left"></i> 企業系統升級最缺的，通常不是 Release Notes，而是自己的依賴圖
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026082201/" rel="next" title="從工單學自動化之前，先分清楚標準流程與人類補丁">
+      從工單學自動化之前，先分清楚標準流程與人類補丁 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E5%85%AC%E5%BC%8F%EF%BC%8C%E4%B8%8D%E7%AD%89%E6%96%BC%E6%9C%89%E6%B8%AC%E9%87%8F"><span class="nav-number">1.</span> <span class="nav-text">有公式，不等於有測量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E6%9C%83%E6%8A%8A%E6%8C%87%E6%A8%99%E5%88%86%E6%88%90%E4%B8%89%E5%80%8B%E8%AD%89%E6%93%9A%E5%B1%A4%E7%B4%9A"><span class="nav-number">2.</span> <span class="nav-text">我會把指標分成三個證據層級</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%BA%E8%B3%87%E6%96%99%E6%99%82%EF%BC%8C%E7%94%A2%E5%93%81%E4%B8%8D%E8%A9%B2%E6%80%A5%E8%91%97%E6%8A%8A%E6%B4%9E%E8%A3%9C%E6%BB%BF"><span class="nav-number">3.</span> <span class="nav-text">缺資料時，產品不該急著把洞補滿</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AI-%E6%9B%B4%E9%9C%80%E8%A6%81%E4%B8%80%E4%BB%BD%E3%80%8C%E5%8F%AF%E7%94%A8%E6%8C%87%E6%A8%99%E6%B8%85%E5%96%AE%E3%80%8D"><span class="nav-number">4.</span> <span class="nav-text">AI 更需要一份「可用指標清單」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%AA%E6%8E%89%E4%B8%80%E5%80%8B%E6%95%B8%E5%AD%97%EF%BC%8C%E6%9C%89%E6%99%82%E6%AF%94%E6%96%B0%E5%A2%9E%E4%B8%80%E5%BC%B5%E5%9C%96%E6%9B%B4%E5%B0%88%E6%A5%AD"><span class="nav-number">5.</span> <span class="nav-text">刪掉一個數字，有時比新增一張圖更專業</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

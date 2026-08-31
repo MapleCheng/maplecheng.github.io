@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="花了一整天把 AI Agent 的知識庫從檔案遷移到向量資料庫，隔天又決定改回混合模式。記錄這段來回折騰的思考過程，以及為什麼「全向量」和「全檔案」都不是最佳解。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI Agent 的記憶架構：向量資料庫 vs 檔案系統的取捨">
+<meta property="og:url" content="https://maplecheng.com/page/2026030801/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="花了一整天把 AI Agent 的知識庫從檔案遷移到向量資料庫，隔天又決定改回混合模式。記錄這段來回折騰的思考過程，以及為什麼「全向量」和「全檔案」都不是最佳解。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-03-08T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="LanceDB">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="RAG">
+<meta property="article:tag" content="向量資料庫">
+<meta property="article:tag" content="知識管理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026030801/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI Agent 的記憶架構：向量資料庫 vs 檔案系統的取捨 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026030801/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI Agent 的記憶架構：向量資料庫 vs 檔案系統的取捨
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-03-08 12:00:00" itemprop="dateCreated datePublished" datetime="2026-03-08T12:00:00+08:00">2026-03-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">花了一整天把 AI Agent 的知識庫從檔案遷移到向量資料庫，隔天又決定改回混合模式。記錄這段來回折騰的思考過程，以及為什麼「全向量」和「全檔案」都不是最佳解。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>我有一個用 OpenClaw 搭的 AI 助手，平常幫我做各種事——專案管理、code review、查資料、回訊息。用了幾個月之後，最大的痛點浮現了：它需要記住越來越多東西，但記憶方式很蠢。</p>
+<p>怎麼蠢呢？每次對話開始，就把一堆 markdown 檔案整包塞進 context。專案慣例、技術規範、開發守則……二十幾個檔案全部載入。簡單暴力，確實有效，但 token 燒得我肉痛。</p>
+<p>所以我花了一整天把知識庫遷移到向量資料庫。然後隔天又改回來了。</p>
+<span id="more"></span>
+
+<h3 id="原本的做法：檔案就是記憶"><a href="#原本的做法：檔案就是記憶" class="headerlink" title="原本的做法：檔案就是記憶"></a>原本的做法：檔案就是記憶</h3><p>一開始的設計很樸素：每個專案的知識寫成一份 markdown，像是 <code>coding-conventions.md</code>、<code>db-naming-rules.md</code>、<code>api-patterns.md</code> 之類的。Agent 啟動時全部載入，塞進 system prompt。</p>
+<p>好處顯而易見——<strong>精確、完整、可預測</strong>。你知道 Agent 看到了什麼，它知道的就是你寫下來的，不多不少。Debug 的時候也好追蹤，打開檔案就能看到 Agent 的「知識庫」是什麼。</p>
+<p>壞處也很明顯：</p>
+<ul>
+<li>22 個知識檔，載入後吃掉大量 context window</li>
+<li>不是每次對話都需要所有知識，但你不知道這次會需要哪些</li>
+<li>隨著知識越加越多，token 用量線性成長</li>
+<li>超過 context window 上限就只能硬砍，砍了又怕漏</li>
+</ul>
+<p>就像你出門把家裡所有工具書都塞進背包一樣。安心是安心，但背不動。</p>
+<h3 id="向量遷移：看起來很美好"><a href="#向量遷移：看起來很美好" class="headerlink" title="向量遷移：看起來很美好"></a>向量遷移：看起來很美好</h3><p>某天看到 LanceDB 的介紹，覺得這根本就是為我的場景設計的——嵌入式向量資料庫，不用開額外服務，直接跑在本地。於是動手遷移。</p>
+<p>把 22 份 markdown 檔案濃縮成大約 30 筆知識條目，每筆控制在 500 字以內，盡量原子化。用 Jina 的 embedding model 做向量化，加上 reranker 做二次排序。</p>
+<p>檢索架構是 hybrid retrieval：</p>
+<ul>
+<li>向量相似度佔 70%</li>
+<li>BM25 關鍵字匹配佔 30%</li>
+<li><code>hardMinScore</code> 設 0.35，低於這個分數的結果直接丟掉</li>
+</ul>
+<p>聽起來很專業對吧？我自己設計完也覺得挺帥的。</p>
+<p>測試的時候效果也不錯——問「Controller 的命名規則是什麼？」能正確召回相關條目；問「資料庫欄位怎麼命名？」也能找到 DDL 規範。token 用量從「每次塞滿」變成「只取需要的」，省了至少 60%。</p>
+<p>好，完美。收工。</p>
+<h3 id="然後現實打臉了"><a href="#然後現實打臉了" class="headerlink" title="然後現實打臉了"></a>然後現實打臉了</h3><p>遷移完的隔天，Agent 在做 code review 的時候漏掉了一條重要的 coding convention。</p>
+<p>我追查原因：那條規則確實在向量資料庫裡，但 Agent 當時的 query 跟那條規則的語義距離不夠近，similarity score 低於 0.35 的門檻，被過濾掉了。</p>
+<p>這讓我意識到一個根本性的問題：</p>
+<p><strong>向量查詢的結果是「可能相關」，檔案載入的結果是「確定完整」。</strong></p>
+<p>當你做開發規範這種需要精確執行的事情，你要的不是「大概率相關的前 5 筆」，你要的是「所有規則，一條都不能漏」。漏掉一條命名規則，可能就是一個 PR 要打回重做。</p>
+<p>向量搜尋的本質是 approximate——它很擅長在大量資料中快速找到「可能有關」的東西，但它不保證完整性。你沒辦法對一個向量查詢說「給我這個主題的所有規則」，因為它不理解「所有」這個概念。它只理解「跟你的 query 最像的 top-K」。</p>
+<h3 id="折返：混合模式才是正解"><a href="#折返：混合模式才是正解" class="headerlink" title="折返：混合模式才是正解"></a>折返：混合模式才是正解</h3><p>糾結了一陣子之後，我決定不全用向量，也不全用檔案，而是走混合模式。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[Agent 遇到決策點] --> B{知識類型?}
+    B -->|精確規範| C[檔案系統]
+    B -->|模糊查詢| D[向量資料庫]
+    
+    C --> C1[載入完整規範檔]
+    C1 --> E[執行決策]
+    
+    D --> D1[Hybrid Retrieval]
+    D1 --> D2[Vector 70% + BM25 30%]
+    D2 --> D3[Reranker 二次排序]
+    D3 --> E
+    
+    E --> F{新知識產生?}
+    F -->|是| G[判斷歸屬]
+    G -->|開發規範| H[更新檔案]
+    G -->|經驗教訓| I[存入向量 DB]
+    F -->|否| J[完成]
+
+    style C fill:#2ecc71,color:#fff
+    style D fill:#4a9eff,color:#fff
+          </pre>
+
+<p>分工邏輯是這樣的：</p>
+<p><strong>檔案系統負責「精確」的東西</strong></p>
+<ul>
+<li>開發規範、命名慣例、code review checklist</li>
+<li>這些是「必須 100% 遵守」的規則</li>
+<li>寧可多塞幾個 token，也不能漏掉任何一條</li>
+</ul>
+<p><strong>向量資料庫負責「靈活」的東西</strong></p>
+<ul>
+<li>過去踩過的坑、debug 經驗、設計決策的理由</li>
+<li>跨專案的知識關聯（某個客戶的坑可能跟另一個客戶相關）</li>
+<li>不需要每次都載入，用到的時候再查就好</li>
+</ul>
+<p>用一個不太精確但還蠻傳神的類比：向量資料庫就像二進制，機器原生、高效、但人不好讀；檔案系統就像 JSON，人機皆讀、好維護、但體積大。你不會把所有東西都存二進制，也不會把所有東西都存 JSON。</p>
+<h3 id="Context-Driven-Recall：不預載，按需查詢"><a href="#Context-Driven-Recall：不預載，按需查詢" class="headerlink" title="Context-Driven Recall：不預載，按需查詢"></a>Context-Driven Recall：不預載，按需查詢</h3><p>混合模式裡有一個重要的設計決策：<strong>不再開場就載入所有知識</strong>。</p>
+<p>取而代之的是 context-driven recall——在每個決策點，根據當前的上下文去查詢可能相關的知識。</p>
+<p>比如說 Agent 要幫我寫一個新的 API endpoint，它不需要在對話一開始就知道所有的 coding conventions。它需要的是：</p>
+<ul>
+<li>在設計 Controller 的時候，查一下 Controller 的命名規則</li>
+<li>在寫 DAL 的時候，查一下 DataModel 的慣例</li>
+<li>在寫 SQL 的時候，查一下 DDL 命名規範</li>
+</ul>
+<p>每個步驟只載入那個步驟需要的知識。這樣 context window 的使用效率大幅提升，而且因為查詢的語境更精確，向量搜尋的準確率也更高。</p>
+<p>當然，這對 Agent 的「自我意識」要求比較高——它要知道自己在做什麼、這個步驟需要什麼知識、去哪裡查。這部分要靠好的 system prompt 設計，告訴它「在每個決策點，先查相關慣例再行動」。</p>
+<h3 id="自動擷取的雜訊問題"><a href="#自動擷取的雜訊問題" class="headerlink" title="自動擷取的雜訊問題"></a>自動擷取的雜訊問題</h3><p>還有一個踩到的坑值得一提。</p>
+<p>向量資料庫有一個 autoCapture 功能——自動從對話中擷取重要資訊存入知識庫。聽起來很棒吧？Agent 自己會學習！</p>
+<p>結果它學了一堆垃圾。</p>
+<p>對話中的 metadata、操作步驟的記錄、甚至「Maple 說了 OK」這種東西都被當成「知識」存了進去。幾天之後向量資料庫裡面塞滿了這種無意義的條目，查詢結果的品質明顯下降——因為那些垃圾條目也在搶排名。</p>
+<p>解法是定期清理，但更根本的解法是<strong>不要無條件信任自動擷取</strong>。有價值的知識應該是人（或 Agent 在明確指令下）主動存入的，不是從對話流裡隨便撈的。</p>
+<p>這就像你不會把會議逐字稿直接當作知識庫——你會整理出會議結論和行動項目，然後只存那些。</p>
+<h3 id="向量記憶的衛生守則"><a href="#向量記憶的衛生守則" class="headerlink" title="向量記憶的衛生守則"></a>向量記憶的衛生守則</h3><p>折騰了這一輪之後，我整理出幾條向量記憶的衛生守則：</p>
+<ul>
+<li><strong>每筆知識控制在 500 字以內</strong>——太長的條目 embedding 品質會下降，而且召回後佔 token</li>
+<li><strong>原子化</strong>——一筆知識只講一件事。不要把「Controller 命名規則」和「DAL 命名規則」塞在同一筆</li>
+<li><strong>不存重複內容</strong>——向量資料庫不會自動去重，你存了三筆差不多的東西，查詢結果前三名可能都是它們</li>
+<li><strong>定期清理</strong>——autoCapture 產生的雜訊、過時的資訊、測試用的條目，每隔一段時間掃一次</li>
+<li><strong>存完立刻驗證</strong>——存入後馬上用 recall 查一次，確認能查到、分數合理。查不到就改寫重存</li>
+</ul>
+<h3 id="沒有完美的記憶架構"><a href="#沒有完美的記憶架構" class="headerlink" title="沒有完美的記憶架構"></a>沒有完美的記憶架構</h3><p>折騰了一整天遷移到向量，隔天又花半天改回混合模式。看起來好像白做工了？</p>
+<p>其實不是。這個過程讓我搞清楚了一件重要的事：<strong>記憶架構的選擇取決於你對「精確度」和「靈活度」的需求比例。</strong></p>
+<p>如果你的 Agent 主要做的是創意發想、資料蒐集、開放式問答——全向量可能就夠了，因為你要的是「聯想」和「靈活」。</p>
+<p>如果你的 Agent 要執行嚴格的規範、遵循特定的流程——純檔案更安全，因為你要的是「確定」和「完整」。</p>
+<p>大部分 Agent 的場景介於兩者之間，所以混合模式通常是比較務實的選擇。</p>
+<p>重點不是技術多花俏，是它能不能可靠地在正確的時候給你正確的知識。這聽起來像廢話，但在被向量搜尋的 approximate 特性坑了一次之後，我對「可靠」這兩個字有了更深的體會。</p>
+<p>如果你也在做 AI Agent 的知識管理，我的建議是：先從檔案開始，等你真的感受到「token 不夠用」的痛了，再考慮向量化——而且只向量化那些「不需要 100% 完整」的部分。精確的規範，就讓它安安靜靜躺在 markdown 裡吧。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/%E7%9F%A5%E8%AD%98%E7%AE%A1%E7%90%86/" rel="tag"># 知識管理</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E5%90%91%E9%87%8F%E8%B3%87%E6%96%99%E5%BA%AB/" rel="tag"># 向量資料庫</a>
+              <a href="/tags/LanceDB/" rel="tag"># LanceDB</a>
+              <a href="/tags/RAG/" rel="tag"># RAG</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026030701/" rel="prev" title="撲克位置理論與股票交易：為什麼你不該在開盤就追">
+      <i class="fa fa-chevron-left"></i> 撲克位置理論與股票交易：為什麼你不該在開盤就追
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026031001/" rel="next" title="JavaScript 浮點數加總的陷阱：為什麼你的報表數字對不上">
+      JavaScript 浮點數加總的陷阱：為什麼你的報表數字對不上 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E6%9C%AC%E7%9A%84%E5%81%9A%E6%B3%95%EF%BC%9A%E6%AA%94%E6%A1%88%E5%B0%B1%E6%98%AF%E8%A8%98%E6%86%B6"><span class="nav-number">1.</span> <span class="nav-text">原本的做法：檔案就是記憶</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91%E9%87%8F%E9%81%B7%E7%A7%BB%EF%BC%9A%E7%9C%8B%E8%B5%B7%E4%BE%86%E5%BE%88%E7%BE%8E%E5%A5%BD"><span class="nav-number">2.</span> <span class="nav-text">向量遷移：看起來很美好</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%84%B6%E5%BE%8C%E7%8F%BE%E5%AF%A6%E6%89%93%E8%87%89%E4%BA%86"><span class="nav-number">3.</span> <span class="nav-text">然後現實打臉了</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%98%E8%BF%94%EF%BC%9A%E6%B7%B7%E5%90%88%E6%A8%A1%E5%BC%8F%E6%89%8D%E6%98%AF%E6%AD%A3%E8%A7%A3"><span class="nav-number">4.</span> <span class="nav-text">折返：混合模式才是正解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Context-Driven-Recall%EF%BC%9A%E4%B8%8D%E9%A0%90%E8%BC%89%EF%BC%8C%E6%8C%89%E9%9C%80%E6%9F%A5%E8%A9%A2"><span class="nav-number">5.</span> <span class="nav-text">Context-Driven Recall：不預載，按需查詢</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8B%95%E6%93%B7%E5%8F%96%E7%9A%84%E9%9B%9C%E8%A8%8A%E5%95%8F%E9%A1%8C"><span class="nav-number">6.</span> <span class="nav-text">自動擷取的雜訊問題</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91%E9%87%8F%E8%A8%98%E6%86%B6%E7%9A%84%E8%A1%9B%E7%94%9F%E5%AE%88%E5%89%87"><span class="nav-number">7.</span> <span class="nav-text">向量記憶的衛生守則</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B2%92%E6%9C%89%E5%AE%8C%E7%BE%8E%E7%9A%84%E8%A8%98%E6%86%B6%E6%9E%B6%E6%A7%8B"><span class="nav-number">8.</span> <span class="nav-text">沒有完美的記憶架構</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

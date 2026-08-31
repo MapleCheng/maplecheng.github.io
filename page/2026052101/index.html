@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近處理聊天平台的 slash command 同步問題時，我踩到一個很典型但也很陰險的狀態機 bug：系統把「我準備同步」記成「我已經同步成功」。這篇聊聊為什麼整合型系統要分清楚意圖、執行與確認。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="狀態機要記成功，不要記意圖：一次 Slash Command 同步踩坑">
+<meta property="og:url" content="https://maplecheng.com/page/2026052101/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近處理聊天平台的 slash command 同步問題時，我踩到一個很典型但也很陰險的狀態機 bug：系統把「我準備同步」記成「我已經同步成功」。這篇聊聊為什麼整合型系統要分清楚意圖、執行與確認。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-05-20T21:01:08.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.343Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Debug">
+<meta property="article:tag" content="狀態機">
+<meta property="article:tag" content="系統設計">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026052101/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>狀態機要記成功，不要記意圖：一次 Slash Command 同步踩坑 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026052101/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          狀態機要記成功，不要記意圖：一次 Slash Command 同步踩坑
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-05-21 05:01:08" itemprop="dateCreated datePublished" datetime="2026-05-21T05:01:08+08:00">2026-05-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近處理聊天平台的 slash command 同步問題時，我踩到一個很典型但也很陰險的狀態機 bug：系統把「我準備同步」記成「我已經同步成功」。這篇聊聊為什麼整合型系統要分清楚意圖、執行與確認。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在處理一個 AI 助理接聊天平台的功能時，我又踩到一個看起來很小、實際上很煩的坑：slash command 明明已經在程式裡加了，服務也重啟了，使用者介面就是看不到。</p>
+<p>聽起來很像快取問題對吧？對，一開始我也很想把鍋丟給快取。畢竟聊天平台的 slash command 本來就常有同步延遲，client 端也可能自己留一份舊資料。但這次真正的問題不是平台慢，而是我們自己的狀態機太樂觀：它把「準備同步」記成了「同步成功」。</p>
+<span id="more"></span>
+
+<h3 id="看起來一樣的-command，其實不是同一件事"><a href="#看起來一樣的-command，其實不是同一件事" class="headerlink" title="看起來一樣的 /command，其實不是同一件事"></a>看起來一樣的 <code>/command</code>，其實不是同一件事</h3><p>先講第一個容易混淆的地方：同樣長得像 <code>/xxx</code> 的指令，在一個 AI 助理系統裡可能有兩層。</p>
+<p>第一層是聊天平台原生的 slash command，也就是你打 <code>/</code> 之後，平台介面會跳出選單、顯示描述、帶 autocomplete，最後送出一個結構化 interaction 給 bot。</p>
+<p>第二層是 agent 自己的文字解析器。也就是你直接傳一段文字，例如 <code>/xxx do something</code>，bot 收到訊息後自己解析，當成內部指令執行。</p>
+<p>這兩者在使用者眼中都叫 <code>/xxx</code>，但對工程師來說完全不是同一條路徑。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart LR
+  A[使用者輸入 /xxx] --> B{平台是否有原生指令？}
+  B -- 有 --> C[平台送出 structured interaction]
+  B -- 沒有，只是文字 --> D[Bot 收到一般訊息]
+  C --> E[Gateway handler]
+  D --> F[Agent text parser]
+  E --> G[執行 skill / action]
+  F --> G
+          </pre>
+
+<p>這張圖很簡單，但它解釋了很多「明明可以手打，為什麼選單看不到」的問題。</p>
+<p>因為手打能執行，只能證明 agent 的文字解析器有支援；不能證明聊天平台上的原生 slash command 已經註冊成功。反過來，平台選單看得到，也不代表文字 parser 一定支援同樣的語法。</p>
+<p>這種 UX 最麻煩的地方是：使用者看到的是同一個名字，工程師 debug 的卻是兩個系統。沒有先把路徑拆開，很容易在錯的地方找半天。</p>
+<h3 id="真正陰險的是-sync-state"><a href="#真正陰險的是-sync-state" class="headerlink" title="真正陰險的是 sync state"></a>真正陰險的是 sync state</h3><p>把兩層路徑拆清楚後，下一步就是確認原生命令到底有沒有註冊上去。</p>
+<p>這類系統通常會做一個最佳化：啟動時算出 command definition 的 fingerprint。如果這次定義跟上次一樣，就不要再打 API 同步，避免每次重啟都去更新遠端設定。</p>
+<p>想法沒問題，而且很常見。問題出在「什麼時候寫入這個 fingerprint」。</p>
+<p>這次踩到的 bug 大概是這樣：</p>
+<ol>
+<li>啟動時發現本地 command 定義變了；</li>
+<li>系統準備呼叫平台 API 同步；</li>
+<li>在同步真正成功前，先把新的 fingerprint 寫進 sync state；</li>
+<li>後面同步因為某個原因中斷或失敗；</li>
+<li>下次重啟時，系統看到 fingerprint 已經一樣，就判斷「不用同步」。</li>
+</ol>
+<p>然後災難就開始了。</p>
+<p>本地狀態說：「我同步過了。」</p>
+<p>遠端平台說：「我沒收到。」</p>
+<p>使用者介面說：「我什麼都看不到。」</p>
+<p>工程師說：「蛤？」</p>
+<p>這種 bug 特別討厭，因為它不是單純的失敗，而是失敗後留下了一個會阻止自我修復的錯誤狀態。你重啟服務也沒用，因為重啟反而會更堅定地相信那份錯的 state。</p>
+<h3 id="狀態機要記成功，不要記意圖"><a href="#狀態機要記成功，不要記意圖" class="headerlink" title="狀態機要記成功，不要記意圖"></a>狀態機要記成功，不要記意圖</h3><p>這件事給我的教訓很直白：狀態機應該記錄已確認的事實，不要記錄尚未完成的意圖。</p>
+<p>「我要同步」不是狀態。</p>
+<p>「我已經成功同步到遠端，而且遠端回應確認」才是狀態。</p>
+<p>如果真的需要記錄中間過程，也應該明確分開，例如：</p>
+<ul>
+<li><code>pending</code>：偵測到需要同步，但尚未送出；</li>
+<li><code>in_progress</code>：同步正在進行；</li>
+<li><code>success</code>：遠端確認成功，並記錄成功時間；</li>
+<li><code>failed</code>：同步失敗，保留錯誤原因與下一次重試條件。</li>
+</ul>
+<p>最怕的是用一個欄位同時代表「我想做」、「我做了」、「我做成功了」。平常看起來省事，出事時就是一坨糊。</p>
+<p>尤其整合外部平台時，成功不能只看本地流程有沒有跑到最後。你要問的是：遠端實際狀態是不是我以為的那樣？如果沒有讀回確認，至少也要把 API 的成功回應當成寫入 state 的最低門檻。</p>
+<h3 id="Debug-時不要相信單一真相來源"><a href="#Debug-時不要相信單一真相來源" class="headerlink" title="Debug 時不要相信單一真相來源"></a>Debug 時不要相信單一真相來源</h3><p>這種同步問題，我現在會刻意看三份資料：本地定義、本地 sync state、遠端實際命令。</p>
+<p>本地定義回答的是：「程式想要註冊什麼？」</p>
+<p>本地 sync state 回答的是：「程式以為自己註冊到哪個版本？」</p>
+<p>遠端實際命令回答的是：「平台上現在真的有什麼？」</p>
+<p>三者只看其中一個都不夠。只看程式碼，你會覺得功能已經寫了；只看 state，你會被錯誤 fingerprint 騙；只看使用者介面，又可能被平台或 client cache 誤導。</p>
+<p>所以我比較喜歡用一個很土的方法：直接打遠端 API 查目前註冊的 commands。不要猜，不要拜託快取快一點，也不要一直重啟服務求神明保佑。</p>
+<p>工程裡很多 debug 最後都會回到這句話：看實際資料。</p>
+<p>不是看你以為送出去什麼，也不是看程式理論上會做什麼，而是看對方現在真的收到了什麼。</p>
+<h3 id="Autocomplete-也有產品細節"><a href="#Autocomplete-也有產品細節" class="headerlink" title="Autocomplete 也有產品細節"></a>Autocomplete 也有產品細節</h3><p>同一輪處理中，還有另一個小坑：slash command 的 autocomplete 不是無限列表。很多平台會限制一次最多顯示固定數量的 choices，例如 25 筆。</p>
+<p>這代表如果你把一大堆可執行能力都塞進同一個選單，使用者打開 <code>/skill</code> 看到的可能只是排序前面的那一小段。他要找的指令其實存在，但因為沒有輸入關鍵字，根本不會出現在候選清單。</p>
+<p>這不是後端功能壞掉，而是產品體驗壞掉。</p>
+<p>所以後來我會傾向把常用能力拉成少數原生 shortcut，剩下的放在通用 skill runner 裡，並且讓 autocomplete 搜尋描述、別名與命令 key。換句話說，不要把平台選單當資料庫瀏覽器，它承載不起完整知識庫。</p>
+<p>這也是 AI Agent 做產品化時很容易忽略的地方：能力很多不等於體驗好。使用者需要的是「我想做的事很快找得到」，不是「理論上所有東西都可以被呼叫」。</p>
+<h3 id="我會怎麼修"><a href="#我會怎麼修" class="headerlink" title="我會怎麼修"></a>我會怎麼修</h3><p>如果要把這類同步流程做得比較穩，我會抓幾個原則：</p>
+<p>第一，fingerprint 只能在遠端同步成功後更新。失敗就保留舊狀態，讓下次啟動仍然知道需要重試。</p>
+<p>第二，state 裡要保留 <code>last_success_at</code>、<code>last_error</code>、遠端回應摘要。不要只留一個 hash，因為 hash 告訴你版本，卻不告訴你過程。</p>
+<p>第三，提供人工驗證或修復工具。像是「列出遠端目前有哪些 command」、「強制重新同步」、「清掉本地 sync state」這種操作，平常用不到，出事時會救命。</p>
+<p>第四，補 regression test。這類 bug 很容易修完一次，半年後重構又回來。測試至少要覆蓋「同步失敗時不能寫入成功 fingerprint」以及「舊 state 不應該阻止必要同步」。</p>
+<h3 id="結論：整合系統最怕假成功"><a href="#結論：整合系統最怕假成功" class="headerlink" title="結論：整合系統最怕假成功"></a>結論：整合系統最怕假成功</h3><p>這次踩坑其實不大，但很典型。</p>
+<p>AI 助理、聊天平台、技能系統、遠端 API、client cache，全部串在一起後，最危險的不是單點失敗，而是假成功。因為失敗會吵，假成功會安靜地讓你相信世界已經照你的意思更新了。</p>
+<p>做整合型系統時，我越來越在意「確認」這件事。寫入前可以樂觀，寫入後一定要保守。狀態機不要記你的願望，要記已經被驗證的事實。</p>
+<p>如果一個系統能誠實地說「我還沒同步成功」，那其實很好修。最麻煩的是它笑笑地告訴你「都好了」，然後遠端什麼都沒有。</p>
+<p>這大概也是工程裡最樸素、但最有用的原則之一：不要把意圖當成果，不要把本地狀態當世界真相。尤其當你的使用者正在介面前面找一個看不到的 <code>/command</code> 時，這句話會突然變得非常有感。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88/" rel="tag"># 系統設計</a>
+              <a href="/tags/Debug/" rel="tag"># Debug</a>
+              <a href="/tags/%E7%8B%80%E6%85%8B%E6%A9%9F/" rel="tag"># 狀態機</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026052001/" rel="prev" title="AI 助理的記憶清理，不是刪檔案，是設維運邊界">
+      <i class="fa fa-chevron-left"></i> AI 助理的記憶清理，不是刪檔案，是設維運邊界
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026052201/" rel="next" title="為什麼我開始用 HTML 做技術分享，而不是 PPT">
+      為什麼我開始用 HTML 做技術分享，而不是 PPT <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%8B%E8%B5%B7%E4%BE%86%E4%B8%80%E6%A8%A3%E7%9A%84-command%EF%BC%8C%E5%85%B6%E5%AF%A6%E4%B8%8D%E6%98%AF%E5%90%8C%E4%B8%80%E4%BB%B6%E4%BA%8B"><span class="nav-number">1.</span> <span class="nav-text">看起來一樣的 &#x2F;command，其實不是同一件事</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E9%99%B0%E9%9A%AA%E7%9A%84%E6%98%AF-sync-state"><span class="nav-number">2.</span> <span class="nav-text">真正陰險的是 sync state</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8B%80%E6%85%8B%E6%A9%9F%E8%A6%81%E8%A8%98%E6%88%90%E5%8A%9F%EF%BC%8C%E4%B8%8D%E8%A6%81%E8%A8%98%E6%84%8F%E5%9C%96"><span class="nav-number">3.</span> <span class="nav-text">狀態機要記成功，不要記意圖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Debug-%E6%99%82%E4%B8%8D%E8%A6%81%E7%9B%B8%E4%BF%A1%E5%96%AE%E4%B8%80%E7%9C%9F%E7%9B%B8%E4%BE%86%E6%BA%90"><span class="nav-number">4.</span> <span class="nav-text">Debug 時不要相信單一真相來源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Autocomplete-%E4%B9%9F%E6%9C%89%E7%94%A2%E5%93%81%E7%B4%B0%E7%AF%80"><span class="nav-number">5.</span> <span class="nav-text">Autocomplete 也有產品細節</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E6%9C%83%E6%80%8E%E9%BA%BC%E4%BF%AE"><span class="nav-number">6.</span> <span class="nav-text">我會怎麼修</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AB%96%EF%BC%9A%E6%95%B4%E5%90%88%E7%B3%BB%E7%B5%B1%E6%9C%80%E6%80%95%E5%81%87%E6%88%90%E5%8A%9F"><span class="nav-number">7.</span> <span class="nav-text">結論：整合系統最怕假成功</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="在設計 AI 多代理系統時，我發現 sub-agent spawn 超過並發上限會被靜默丟棄——不排隊、不報錯、不通知。這篇分享踩坑過程，以及最終用「每任務獨立 session」取代「一個調度器 spawn 多個 sub-agent」的架構演進。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 多代理排程的隱形陷阱：當 Sub-Agent 被靜默丟棄">
+<meta property="og:url" content="https://maplecheng.com/page/2026030101/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="在設計 AI 多代理系統時，我發現 sub-agent spawn 超過並發上限會被靜默丟棄——不排隊、不報錯、不通知。這篇分享踩坑過程，以及最終用「每任務獨立 session」取代「一個調度器 spawn 多個 sub-agent」的架構演進。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-28T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="多代理系統">
+<meta property="article:tag" content="排程設計">
+<meta property="article:tag" content="架構設計">
+<meta property="article:tag" content="踩坑紀錄">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026030101/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI 多代理排程的隱形陷阱：當 Sub-Agent 被靜默丟棄 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026030101/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI 多代理排程的隱形陷阱：當 Sub-Agent 被靜默丟棄
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-03-01 05:00:00" itemprop="dateCreated datePublished" datetime="2026-03-01T05:00:00+08:00">2026-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">在設計 AI 多代理系統時，我發現 sub-agent spawn 超過並發上限會被靜默丟棄——不排隊、不報錯、不通知。這篇分享踩坑過程，以及最終用「每任務獨立 session」取代「一個調度器 spawn 多個 sub-agent」的架構演進。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>昨天半夜做了一件事：把散落各處的 10 個定時新聞報告，統一整合進一個 skill 裡。聽起來很合理對吧？一個 dispatcher cron 起來，spawn 6 個 sub-agent 分頭跑報告，完事收工。</p>
+<p>結果跑起來才發現——有幾份報告憑空消失了。</p>
+<span id="more"></span>
+
+<h3 id="問題：Sub-Agent-去哪了？"><a href="#問題：Sub-Agent-去哪了？" class="headerlink" title="問題：Sub-Agent 去哪了？"></a>問題：Sub-Agent 去哪了？</h3><p>我的原始設計很直覺：一個定時排程觸發，在裡面用 <code>sessions_spawn</code> 一口氣叫出 6 個 sub-agent，各自負責一份報告。邏輯上完全沒問題，程式碼也沒報錯。</p>
+<p>但每次執行完，總有 1～2 份報告沒有產出。</p>
+<p>一開始我以為是 prompt 有問題、是報告格式不對、是某個 API timeout。排查了一輪都不是。最後才發現真相：<strong>超過並發上限的 spawn 請求，會被靜默丟棄。</strong></p>
+<p>對，你沒看錯。不是排隊等待，不是拋出錯誤，不是回傳失敗——是直接丟掉，什麼都不告訴你。</p>
+<h3 id="靜默丟棄有多危險？"><a href="#靜默丟棄有多危險？" class="headerlink" title="靜默丟棄有多危險？"></a>靜默丟棄有多危險？</h3><p>在一般的系統設計裡，我們習慣依賴錯誤訊息來偵測問題。Queue 滿了會拒絕、Thread pool 滿了會拋異常、API rate limit 會回 429。這些都是明確的訊號，你可以據此做 retry、做 backoff、做降級。</p>
+<p>但靜默丟棄打破了這個假設。你的調度器以為 6 個 sub-agent 都派出去了，實際上只有 5 個（甚至更少）真的在跑。而且你沒有任何方式知道哪個被丟了——因為 spawn 的回應看起來是正常的。</p>
+<p>這就像是你在餐廳點了 6 道菜，服務生笑著說「好的」，然後上了 4 道就不再出現了。你等了半小時才意識到剩下的根本不會來。</p>
+<h3 id="並發限制的兩層結構"><a href="#並發限制的兩層結構" class="headerlink" title="並發限制的兩層結構"></a>並發限制的兩層結構</h3><p>深入研究後，我發現並發限制其實有兩層：</p>
+<ul>
+<li><strong>全域上限</strong>（比如 maxConcurrent &#x3D; 8）：整個系統同時能跑多少個 sub-agent</li>
+<li><strong>單一 session 上限</strong>（可能是 5）：一個 parent session 最多能 spawn 幾個 children</li>
+</ul>
+<p>這兩個限制是獨立的。就算全域還有空位，單一 session 也可能已經到頂。更麻煩的是，這個 per-session 限制不一定有明確的文件說明，你只能靠踩坑發現。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[Dispatcher Cron 啟動] --> B[spawn sub-agent 1~6]
+    B --> C{檢查並發上限}
+    C -->|未超過| D[✅ sub-agent 正常執行]
+    C -->|超過全域上限| E[❌ 靜默丟棄]
+    C -->|超過 per-session 上限| F[❌ 靜默丟棄]
+    E --> G[沒有錯誤訊息]
+    F --> G
+    G --> H[調度器渾然不知]
+          </pre>
+
+<h3 id="解法：每個任務一個獨立-Session"><a href="#解法：每個任務一個獨立-Session" class="headerlink" title="解法：每個任務一個獨立 Session"></a>解法：每個任務一個獨立 Session</h3><p>既然「一個 dispatcher spawn 多個 sub-agent」行不通，那就換個思路：<strong>讓每個報告成為獨立的 cron job，各自跑在自己的 isolated session 裡。</strong></p>
+<p>原來的架構：</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[Cron] → [Dispatcher Session]</span><br><span class="line">              ├── spawn<span class="built_in"> sub-agent </span>A</span><br><span class="line">              ├── spawn<span class="built_in"> sub-agent </span>B</span><br><span class="line">              ├── spawn<span class="built_in"> sub-agent </span>C</span><br><span class="line">              ├── spawn<span class="built_in"> sub-agent </span>D</span><br><span class="line">              ├── spawn<span class="built_in"> sub-agent </span>E  ← 可能被丟棄</span><br><span class="line">              └── spawn<span class="built_in"> sub-agent </span>F  ← 可能被丟棄</span><br></pre></td></tr></table></figure>
+
+<p>改成：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-attr">[Cron A]</span> → <span class="selector-attr">[Isolated Session A]</span> → 執行報告 <span class="selector-tag">A</span></span><br><span class="line"><span class="selector-attr">[Cron B]</span> → <span class="selector-attr">[Isolated Session B]</span> → 執行報告 <span class="selector-tag">B</span></span><br><span class="line"><span class="selector-attr">[Cron C]</span> → <span class="selector-attr">[Isolated Session C]</span> → 執行報告 C</span><br><span class="line"><span class="selector-attr">[Cron D]</span> → <span class="selector-attr">[Isolated Session D]</span> → 執行報告 D</span><br><span class="line"><span class="selector-attr">[Cron E]</span> → <span class="selector-attr">[Isolated Session E]</span> → 執行報告 E</span><br><span class="line"><span class="selector-attr">[Cron F]</span> → <span class="selector-attr">[Isolated Session F]</span> → 執行報告 F</span><br></pre></td></tr></table></figure>
+
+<p>每個 cron job 直接在自己的 session context 裡執行任務，不 spawn 子代理。這樣就繞過了 sub-agent 並發限制的問題。</p>
+<h3 id="但這不是開倒車嗎？"><a href="#但這不是開倒車嗎？" class="headerlink" title="但這不是開倒車嗎？"></a>但這不是開倒車嗎？</h3><p>你可能會問：「這不就是把一個程式拆成六個嗎？感覺很笨。」</p>
+<p>沒錯，從表面上看這確實是更「原始」的做法。但仔細想想，它其實有幾個優勢：</p>
+<p><strong>1. 故障隔離</strong></p>
+<p>一個報告失敗不會影響其他報告。如果是 dispatcher 模式，dispatcher 本身出問題就全軍覆沒。</p>
+<p><strong>2. 可觀察性</strong></p>
+<p>每個 session 有獨立的 log，出問題一眼就能看出是哪份報告掛了。不需要在一個大 log 裡面找特定 sub-agent 的輸出。</p>
+<p><strong>3. 時間彈性</strong></p>
+<p>不是每份報告都需要同時跑。有的可以早上 6 點跑，有的可以 7 點跑。Dispatcher 模式反而限制了你的排程靈活度。</p>
+<p><strong>4. 資源可控</strong></p>
+<p>每個 session 的資源消耗是獨立計算的。不會因為某個報告特別吃 token，就影響其他報告的執行。</p>
+<h3 id="設計多代理系統的幾個教訓"><a href="#設計多代理系統的幾個教訓" class="headerlink" title="設計多代理系統的幾個教訓"></a>設計多代理系統的幾個教訓</h3><p>這次踩坑讓我整理了幾條心得：</p>
+<p><strong>永遠不要假設 spawn 一定成功。</strong> 就算 API 沒有回傳錯誤，也要有機制驗證 sub-agent 確實在執行。可以用 heartbeat、可以用結果檢查、可以用 session list 確認。</p>
+<p><strong>靜默失敗是最危險的失敗模式。</strong> 比起炸一個 exception 讓你看到，「什麼都沒發生」反而最難 debug。在設計系統時，如果你發現某個環節有靜默失敗的可能，要麼加上明確的回報機制，要麼繞過它。</p>
+<p><strong>簡單架構往往比聰明架構更可靠。</strong> 「一個 dispatcher 管理多個 sub-agent」看起來優雅，但引入了中心化的單點故障和並發限制問題。「每個任務獨立跑」看起來笨，但實際上更穩固。</p>
+<p><strong>多代理不等於多 sub-agent。</strong> 「多代理」的核心是任務分解和並行執行，不一定要用 parent-child 的 spawn 模式實現。Independent session 也是一種多代理架構，只是協調方式不同。</p>
+<h3 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h3><p>AI Agent 的生態還很年輕，很多行為沒有你在傳統軟體開發裡習慣的那種明確規格。「超過上限會靜默丟棄」這種行為，在傳統系統裡會被視為 bug，但在 agent 框架裡可能只是「還沒來得及處理的邊界情況」。</p>
+<p>所以，多跑、多測、多踩坑。不要相信一切都會按照你想像的方式運作——尤其是在半夜三點重構系統的時候。</p>
+<p>如果你也在搞 AI 多代理系統的排程設計，希望這篇能幫你少走一段彎路。我的半夜就不白熬了 😂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88/" rel="tag"># 架構設計</a>
+              <a href="/tags/%E8%B8%A9%E5%9D%91%E7%B4%80%E9%8C%84/" rel="tag"># 踩坑紀錄</a>
+              <a href="/tags/%E5%A4%9A%E4%BB%A3%E7%90%86%E7%B3%BB%E7%B5%B1/" rel="tag"># 多代理系統</a>
+              <a href="/tags/%E6%8E%92%E7%A8%8B%E8%A8%AD%E8%A8%88/" rel="tag"># 排程設計</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026022801/" rel="prev" title="給 AI 寫的 Issue 要多詳細？一個 20K 字 Issue 的誕生過程">
+      <i class="fa fa-chevron-left"></i> 給 AI 寫的 Issue 要多詳細？一個 20K 字 Issue 的誕生過程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026030301/" rel="next" title="當 AI Agent 學會自我進化：Skill 架構設計的踩坑與頓悟">
+      當 AI Agent 學會自我進化：Skill 架構設計的踩坑與頓悟 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%95%8F%E9%A1%8C%EF%BC%9ASub-Agent-%E5%8E%BB%E5%93%AA%E4%BA%86%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">問題：Sub-Agent 去哪了？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9C%E9%BB%98%E4%B8%9F%E6%A3%84%E6%9C%89%E5%A4%9A%E5%8D%B1%E9%9A%AA%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">靜默丟棄有多危險？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A6%E7%99%BC%E9%99%90%E5%88%B6%E7%9A%84%E5%85%A9%E5%B1%A4%E7%B5%90%E6%A7%8B"><span class="nav-number">3.</span> <span class="nav-text">並發限制的兩層結構</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%B3%95%EF%BC%9A%E6%AF%8F%E5%80%8B%E4%BB%BB%E5%8B%99%E4%B8%80%E5%80%8B%E7%8D%A8%E7%AB%8B-Session"><span class="nav-number">4.</span> <span class="nav-text">解法：每個任務一個獨立 Session</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%86%E9%80%99%E4%B8%8D%E6%98%AF%E9%96%8B%E5%80%92%E8%BB%8A%E5%97%8E%EF%BC%9F"><span class="nav-number">5.</span> <span class="nav-text">但這不是開倒車嗎？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E8%A8%88%E5%A4%9A%E4%BB%A3%E7%90%86%E7%B3%BB%E7%B5%B1%E7%9A%84%E5%B9%BE%E5%80%8B%E6%95%99%E8%A8%93"><span class="nav-number">6.</span> <span class="nav-text">設計多代理系統的幾個教訓</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">7.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

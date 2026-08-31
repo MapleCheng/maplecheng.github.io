@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="AI coding 工具的設定目錄裡常混著設定、指令、技能與執行期資料。從技術主管角度，真正要管理的不是某個隱藏資料夾，而是每一類資訊的責任、版本與信任邊界。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="別把 AI Coding 的設定資料夾，當成專案架構">
+<meta property="og:url" content="https://maplecheng.com/page/2026071901/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="AI coding 工具的設定目錄裡常混著設定、指令、技能與執行期資料。從技術主管角度，真正要管理的不是某個隱藏資料夾，而是每一類資訊的責任、版本與信任邊界。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-07-18T21:01:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.345Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Coding">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="CTO筆記">
+<meta property="article:tag" content="工程管理">
+<meta property="article:tag" content="開發流程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026071901/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>別把 AI Coding 的設定資料夾，當成專案架構 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026071901/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          別把 AI Coding 的設定資料夾，當成專案架構
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-07-19 05:01:00" itemprop="dateCreated datePublished" datetime="2026-07-19T05:01:00+08:00">2026-07-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">AI coding 工具的設定目錄裡常混著設定、指令、技能與執行期資料。從技術主管角度，真正要管理的不是某個隱藏資料夾，而是每一類資訊的責任、版本與信任邊界。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>團隊開始使用 AI coding 工具後，我常看到一個很自然、也很危險的動作：打開某個隱藏設定資料夾，看到裡面有設定檔、session、快取、資料庫、外掛紀錄，接著就把它當成「這個工具的標準專案結構」。</p>
+<p>這個誤會很容易發生。資料夾確實看起來很像架構；檔名也都很技術。但對需要長期維護的工程團隊來說，<strong>看得到的檔案，不等於應該被管理的介面</strong>。</p>
+<span id="more"></span>
+
+<p>我後來會先把 AI coding 工具相關的檔案拆成四類：設定、指令、技能，以及執行期資料。這個分類比記住某個工具目前用了哪些資料夾更重要，因為工具會改版，資料夾會搬家，但責任邊界不應該跟著漂。</p>
+<h2 id="第一類：設定，是「這個工具怎麼運作」"><a href="#第一類：設定，是「這個工具怎麼運作」" class="headerlink" title="第一類：設定，是「這個工具怎麼運作」"></a>第一類：設定，是「這個工具怎麼運作」</h2><p>設定檔處理的是模型、profile、權限預設、可信任專案、網路或工具行為等問題。它回答的是：這個 agent 在什麼條件下可以啟動？要讀哪一層設定？誰可以覆寫誰？</p>
+<p>這一層最容易被低估的，其實是<strong>優先序</strong>。同一個行為可能同時受到命令列參數、專案設定、個人 profile、使用者全域設定和系統預設影響。如果團隊不知道最後是哪一層生效，就會出現很熟悉的場景：A 的電腦可以跑、B 的不行；本機測試正常、CI 卻用了另一個模型；安全限制明明寫了，卻被某個較近的設定檔蓋掉。</p>
+<p>所以設定不該只是「把參數放對地方」。技術主管需要把它當成配置治理：哪些屬於個人偏好，哪些必須進版控，哪些只能由平台管理，哪些專案只有在被信任後才可以載入。設定層愈清楚，團隊愈不必靠口耳相傳猜環境。</p>
+<h2 id="第二類：指令，是「AI-在這裡該怎麼做事」"><a href="#第二類：指令，是「AI-在這裡該怎麼做事」" class="headerlink" title="第二類：指令，是「AI 在這裡該怎麼做事」"></a>第二類：指令，是「AI 在這裡該怎麼做事」</h2><p>另一類常被混在設定裡的，是專案指令文件。它描述的不是模型溫度或 API 端點，而是工程脈絡：目錄怎麼分、哪些區域不能碰、測試要怎麼跑、資料庫 migration 有哪些規則、PR 前要做什麼檢查。</p>
+<p>這類文件對人是 onboarding 文件，對 AI 則是持久的工作說明。它應該跟程式碼一起演進、可以逐層補充，也應該接受 code review。根目錄的規則講共通原則，子目錄再補上局部限制，通常比塞一份越寫越長的萬用指令可靠。</p>
+<p>不過我不建議把它當成萬靈丹。指令文件不是把所有知識倒進去的地方，更不是把敏感資訊藏在 repo 裡的捷徑。它的價值在於提供穩定、可驗證的操作約束：先讀哪些文件、不要改哪些邊界、完成後如何驗收。講不清楚的規則，AI 讀再多也只是在猜。</p>
+<h2 id="第三類：技能，是可重用的方法，不是工具的私有雜物"><a href="#第三類：技能，是可重用的方法，不是工具的私有雜物" class="headerlink" title="第三類：技能，是可重用的方法，不是工具的私有雜物"></a>第三類：技能，是可重用的方法，不是工具的私有雜物</h2><p>當團隊把某個任務反覆做過幾次，例如釋出前檢查、資料修復、需求分析、測試診斷，真正值得沉澱的通常不是一段很長的聊天紀錄，而是一個 skill：觸發條件、必要前置、步驟、風險、失敗處理與驗證方式。</p>
+<p>這裡的重點是把「怎麼做」和「工具把它放在哪裡」分開。不同 AI coding 平台對技能、命令、外掛的格式未必相容；即使檔案看起來很像，也不代表能直接搬過去用。前幾天能讀的格式，下一版可能就有新的作者入口或載入規則。</p>
+<p>因此我會把技能內容視為團隊資產，把特定宿主的封裝視為 adapter。核心方法盡量用清楚文件、腳本與可測試輸出保存；需要接到特定工具時，再做薄薄一層轉接。這樣未來換工具，不會連整套作業方法一起被鎖死。</p>
+<h2 id="第四類：執行期資料，是證據，不是骨架"><a href="#第四類：執行期資料，是證據，不是骨架" class="headerlink" title="第四類：執行期資料，是證據，不是骨架"></a>第四類：執行期資料，是證據，不是骨架</h2><p>最常被誤當成專案結構的，是 session、cache、本機索引、SQLite、暫存下載、外掛狀態等執行期資料。它們很有用，因為除錯時能提供證據；但它們通常不是穩定 API，也不是應該手動建立、複製到每台電腦或放進 Git 的內容。</p>
+<p>把這些資料當成骨架，會導致幾個後果：設定被快取覆蓋時找不到原因；團隊誤把本機對話或憑證狀態同步出去；升級後因內部格式變動而壞掉；更糟的是，大家以為備份了這個資料夾，就完成了可復原設計。</p>
+<p>真正的可復原設計，應該備份可宣告的設定、版控中的指令與技能、必要的憑證管理流程，以及能重建執行環境的文件。執行期資料可以依風險決定是否保留為診斷證據，但不該默默變成唯一資料源。</p>
+<h2 id="從資料夾思維，轉成責任思維"><a href="#從資料夾思維，轉成責任思維" class="headerlink" title="從資料夾思維，轉成責任思維"></a>從資料夾思維，轉成責任思維</h2><p>我現在在導入 AI coding 工具時，會要求團隊先回答四個問題：</p>
+<ol>
+<li>這份資料是在控制行為、描述工作方法，還是只是工具跑過後留下的痕跡？</li>
+<li>它該不該進版控？如果要，誰 review、如何更新？</li>
+<li>它是否包含個人偏好、專案規範或敏感狀態？三者能不能混在同一處？</li>
+<li>工具明天換版或換宿主時，我們要移走的是檔案，還是可驗證的工作能力？</li>
+</ol>
+<p>這幾個問題看起來樸素，卻能避開很多「照著網路上的目錄結構建一遍」的假安全感。AI coding 的工具層還在快速演化，今天的隱藏資料夾很可能只是實作細節，不是團隊契約。</p>
+<p>身為技術主管，我不希望團隊對某一個 agent 形成信仰式依賴。我希望我們知道：設定在哪裡收斂、規則如何被閱讀、技能怎麼重用、狀態出了問題要如何重建與稽核。把這些邊界畫清楚後，工具可以替換，方法可以累積，工程治理才不會跟著某個資料夾一起消失。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Agent/" rel="tag"># Agent</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E6%B5%81%E7%A8%8B/" rel="tag"># 開發流程</a>
+              <a href="/tags/AI-Coding/" rel="tag"># AI Coding</a>
+              <a href="/tags/%E5%B7%A5%E7%A8%8B%E7%AE%A1%E7%90%86/" rel="tag"># 工程管理</a>
+              <a href="/tags/CTO%E7%AD%86%E8%A8%98/" rel="tag"># CTO筆記</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026071801/" rel="prev" title="把現場素材交給 AI 之前，先設計一個不會卡手的入口">
+      <i class="fa fa-chevron-left"></i> 把現場素材交給 AI 之前，先設計一個不會卡手的入口
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026072001/" rel="next" title="讓 Coding Agent 排隊，不是為了多跑幾個模型">
+      讓 Coding Agent 排隊，不是為了多跑幾個模型 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%A1%9E%EF%BC%9A%E8%A8%AD%E5%AE%9A%EF%BC%8C%E6%98%AF%E3%80%8C%E9%80%99%E5%80%8B%E5%B7%A5%E5%85%B7%E6%80%8E%E9%BA%BC%E9%81%8B%E4%BD%9C%E3%80%8D"><span class="nav-number">1.</span> <span class="nav-text">第一類：設定，是「這個工具怎麼運作」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E9%A1%9E%EF%BC%9A%E6%8C%87%E4%BB%A4%EF%BC%8C%E6%98%AF%E3%80%8CAI-%E5%9C%A8%E9%80%99%E8%A3%A1%E8%A9%B2%E6%80%8E%E9%BA%BC%E5%81%9A%E4%BA%8B%E3%80%8D"><span class="nav-number">2.</span> <span class="nav-text">第二類：指令，是「AI 在這裡該怎麼做事」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E9%A1%9E%EF%BC%9A%E6%8A%80%E8%83%BD%EF%BC%8C%E6%98%AF%E5%8F%AF%E9%87%8D%E7%94%A8%E7%9A%84%E6%96%B9%E6%B3%95%EF%BC%8C%E4%B8%8D%E6%98%AF%E5%B7%A5%E5%85%B7%E7%9A%84%E7%A7%81%E6%9C%89%E9%9B%9C%E7%89%A9"><span class="nav-number">3.</span> <span class="nav-text">第三類：技能，是可重用的方法，不是工具的私有雜物</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E9%A1%9E%EF%BC%9A%E5%9F%B7%E8%A1%8C%E6%9C%9F%E8%B3%87%E6%96%99%EF%BC%8C%E6%98%AF%E8%AD%89%E6%93%9A%EF%BC%8C%E4%B8%8D%E6%98%AF%E9%AA%A8%E6%9E%B6"><span class="nav-number">4.</span> <span class="nav-text">第四類：執行期資料，是證據，不是骨架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%9E%E8%B3%87%E6%96%99%E5%A4%BE%E6%80%9D%E7%B6%AD%EF%BC%8C%E8%BD%89%E6%88%90%E8%B2%AC%E4%BB%BB%E6%80%9D%E7%B6%AD"><span class="nav-number">5.</span> <span class="nav-text">從資料夾思維，轉成責任思維</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

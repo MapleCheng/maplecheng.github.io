@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="AI 自動化做久了，我越來越確定真正難的不是 prompt，而是面對配額限制、搜尋 rate limit 與外部服務不穩時，系統能不能優雅降級。這篇分享我如何重新思考 AI 排程報告系統的 fallback 設計。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="當 AI 排程系統撞上配額與 Rate Limit，我怎麼把它改得沒那麼脆弱">
+<meta property="og:url" content="https://maplecheng.com/page/2026040601/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="AI 自動化做久了，我越來越確定真正難的不是 prompt，而是面對配額限制、搜尋 rate limit 與外部服務不穩時，系統能不能優雅降級。這篇分享我如何重新思考 AI 排程報告系統的 fallback 設計。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-04-05T21:20:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Cron">
+<meta property="article:tag" content="Fallback">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="Rate Limit">
+<meta property="article:tag" content="系統設計">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026040601/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>當 AI 排程系統撞上配額與 Rate Limit，我怎麼把它改得沒那麼脆弱 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026040601/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          當 AI 排程系統撞上配額與 Rate Limit，我怎麼把它改得沒那麼脆弱
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-04-06 05:20:00" itemprop="dateCreated datePublished" datetime="2026-04-06T05:20:00+08:00">2026-04-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">AI 自動化做久了，我越來越確定真正難的不是 prompt，而是面對配額限制、搜尋 rate limit 與外部服務不穩時，系統能不能優雅降級。這篇分享我如何重新思考 AI 排程報告系統的 fallback 設計。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近我又被一個很典型、但也很現實的問題教育了一次：<strong>AI 自動化流程真正會讓你痛的，通常不是模型不夠聰明，而是外部世界根本不穩。</strong></p>
+<p>事情很簡單。我有一套會定時跑的 AI 報告流程，平常看起來很順：到點觸發、抓資料、整理內容、輸出摘要。聽起來很合理對吧？但只要其中兩個外部依賴同時出狀況，整套流程就會瞬間從「自動化助手」變成「凌晨把你叫起來的告警機器」。</p>
+<p>這次的組合拳是這樣：模型端碰到額度或 credit 問題，搜尋端又撞到 rate limit。然後災難就開始了。</p>
+<span id="more"></span>
+
+<h3 id="問題從來不是單點故障，而是連鎖故障"><a href="#問題從來不是單點故障，而是連鎖故障" class="headerlink" title="問題從來不是單點故障，而是連鎖故障"></a>問題從來不是單點故障，而是連鎖故障</h3><p>很多人設計 AI workflow 時，會先假設主模型可用、搜尋 API 穩定、抓回來的內容格式正常。這種設計在 demo 階段沒什麼問題，但一旦進入排程環境，事情完全不是這樣。</p>
+<p>排程系統的特性是：</p>
+<ul>
+<li>它會固定時間跑</li>
+<li>它會跟其他 job 搶同一批外部資源</li>
+<li>它發生錯誤時，通常不是你坐在旁邊即時救火</li>
+</ul>
+<p>所以真正麻煩的不是「某個 API 壞掉」，而是：</p>
+<ul>
+<li>主模型剛好沒額度</li>
+<li>備援模型能用，但輸出風格不同</li>
+<li>搜尋 API 同時因為短時間請求太多回 429</li>
+<li>你後面還有其他 cron 也排在差不多的時段</li>
+</ul>
+<p>這時候如果流程只寫成「失敗就重試」，通常只會更慘。</p>
+<p>因為你其實不是在處理一個短暫失敗，而是在放大整體壅塞。</p>
+<h3 id="我後來接受一件事：AI-pipeline-一定要預設會失敗"><a href="#我後來接受一件事：AI-pipeline-一定要預設會失敗" class="headerlink" title="我後來接受一件事：AI pipeline 一定要預設會失敗"></a>我後來接受一件事：AI pipeline 一定要預設會失敗</h3><p>以前我會把 fallback 當成加分題，現在我比較像把它當成必考題。</p>
+<p>也就是說，設計流程時就先問自己：</p>
+<ul>
+<li>主模型失敗了怎麼辦？</li>
+<li>搜尋拿不到結果怎麼辦？</li>
+<li>只拿到半套資料時，可不可以先產出一個品質尚可的版本？</li>
+<li>如果今天真的不能產出，是不是至少要「清楚失敗」，而不是默默死掉？</li>
+</ul>
+<p>這個心態差很多。</p>
+<p>因為你一旦接受「失敗是常態」，設計就會從追求完美輸出，轉成追求<strong>可恢復、可退化、可觀測</strong>。</p>
+<h3 id="我現在比較偏好的做法：三層-fallback"><a href="#我現在比較偏好的做法：三層-fallback" class="headerlink" title="我現在比較偏好的做法：三層 fallback"></a>我現在比較偏好的做法：三層 fallback</h3><p>我後來把這類 AI 排程流程，盡量拆成三層。</p>
+<p>第一層是<strong>模型 fallback</strong>。<br>主模型不通，就切到備援模型。這很基本，但實作時要注意一件事：不要假設所有模型輸出格式完全一致。你最好在後面加一層標準化，否則前面只是換模型，後面 parsing 一樣炸。</p>
+<p>第二層是<strong>資料來源 fallback</strong>。<br>如果搜尋 API 回 429，不代表整篇報告就不能做。有些內容可以用較少的搜尋請求完成，有些可以改成直接抓已知來源，有些則可以降低覆蓋範圍，先產出「夠用版」。</p>
+<p>第三層是<strong>結果等級 fallback</strong>。<br>不是所有任務都非得輸出完整版。很多時候，</p>
+<ul>
+<li>完整版</li>
+<li>精簡版</li>
+<li>失敗摘要版</li>
+</ul>
+<p>這三種層級，比單純的成功 &#x2F; 失敗二分法實用很多。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[cron 觸發] --> B{主模型可用?}
+    B -- 是 --> C[主流程生成]
+    B -- 否 --> D[切換備援模型]
+    D --> E{搜尋可用?}
+    C --> E
+    E -- 是 --> F[完整資料整理]
+    E -- 否 --> G[縮減搜尋範圍 / 直接抓既有來源]
+    F --> H[輸出完整版]
+    G --> I{資料是否足夠?}
+    I -- 是 --> J[輸出精簡版]
+    I -- 否 --> K[輸出失敗摘要與原因]
+          </pre>
+
+<h3 id="Rate-limit-不是-bug，是系統設計邊界"><a href="#Rate-limit-不是-bug，是系統設計邊界" class="headerlink" title="Rate limit 不是 bug，是系統設計邊界"></a>Rate limit 不是 bug，是系統設計邊界</h3><p>我以前看到 429，第一反應常常是：「靠，又被擋了。」</p>
+<p>現在比較像是：「好，這代表我對外部服務的使用方式，已經碰到它的制度邊界了。」</p>
+<p>這不是 bug，比較像是你系統設計時沒有把現實世界算進去。</p>
+<p>尤其多個 cron 在相近時間一起跑時，最容易出現這種問題。你以為每個任務都只打幾次 API，很節制；但當它們同時發生，總量就完全不是那回事。</p>
+<p>所以我現在會優先做幾件事：</p>
+<ul>
+<li>減少不必要搜尋，先問「這次真的需要幾個來源？」</li>
+<li>把能共用的資料抽成一次抓取，而不是每個 job 各抓一次</li>
+<li>降低同時併發數，寧可慢一點，也不要一起炸</li>
+<li>遇到 429 時尊重節流，不做情緒化狂重試</li>
+</ul>
+<p>說穿了，<strong>rate limit 其實在提醒你：你的系統現在太貪心了。</strong></p>
+<h3 id="真正有用的不是「永不失敗」，而是「失敗時還像個系統」"><a href="#真正有用的不是「永不失敗」，而是「失敗時還像個系統」" class="headerlink" title="真正有用的不是「永不失敗」，而是「失敗時還像個系統」"></a>真正有用的不是「永不失敗」，而是「失敗時還像個系統」</h3><p>我現在越來越不相信那種宣稱自己全自動、全穩定、全智能的 AI 工作流。</p>
+<p>不是因為 AI 沒用，而是因為真實世界根本不是實驗室。模型會變、供應商會限流、網站會改版、排程會碰撞、外部資料會缺漏。這些都不是例外，是日常。</p>
+<p>所以我對一套 AI 自動化流程的評價標準，慢慢變成下面這幾個：</p>
+<ul>
+<li>失敗時有沒有清楚的原因</li>
+<li>有沒有備援路徑</li>
+<li>可不可以降級輸出</li>
+<li>出問題時，下一次修正會不會很容易</li>
+</ul>
+<p>如果答案是 yes，那這套系統就算還不完美，我也會覺得它已經夠成熟。</p>
+<h3 id="CTO-的私心總結"><a href="#CTO-的私心總結" class="headerlink" title="CTO 的私心總結"></a>CTO 的私心總結</h3><p>做 AI 系統久了，我反而越來越少迷信模型本身，越來越重視整體工程設計。</p>
+<p>模型當然重要，但真正決定體驗的，常常是那些很不 glamorous 的東西：排程、重試、節流、fallback、觀測性、錯誤訊息。</p>
+<p>這些東西平常沒人在意，直到某天它們一起出事，你才會發現：原來 AI 系統最難的地方，從來不是讓它「看起來很聰明」，而是讓它在不順的時候，<strong>仍然表現得像一個可靠的系統</strong>。</p>
+<p>如果你最近也在做 AI 自動化，而且偶爾被 429、配額、超時、外部服務不穩搞到懷疑人生，那我真心建議：先別急著改 prompt，先回頭檢查你的 fallback。很多時候，救你的不是更強的模型，而是更老實的系統設計。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/Cron/" rel="tag"># Cron</a>
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/Fallback/" rel="tag"># Fallback</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88/" rel="tag"># 系統設計</a>
+              <a href="/tags/Rate-Limit/" rel="tag"># Rate Limit</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026040502/" rel="prev" title="我怎麼幫 AI 助手做一套「不會失憶」的記憶系統">
+      <i class="fa fa-chevron-left"></i> 我怎麼幫 AI 助手做一套「不會失憶」的記憶系統
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026040701/" rel="next" title="AI 例行報告別押單一模型：我把失敗當成系統設計的一部分">
+      AI 例行報告別押單一模型：我把失敗當成系統設計的一部分 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%95%8F%E9%A1%8C%E5%BE%9E%E4%BE%86%E4%B8%8D%E6%98%AF%E5%96%AE%E9%BB%9E%E6%95%85%E9%9A%9C%EF%BC%8C%E8%80%8C%E6%98%AF%E9%80%A3%E9%8E%96%E6%95%85%E9%9A%9C"><span class="nav-number">1.</span> <span class="nav-text">問題從來不是單點故障，而是連鎖故障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E5%BE%8C%E4%BE%86%E6%8E%A5%E5%8F%97%E4%B8%80%E4%BB%B6%E4%BA%8B%EF%BC%9AAI-pipeline-%E4%B8%80%E5%AE%9A%E8%A6%81%E9%A0%90%E8%A8%AD%E6%9C%83%E5%A4%B1%E6%95%97"><span class="nav-number">2.</span> <span class="nav-text">我後來接受一件事：AI pipeline 一定要預設會失敗</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E7%8F%BE%E5%9C%A8%E6%AF%94%E8%BC%83%E5%81%8F%E5%A5%BD%E7%9A%84%E5%81%9A%E6%B3%95%EF%BC%9A%E4%B8%89%E5%B1%A4-fallback"><span class="nav-number">3.</span> <span class="nav-text">我現在比較偏好的做法：三層 fallback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rate-limit-%E4%B8%8D%E6%98%AF-bug%EF%BC%8C%E6%98%AF%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88%E9%82%8A%E7%95%8C"><span class="nav-number">4.</span> <span class="nav-text">Rate limit 不是 bug，是系統設計邊界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E6%9C%89%E7%94%A8%E7%9A%84%E4%B8%8D%E6%98%AF%E3%80%8C%E6%B0%B8%E4%B8%8D%E5%A4%B1%E6%95%97%E3%80%8D%EF%BC%8C%E8%80%8C%E6%98%AF%E3%80%8C%E5%A4%B1%E6%95%97%E6%99%82%E9%82%84%E5%83%8F%E5%80%8B%E7%B3%BB%E7%B5%B1%E3%80%8D"><span class="nav-number">5.</span> <span class="nav-text">真正有用的不是「永不失敗」，而是「失敗時還像個系統」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTO-%E7%9A%84%E7%A7%81%E5%BF%83%E7%B8%BD%E7%B5%90"><span class="nav-number">6.</span> <span class="nav-text">CTO 的私心總結</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

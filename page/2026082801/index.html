@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="Agent 進入背景與多步驟執行後，只設 token 或金額上限仍不足以防止失控。從技術主管視角談如何用呼叫、時間、重試、工具與副作用預算，替每個任務建立可觀測的停止條件。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent 的執行預算不是成本上限，而是停止條件">
+<meta property="og:url" content="https://maplecheng.com/page/2026082801/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="Agent 進入背景與多步驟執行後，只設 token 或金額上限仍不足以防止失控。從技術主管視角談如何用呼叫、時間、重試、工具與副作用預算，替每個任務建立可觀測的停止條件。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-08-27T21:01:04.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.347Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Agent Runtime">
+<meta property="article:tag" content="可觀測性">
+<meta property="article:tag" content="成本治理">
+<meta property="article:tag" content="系統可靠性">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026082801/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Agent 的執行預算不是成本上限，而是停止條件 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026082801/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Agent 的執行預算不是成本上限，而是停止條件
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-08-28 05:01:04" itemprop="dateCreated datePublished" datetime="2026-08-28T05:01:04+08:00">2026-08-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Agent 進入背景與多步驟執行後，只設 token 或金額上限仍不足以防止失控。從技術主管視角談如何用呼叫、時間、重試、工具與副作用預算，替每個任務建立可觀測的停止條件。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看到 Agent 開發框架開始把 LLM 呼叫上限、執行軌跡、護欄與評測做進 runtime，我覺得這是一個很務實的訊號：大家終於不只在問 Agent 能做多少事，也開始認真處理它到底可以做多久。</p>
+<p>很多團隊已經會設定模型費用警示，卻仍可能遇到一個任務反覆查詢、換模型、重試工具，最後沒有超出帳單上限，卻把時間、服務配額與人的耐心一起耗光。站在技術主管的位置，我會把執行預算看成任務的停止條件，而不只是月底成本報表上的一條紅線。</p>
+<span id="more"></span>
+
+<h2 id="金額只是最晚才看見的結果"><a href="#金額只是最晚才看見的結果" class="headerlink" title="金額只是最晚才看見的結果"></a>金額只是最晚才看見的結果</h2><p>談 AI 預算時，最直覺的是 token、模型單價與每月額度。這些當然要管，但它們通常是執行過程累積後的結果，不足以描述任務是否健康。</p>
+<p>一個 Agent 可能只用了便宜模型，卻在錯誤方向上跑了五十步；也可能沒有花很多 token，卻反覆呼叫昂貴或有速率限制的外部工具。還有一種更麻煩的情況：主模型失敗後切到 fallback，新的模型重新閱讀整份上下文，又從頭嘗試一次。每個局部決策看起來都合理，整體卻逐漸失去終止條件。</p>
+<p>因此，若系統只問「這次花了多少錢」，往往太晚。更早該問的是：它已經用了幾次模型呼叫、走了多少步、重試幾次、等待多久、讀了多少資料、觸發多少工具，以及產生了多少不可逆的動作。</p>
+<h2 id="執行預算應該是多維度的"><a href="#執行預算應該是多維度的" class="headerlink" title="執行預算應該是多維度的"></a>執行預算應該是多維度的</h2><p>我現在會把任務預算至少拆成五類。</p>
+<p>第一是<strong>模型呼叫預算</strong>。它不只限制總次數，也要區分規劃、摘要、驗證與生成等用途。若同一個問題連續呼叫多次仍沒有新增證據，系統應該停下來，而不是期待下一次抽樣突然開悟。</p>
+<p>第二是<strong>時間與步數預算</strong>。背景任務不能因為使用者看不到，就獲得無限生命。牆鐘時間、有效運算時間與狀態轉移次數都值得記錄。任務長時間停在等待、重試或來回規劃，代表它可能需要人工決策，而不是更多耐心。</p>
+<p>第三是<strong>工具與資料預算</strong>。資料庫查詢、搜尋、檔案讀取與外部 API 各有不同成本和風險。限制總工具呼叫數還不夠，還要限制單一工具的重複使用、查詢範圍與回傳量，避免 Agent 用「再查一次」掩蓋自己沒有收斂。</p>
+<p>第四是<strong>重試與 fallback 預算</strong>。重試不能重置整個任務的計數器，切換模型也不能得到一份全新額度。預算必須沿著任務樹繼承，否則主 Agent 每叫一個 sub-agent，就等於偷偷增發新的信用卡。</p>
+<p>第五是<strong>副作用預算</strong>。建立草稿、改檔案、送出通知與更新正式資料，不能只用同一個次數衡量。愈接近不可逆操作，額度應該愈小，甚至預設為零，直到取得明確核准。</p>
+<h2 id="用完預算時，不能只回一個錯誤"><a href="#用完預算時，不能只回一個錯誤" class="headerlink" title="用完預算時，不能只回一個錯誤"></a>用完預算時，不能只回一個錯誤</h2><p>預算真正有用的地方，不是把 Agent 硬切斷，而是讓系統在額度耗盡時做出可理解的轉移。</p>
+<p>低風險任務可以降級，例如縮小搜尋範圍、改用較便宜的模型，或只交付目前已驗證的部分。需要判斷的任務則應進入 <code>decision_required</code>，清楚說明已完成什麼、卡在哪裡、還缺哪些證據，以及增加多少額度可能換到什麼結果。涉及正式資料的任務，預算耗盡時應停止後續副作用，而不是為了「完成」偷偷略過驗證。</p>
+<p>這裡有一個很重要的原則：fallback 是故障處理，不是繞過政策。原模型超出呼叫上限後切到另一個模型，仍必須沿用同一份任務預算、權限與審批條件。否則系統看似提高可用性，實際上只是把失控路徑藏進備援鏈。</p>
+<h2 id="沒有-execution-spans，預算只會變成另一個黑盒"><a href="#沒有-execution-spans，預算只會變成另一個黑盒" class="headerlink" title="沒有 execution spans，預算只會變成另一個黑盒"></a>沒有 execution spans，預算只會變成另一個黑盒</h2><p>要管理預算，前提是看得見它花在哪裡。只有任務總 token 和總金額，無法回答是規劃太久、工具太慢、context 膨脹，還是重試策略出了問題。</p>
+<p>我會要求每個重要階段留下 execution span：它的目的、父任務、使用模型、工具呼叫、等待時間、輸入輸出量、重試原因與結束狀態。這些 span 不只是除錯資料，也讓團隊能比較不同版本的 runtime 行為。</p>
+<p>例如模型升級後，最終答案正確率可能提高，但平均工具呼叫增加一倍；新的 fallback chain 可能降低失敗率，卻讓尾端延遲與成本大幅上升。若沒有分階段軌跡，團隊只會看到「大多數任務成功」，卻不知道成功正在變得愈來愈昂貴。</p>
+<h2 id="預算要用真實工作負載校準"><a href="#預算要用真實工作負載校準" class="headerlink" title="預算要用真實工作負載校準"></a>預算要用真實工作負載校準</h2><p>預算也不是拍腦袋設一個固定數字。太鬆沒有保護作用，太緊則會讓正常任務頻繁中斷。比較可靠的作法，是從真實工作負載建立基線：不同任務類型通常需要幾次模型呼叫、多少工具步驟、多久完成，哪些失敗會因一次重試恢復，哪些重試只是在浪費資源。</p>
+<p>接著再按風險與價值分級。讀取型摘要可以給較大的探索空間；會修改資料的流程應有更短步數、更少重試與更早的人工確認；高成本分析可以允許延長時間，但必須定期產生 checkpoint，證明工作確實在前進。</p>
+<p>每次改模型、工具描述、prompt、context 壓縮或 fallback 策略，都應用同一批真實任務重跑。評估的不只是最後答案，還要比較完成率、呼叫分布、尾端延遲、人工介入點與預算耗盡原因。這樣預算才會從靜態限制，變成 runtime 的可靠性指標。</p>
+<h2 id="能力愈強，愈需要清楚的停止理由"><a href="#能力愈強，愈需要清楚的停止理由" class="headerlink" title="能力愈強，愈需要清楚的停止理由"></a>能力愈強，愈需要清楚的停止理由</h2><p>Agent 失控不一定長得像巨額帳單。它可能只是一直很忙：不斷查資料、不斷反省、不斷換模型，產出一長串看似合理的軌跡，卻沒有更接近可驗證結果。這種失控最容易被忽略，因為系統沒有當機，甚至每一步都能解釋。</p>
+<p>對我來說，成熟的 Agent runtime 不只要知道如何開始，也要在每一步回答：剩下多少執行空間、目前進展是否值得繼續、耗盡後要降級、交棒還是停止。</p>
+<p>成本上限保護帳單；執行預算保護的是整個工作流。當模型呼叫、時間、重試、工具與副作用都有可觀測的邊界，Agent 才不會把「還能再試一次」當成永遠成立的理由。真正可靠的自動化，不是永遠把任務做完，而是在不值得繼續時，能帶著證據停在對的地方。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%88%90%E6%9C%AC%E6%B2%BB%E7%90%86/" rel="tag"># 成本治理</a>
+              <a href="/tags/%E5%8F%AF%E8%A7%80%E6%B8%AC%E6%80%A7/" rel="tag"># 可觀測性</a>
+              <a href="/tags/Agent-Runtime/" rel="tag"># Agent Runtime</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E5%8F%AF%E9%9D%A0%E6%80%A7/" rel="tag"># 系統可靠性</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026082701/" rel="prev" title="資料格式不是升級路徑，先分清保存、交換與執行">
+      <i class="fa fa-chevron-left"></i> 資料格式不是升級路徑，先分清保存、交換與執行
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026083001/" rel="next" title="當 AI 會照文件下指令，文件就成了軟體供應鏈">
+      當 AI 會照文件下指令，文件就成了軟體供應鏈 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%91%E9%A1%8D%E5%8F%AA%E6%98%AF%E6%9C%80%E6%99%9A%E6%89%8D%E7%9C%8B%E8%A6%8B%E7%9A%84%E7%B5%90%E6%9E%9C"><span class="nav-number">1.</span> <span class="nav-text">金額只是最晚才看見的結果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%B7%E8%A1%8C%E9%A0%90%E7%AE%97%E6%87%89%E8%A9%B2%E6%98%AF%E5%A4%9A%E7%B6%AD%E5%BA%A6%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">執行預算應該是多維度的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E5%AE%8C%E9%A0%90%E7%AE%97%E6%99%82%EF%BC%8C%E4%B8%8D%E8%83%BD%E5%8F%AA%E5%9B%9E%E4%B8%80%E5%80%8B%E9%8C%AF%E8%AA%A4"><span class="nav-number">3.</span> <span class="nav-text">用完預算時，不能只回一個錯誤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B2%92%E6%9C%89-execution-spans%EF%BC%8C%E9%A0%90%E7%AE%97%E5%8F%AA%E6%9C%83%E8%AE%8A%E6%88%90%E5%8F%A6%E4%B8%80%E5%80%8B%E9%BB%91%E7%9B%92"><span class="nav-number">4.</span> <span class="nav-text">沒有 execution spans，預算只會變成另一個黑盒</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A0%90%E7%AE%97%E8%A6%81%E7%94%A8%E7%9C%9F%E5%AF%A6%E5%B7%A5%E4%BD%9C%E8%B2%A0%E8%BC%89%E6%A0%A1%E6%BA%96"><span class="nav-number">5.</span> <span class="nav-text">預算要用真實工作負載校準</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%BD%E5%8A%9B%E6%84%88%E5%BC%B7%EF%BC%8C%E6%84%88%E9%9C%80%E8%A6%81%E6%B8%85%E6%A5%9A%E7%9A%84%E5%81%9C%E6%AD%A2%E7%90%86%E7%94%B1"><span class="nav-number">6.</span> <span class="nav-text">能力愈強，愈需要清楚的停止理由</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

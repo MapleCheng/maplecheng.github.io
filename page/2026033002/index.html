@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="在 ERP 系統裡，物料移轉、工時分攤都涉及除法運算。除不盡的餘數要怎麼處理？四捨五入？最後一筆補差？本文分享一個真實案例：同一套系統裡，不同模組用了不同的策略，而我們直到客戶提問才發現。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ERP 系統的除法餘數怎麼處理？一個被忽略的精度陷阱">
+<meta property="og:url" content="https://maplecheng.com/page/2026033002/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="在 ERP 系統裡，物料移轉、工時分攤都涉及除法運算。除不盡的餘數要怎麼處理？四捨五入？最後一筆補差？本文分享一個真實案例：同一套系統裡，不同模組用了不同的策略，而我們直到客戶提問才發現。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-03-29T21:01:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content=".NET">
+<meta property="article:tag" content="ERP">
+<meta property="article:tag" content="SQL">
+<meta property="article:tag" content="數值精度">
+<meta property="article:tag" content="製造業系統">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026033002/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>ERP 系統的除法餘數怎麼處理？一個被忽略的精度陷阱 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026033002/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ERP 系統的除法餘數怎麼處理？一個被忽略的精度陷阱
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-03-30 05:01:00" itemprop="dateCreated datePublished" datetime="2026-03-30T05:01:00+08:00">2026-03-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">在 ERP 系統裡，物料移轉、工時分攤都涉及除法運算。除不盡的餘數要怎麼處理？四捨五入？最後一筆補差？本文分享一個真實案例：同一套系統裡，不同模組用了不同的策略，而我們直到客戶提問才發現。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>今天收到一封客戶來信，問了一個看似簡單的問題：</p>
+<blockquote>
+<p>「配料移轉的時候，如果除不盡，你們是怎麼處理的？會把餘數補在最後一筆嗎？」</p>
+</blockquote>
+<p>我愣了一下。老實說，這問題我還真沒想過。直覺回答：「應該是四捨五入吧？」然後去查了程式碼⋯⋯</p>
+<p>結果發現事情沒那麼簡單。</p>
+<span id="more"></span>
+
+<h3 id="問題背景"><a href="#問題背景" class="headerlink" title="問題背景"></a>問題背景</h3><p>在製造業 ERP 系統裡，「配料移轉」是個常見操作：一批物料要分給多個工單使用，需要按比例分配。例如：</p>
+<ul>
+<li>總物料：100 kg</li>
+<li>工單 A：30%</li>
+<li>工單 B：30%</li>
+<li>工單 C：40%</li>
+</ul>
+<p>聽起來很簡單，<code>100 × 0.3 = 30</code> 嘛。但現實是，比例可能不是整數，除法可能除不盡：</p>
+<ul>
+<li>總物料：100 kg</li>
+<li>工單 A：33.333…%</li>
+<li>工單 B：33.333…%</li>
+<li>工單 C：33.334…%</li>
+</ul>
+<p>這時候怎麼辦？每筆都四捨五入？那最後加起來可能不等於 100。最後一筆補差？那前面的帳怎麼對？</p>
+<h3 id="查程式碼時間"><a href="#查程式碼時間" class="headerlink" title="查程式碼時間"></a>查程式碼時間</h3><p>我先去看了配料移轉的程式碼（<code>MaterialAllocationService.cs</code>）：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// L76-78</span></span><br><span class="line">ROUND(..., <span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+
+<p>好，就是單純四捨五入到小數第 4 位，沒有補差機制。</p>
+<p>然後我想說，那 MES 系統呢？會不會不一樣？去查了 <code>MaterialFeedDataAccess.cs</code>：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// L17</span></span><br><span class="line">ROUND(..., comUnit.DecimalDigits)</span><br></pre></td></tr></table></figure>
+
+<p>也是 ROUND，只是位數根據單位設定動態決定。還是沒有補差。</p>
+<h3 id="轉折來了"><a href="#轉折來了" class="headerlink" title="轉折來了"></a>轉折來了</h3><p>正當我準備回信說「我們所有模組都是四捨五入」時，我突然想到——等等，工時分攤好像也是類似的邏輯？去查了一下 <code>WorkOrderBll.cs</code>：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// L654-660</span></span><br><span class="line"><span class="keyword">var</span> diff = total - summed;</span><br><span class="line">lastItem.Quantity += diff;</span><br></pre></td></tr></table></figure>
+
+<p>⋯⋯</p>
+<p><strong>工時分攤有補差！</strong></p>
+<p>只有工時分攤這個模組，會在計算完所有分攤後，把總和跟原始的差值補到最後一筆。其他所有模組（配料移轉、MES 物料需求）都是單純 ROUND。</p>
+<h3 id="為什麼會這樣？"><a href="#為什麼會這樣？" class="headerlink" title="為什麼會這樣？"></a>為什麼會這樣？</h3><p>我跟團隊討論了一下，推測歷史原因可能是：</p>
+<ol>
+<li><p><strong>工時分攤</strong>：涉及薪資計算，必須精確到分毫，否則月底結算會對不起來。所以開發者特意加了補差邏輯。</p>
+</li>
+<li><p><strong>物料移轉</strong>：早期開發時沒想那麼多，覺得四捨五入到小數第 4 位（0.0001 kg &#x3D; 0.1 克）已經夠精確了，客戶不會在意那點誤差。</p>
+</li>
+<li><p><strong>MES</strong>：跟物料移轉類似，而且用的是單位設定的位數，理論上更靈活，但也沒有補差。</p>
+</li>
+</ol>
+<p>問題是，這套系統已經上線好幾年了，從來沒有人發現（或至少沒有人提報）這個問題。直到這次客戶主動問起。</p>
+<h3 id="要不要統一？"><a href="#要不要統一？" class="headerlink" title="要不要統一？"></a>要不要統一？</h3><p>這就引出一個設計決策問題：<strong>要不要把所有模組統一成有補差機制？</strong></p>
+<p><strong>贊成統一的理由：</strong></p>
+<ul>
+<li>邏輯一致性，所有數值運算都精確</li>
+<li>避免未來其他客戶也提問</li>
+<li>工時分攤已經證明補差機制可行</li>
+</ul>
+<p><strong>反對統一的理由：</strong></p>
+<ul>
+<li>現有客戶已經習慣目前的行為，突然改變可能引發新問題</li>
+<li>物料移轉的誤差極小（0.1 克），實際影響有限</li>
+<li>改動需要全面回歸測試，成本不低</li>
+</ul>
+<p>最後我們的結論是：<strong>暫不主動改動，但記錄在案</strong>。如果未來有客戶明確要求，再針對該客戶的实例進行調整。</p>
+<h3 id="技術實作細節"><a href="#技術實作細節" class="headerlink" title="技術實作細節"></a>技術實作細節</h3><p>如果你正在設計類似系統，這裡是兩種做法的程式碼範例：</p>
+<p><strong>單純四捨五入（現有做法）：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">    MaterialId,</span><br><span class="line">    ROUND(TotalQuantity <span class="operator">*</span> Ratio, <span class="number">4</span>) <span class="keyword">as</span> AllocatedQuantity</span><br><span class="line"><span class="keyword">FROM</span> MaterialAllocation</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// C#</span></span><br><span class="line"><span class="keyword">var</span> allocated = Math.Round(total * ratio, <span class="number">4</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>最後一筆補差（工時分攤做法）：</strong></p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> items = CalculateAllocations(total, ratios);</span><br><span class="line"><span class="keyword">var</span> summed = items.Sum(x =&gt; x.Quantity);</span><br><span class="line"><span class="keyword">var</span> diff = total - summed;</span><br><span class="line">items.Last().Quantity += diff;</span><br></pre></td></tr></table></figure>
+
+<p>或者更嚴謹的做法（避免浮點數誤差累積）：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">decimal</span> runningTotal = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; items.Count - <span class="number">1</span>; i++)</span><br><span class="line">&#123;</span><br><span class="line">    items[i].Quantity = Math.Round(total * ratios[i], <span class="number">4</span>);</span><br><span class="line">    runningTotal += items[i].Quantity;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 最後一筆用總和減去已分配的</span></span><br><span class="line">items.Last().Quantity = total - runningTotal;</span><br></pre></td></tr></table></figure>
+
+<h3 id="這個案例的教訓"><a href="#這個案例的教訓" class="headerlink" title="這個案例的教訓"></a>這個案例的教訓</h3><p><strong>1. 系統越大，越容易有「隱形不一致」</strong></p>
+<p>同一套系統、同一個團隊開發，不同模組卻用了不同的數值處理策略。這不是因為大家笨，而是因為：</p>
+<ul>
+<li>不同模組由不同人開發</li>
+<li>開發時間跨度長（幾年）</li>
+<li>沒有人做過全面的「數值精度審查」</li>
+</ul>
+<p><strong>2. 客戶是最好的 QA</strong></p>
+<p>這個問題在內部測試、code review 都沒被發現，直到客戶實際使用後提問。這提醒我：</p>
+<ul>
+<li>內部測試再怎麼全面，也覆蓋不了真實使用場景</li>
+<li>客戶提問不是麻煩，是免費的品質改進機會</li>
+</ul>
+<p><strong>3. 文檔的重要性</strong></p>
+<p>如果當初開發工時分攤的同事，在程式碼或設計文檔裡註記「此處採用補差機制，其他模組採用四捨五入」，今天我們就能更快回答客戶問題。</p>
+<h3 id="結論"><a href="#結論" class="headerlink" title="結論"></a>結論</h3><p>ERP 系統裡的數值精度問題，看似小細節，實際影響可能很大。特別是涉及金錢、物料計量的場景，每一個小數點背後的決策都應該被記錄、被審查。</p>
+<p>如果你的系統也有類似邏輯，建議做一次全面檢查：</p>
+<ul>
+<li>所有涉及除法的運算，餘數怎麼處理？</li>
+<li>不同模組的策略是否一致？</li>
+<li>如果不一致，是歷史原因還是刻意設計？</li>
+<li>有沒有文檔記錄這些決策？</li>
+</ul>
+<p>別等到客戶問起才來查程式碼。那時候就太晚了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ERP/" rel="tag"># ERP</a>
+              <a href="/tags/%E6%95%B8%E5%80%BC%E7%B2%BE%E5%BA%A6/" rel="tag"># 數值精度</a>
+              <a href="/tags/SQL/" rel="tag"># SQL</a>
+              <a href="/tags/NET/" rel="tag"># .NET</a>
+              <a href="/tags/%E8%A3%BD%E9%80%A0%E6%A5%AD%E7%B3%BB%E7%B5%B1/" rel="tag"># 製造業系統</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026033001/" rel="prev" title="在 macOS 上用 OneDrive 遇到「Resource deadlock avoided」？這是解法">
+      <i class="fa fa-chevron-left"></i> 在 macOS 上用 OneDrive 遇到「Resource deadlock avoided」？這是解法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026033101/" rel="next" title="小團隊的 Git 平台選擇：Gitea vs GitLab EE 實測比較">
+      小團隊的 Git 平台選擇：Gitea vs GitLab EE 實測比較 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%95%8F%E9%A1%8C%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">問題背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%A8%8B%E5%BC%8F%E7%A2%BC%E6%99%82%E9%96%93"><span class="nav-number">2.</span> <span class="nav-text">查程式碼時間</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%89%E6%8A%98%E4%BE%86%E4%BA%86"><span class="nav-number">3.</span> <span class="nav-text">轉折來了</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E6%9C%83%E9%80%99%E6%A8%A3%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">為什麼會這樣？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%81%E4%B8%8D%E8%A6%81%E7%B5%B1%E4%B8%80%EF%BC%9F"><span class="nav-number">5.</span> <span class="nav-text">要不要統一？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E5%AF%A6%E4%BD%9C%E7%B4%B0%E7%AF%80"><span class="nav-number">6.</span> <span class="nav-text">技術實作細節</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%99%E5%80%8B%E6%A1%88%E4%BE%8B%E7%9A%84%E6%95%99%E8%A8%93"><span class="nav-number">7.</span> <span class="nav-text">這個案例的教訓</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AB%96"><span class="nav-number">8.</span> <span class="nav-text">結論</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

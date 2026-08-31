@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近整理一份現場系統的使用回饋，我又被提醒一次：企業內部系統的體驗問題，往往不是介面漂不漂亮，而是搜尋、排序、預設值、數字格式與匯出這些小地方，有沒有真的貼近每天操作的人。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="現場系統的 UX，通常不是從漂亮畫面開始">
+<meta property="og:url" content="https://maplecheng.com/page/2026060501/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近整理一份現場系統的使用回饋，我又被提醒一次：企業內部系統的體驗問題，往往不是介面漂不漂亮，而是搜尋、排序、預設值、數字格式與匯出這些小地方，有沒有真的貼近每天操作的人。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-06-04T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.343Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="企業系統">
+<meta property="article:tag" content="使用者體驗">
+<meta property="article:tag" content="產品管理">
+<meta property="article:tag" content="需求分析">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026060501/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>現場系統的 UX，通常不是從漂亮畫面開始 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026060501/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          現場系統的 UX，通常不是從漂亮畫面開始
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-06-05 05:00:00" itemprop="dateCreated datePublished" datetime="2026-06-05T05:00:00+08:00">2026-06-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近整理一份現場系統的使用回饋，我又被提醒一次：企業內部系統的體驗問題，往往不是介面漂不漂亮，而是搜尋、排序、預設值、數字格式與匯出這些小地方，有沒有真的貼近每天操作的人。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近整理一份現場系統的使用回饋，內容看起來都不是什麼驚天動地的大功能：日期能不能用日曆選、清單能不能搜尋或排序、數字小數位不要太長、報表能不能匯出、某個預設值可不可以先留空。很瑣碎，甚至有點像待辦清單。</p>
+<p>但我越來越覺得，真正會決定內部系統好不好用的，常常就是這些小事。</p>
+<span id="more"></span>
+
+<h3 id="現場不會照著你的流程慢慢操作"><a href="#現場不會照著你的流程慢慢操作" class="headerlink" title="現場不會照著你的流程慢慢操作"></a>現場不會照著你的流程慢慢操作</h3><p>工程師在開發企業系統時，很容易把流程想成一條乾淨的路：先選單據，再填數量，再確認，再送出。每一步都有明確欄位，每個欄位都有資料來源，狀態也都在資料庫裡定義好了。</p>
+<p>可是現場使用不是這樣。</p>
+<p>現場的人通常是在一堆干擾裡操作系統：旁邊有人問問題，機台在跑，資料可能晚一步才同步，手上可能還有紙本或其他工作要顧。他們不會想欣賞你的資訊架構，也不會想理解欄位命名背後的 domain model。他們只想快速找到現在要處理的那一筆，確認數字沒錯，按下去，然後繼續工作。</p>
+<p>所以當使用者說「工單太多不好找」時，表面上是搜尋功能，實際上是在說：系統沒有幫我縮短決策路徑。</p>
+<p>當使用者說「日期最好可以直接選」時，表面上是 date picker，實際上是在說：不要讓我把腦力浪費在格式輸入上。</p>
+<p>當使用者說「小數點太多」時，表面上是顯示格式，實際上是在說：我只需要能判斷工作的精度，不需要看到資料庫把浮點數尾巴全攤開。</p>
+<h3 id="內部系統的-UX，很多時候是資訊密度的控制"><a href="#內部系統的-UX，很多時候是資訊密度的控制" class="headerlink" title="內部系統的 UX，很多時候是資訊密度的控制"></a>內部系統的 UX，很多時候是資訊密度的控制</h3><p>做 SaaS 或消費產品時，UX 常常會談視覺、動線、轉換率。但企業內部系統有另一種很現實的 UX：資訊密度。</p>
+<p>同一個畫面到底要顯示多少資料？哪些欄位要直接露出來，哪些可以收起來？排序預設依照時間、狀態、急迫程度，還是使用者最常處理的順序？搜尋要支援代號、日期、批號、關鍵字，還是全部都要？</p>
+<p>這些決定看起來不炫，但它們會直接影響每天的操作成本。</p>
+<p>一個清單如果沒有好的排序和篩選，資料越多就越像雜物間。功能沒有壞，資料也沒有錯，但使用者還是會覺得難用。因為他要花太多時間在「找東西」，而不是「完成工作」。</p>
+<p>我現在看這類回饋，會先把它們分成幾種成本：</p>
+<ul>
+<li><strong>尋找成本</strong>：找不到資料、清單太長、缺搜尋或排序。</li>
+<li><strong>輸入成本</strong>：日期格式、預設值、欄位太多、要刪掉不需要的內容。</li>
+<li><strong>理解成本</strong>：欄位語意不清楚，例如兩個數量看起來很像，但代表的業務意義不同。</li>
+<li><strong>驗證成本</strong>：數字位數太長、缺少彙總、沒有匯出，使用者很難交叉檢查。</li>
+<li><strong>交接成本</strong>：資料只能留在系統裡，無法產出 CSV、報表或連結給其他角色。</li>
+</ul>
+<p>這樣分類之後，需求就不只是「加一個功能」。它會變成一張可以排優先順序的改善地圖。</p>
+<h3 id="欄位語意比欄位名稱更重要"><a href="#欄位語意比欄位名稱更重要" class="headerlink" title="欄位語意比欄位名稱更重要"></a>欄位語意比欄位名稱更重要</h3><p>這次回饋裡，我特別在意的是「某兩個數量差在哪裡」這類問題。</p>
+<p>在系統設計裡，我們很容易以為欄位名稱已經足夠清楚。資料表有欄位，API 有 schema，前端有 label，看起來一切都合理。但對使用者來說，如果兩個數字都像是「可以做多少」或「已經做多少」，那它們就會在操作時互相干擾。</p>
+<p>欄位語意不清楚，後果通常不會立刻爆炸。它比較像慢性病：使用者每次操作都多猶豫一秒，主管每次看報表都多問一句，工程師每次追問題都要回去查資料流。久了之後，大家會說「這個系統很難用」，但其實難用的根源不是畫面，而是語意沒有被產品化。</p>
+<p>好的企業系統不只是把資料顯示出來，而是把資料放在使用者能理解的工作脈絡裡。</p>
+<p>如果某個數量代表理論值，另一個代表現場可執行值，就不要只靠兩個相似的名詞硬撐。該補說明就補說明，該改名稱就改名稱，該在畫面上呈現計算來源就呈現。內部系統不是考試，不需要讓使用者猜題。</p>
+<h3 id="預設值也是一種產品立場"><a href="#預設值也是一種產品立場" class="headerlink" title="預設值也是一種產品立場"></a>預設值也是一種產品立場</h3><p>另一個很小但很典型的回饋，是「某個欄位預設空白就好，不要讓使用者還要多刪一次」。</p>
+<p>這種需求很容易被低估。工程師可能會想：多按一次 delete 有差嗎？</p>
+<p>有差。</p>
+<p>如果這個動作一天只做一次，可能沒差。如果一天做五十次，一個月做一千次，那就很有差。更重要的是，預設值會暗示系統期待使用者怎麼做。錯的預設值會讓使用者不斷和系統對抗：系統先填一個東西，使用者再把它刪掉；系統先假設一種情境，使用者再修正成另一種情境。</p>
+<p>久了之後，使用者會形成肌肉記憶，但那不是好的肌肉記憶，是被迫繞路。</p>
+<p>我會把預設值視為產品設計裡很重要的判斷：如果大多數情境需要某個值，就預填；如果不確定，寧可空白；如果不同角色有不同習慣，就讓系統記住上一次選擇，而不是用開發者腦中的預設情境套所有人。</p>
+<h3 id="匯出不是附加功能，是工作流出口"><a href="#匯出不是附加功能，是工作流出口" class="headerlink" title="匯出不是附加功能，是工作流出口"></a>匯出不是附加功能，是工作流出口</h3><p>很多內部系統做到最後，都會遇到「能不能匯出 Excel &#x2F; CSV」這件事。</p>
+<p>工程師有時候會覺得：都已經有系統了，為什麼還要匯出？是不是又要回到人工整理？</p>
+<p>但從管理流程看，匯出不一定是退步。它常常是工作流的出口。</p>
+<p>資料在系統裡是結構化的，但人與人之間的協作不一定都在同一個系統裡。現場要交班、主管要彙整、會議要討論、其他部門要對帳，這些情境未必都適合直接登入同一套後台。CSV、報表、連結，都是把系統資料帶到下一個工作場景的方式。</p>
+<p>所以我不會把匯出視為「使用者想偷懶」。更準確地說，使用者是在告訴你：這個系統目前還沒有覆蓋完整工作流，中間有一段需要被攜出、分享、核對或歸檔。</p>
+<p>這時候要問的不是「要不要給匯出」，而是：</p>
+<ul>
+<li>匯出的對象是誰？</li>
+<li>他要拿去做什麼決策？</li>
+<li>需要明細還是彙總？</li>
+<li>每天固定產出，還是需要依條件產出？</li>
+<li>匯出後有沒有版本、時間、來源可追溯？</li>
+</ul>
+<p>這些問清楚，匯出功能就會從「多一顆按鈕」變成資料治理的一部分。</p>
+<h3 id="把抱怨翻成設計語言"><a href="#把抱怨翻成設計語言" class="headerlink" title="把抱怨翻成設計語言"></a>把抱怨翻成設計語言</h3><p>技術主管在面對使用者回饋時，最重要的工作之一，就是不要只照單全收，也不要防衛性地反駁。</p>
+<p>使用者說的通常是症狀，不一定是解法。他說要搜尋，可能其實需要更好的預設排序；他說要匯出，可能其實需要固定日報；他說欄位看不懂，可能其實是業務語意沒有被整理；他說按起來很煩，可能是預設值和實際流程不一致。</p>
+<p>我們要做的是把抱怨翻成設計語言，再翻成工程可以執行的規格。</p>
+<p>這也是我覺得企業系統有趣的地方。它不像做一個漂亮 landing page，可以很快用視覺抓住人。企業系統的價值常常藏在很無聊的細節裡：少找十秒、少刪一次、少問一句、少匯整一份重複報表。</p>
+<p>這些小改善單獨看都不性感，但累積起來，就是使用者願不願意每天打開系統的差別。</p>
+<p>漂亮畫面當然重要，我也喜歡乾淨的 UI。但在現場系統裡，真正的 UX 往往不是從漂亮開始，而是從尊重使用者每天重複一百次的小動作開始。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BC%81%E6%A5%AD%E7%B3%BB%E7%B5%B1/" rel="tag"># 企業系統</a>
+              <a href="/tags/%E4%BD%BF%E7%94%A8%E8%80%85%E9%AB%94%E9%A9%97/" rel="tag"># 使用者體驗</a>
+              <a href="/tags/%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90/" rel="tag"># 需求分析</a>
+              <a href="/tags/%E7%94%A2%E5%93%81%E7%AE%A1%E7%90%86/" rel="tag"># 產品管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026060301/" rel="prev" title="當 AI Agent 開始面對客戶，內容管理就不只是後台了">
+      <i class="fa fa-chevron-left"></i> 當 AI Agent 開始面對客戶，內容管理就不只是後台了
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026060601/" rel="next" title="工廠裡的 AI Agent，不該只是比較會聊天的看板">
+      工廠裡的 AI Agent，不該只是比較會聊天的看板 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8F%BE%E5%A0%B4%E4%B8%8D%E6%9C%83%E7%85%A7%E8%91%97%E4%BD%A0%E7%9A%84%E6%B5%81%E7%A8%8B%E6%85%A2%E6%85%A2%E6%93%8D%E4%BD%9C"><span class="nav-number">1.</span> <span class="nav-text">現場不會照著你的流程慢慢操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A7%E9%83%A8%E7%B3%BB%E7%B5%B1%E7%9A%84-UX%EF%BC%8C%E5%BE%88%E5%A4%9A%E6%99%82%E5%80%99%E6%98%AF%E8%B3%87%E8%A8%8A%E5%AF%86%E5%BA%A6%E7%9A%84%E6%8E%A7%E5%88%B6"><span class="nav-number">2.</span> <span class="nav-text">內部系統的 UX，很多時候是資訊密度的控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AC%84%E4%BD%8D%E8%AA%9E%E6%84%8F%E6%AF%94%E6%AC%84%E4%BD%8D%E5%90%8D%E7%A8%B1%E6%9B%B4%E9%87%8D%E8%A6%81"><span class="nav-number">3.</span> <span class="nav-text">欄位語意比欄位名稱更重要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A0%90%E8%A8%AD%E5%80%BC%E4%B9%9F%E6%98%AF%E4%B8%80%E7%A8%AE%E7%94%A2%E5%93%81%E7%AB%8B%E5%A0%B4"><span class="nav-number">4.</span> <span class="nav-text">預設值也是一種產品立場</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%AF%E5%87%BA%E4%B8%8D%E6%98%AF%E9%99%84%E5%8A%A0%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%98%AF%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%87%BA%E5%8F%A3"><span class="nav-number">5.</span> <span class="nav-text">匯出不是附加功能，是工作流出口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%8A%E6%8A%B1%E6%80%A8%E7%BF%BB%E6%88%90%E8%A8%AD%E8%A8%88%E8%AA%9E%E8%A8%80"><span class="nav-number">6.</span> <span class="nav-text">把抱怨翻成設計語言</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

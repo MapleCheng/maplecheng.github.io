@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="分享如何用 AI Agent + Google Calendar + Notion 自動組裝每日站會日報，包括踩過的坑和最終的設計決策。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用 AI 自動產生每日站會報告，從日曆和任務清單組裝「昨天做了什麼」">
+<meta property="og:url" content="https://maplecheng.com/page/2026021002/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="分享如何用 AI Agent + Google Calendar + Notion 自動組裝每日站會日報，包括踩過的坑和最終的設計決策。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-09T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Google Calendar">
+<meta property="article:tag" content="Notion">
+<meta property="article:tag" content="工作流程">
+<meta property="article:tag" content="站會">
+<meta property="article:tag" content="自動化">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026021002/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>用 AI 自動產生每日站會報告，從日曆和任務清單組裝「昨天做了什麼」 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026021002/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用 AI 自動產生每日站會報告，從日曆和任務清單組裝「昨天做了什麼」
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-10 05:00:00" itemprop="dateCreated datePublished" datetime="2026-02-10T05:00:00+08:00">2026-02-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">分享如何用 AI Agent + Google Calendar + Notion 自動組裝每日站會日報，包括踩過的坑和最終的設計決策。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>每天早上的站會日報，說實話是我最懶得寫的東西。不是因為難，是因為無聊——打開日曆看昨天做了什麼，打開任務清單看今天要幹嘛，然後用條列式整理一遍。這種事不就該自動化嗎？</p>
+<span id="more"></span>
+
+<h3 id="站會日報的結構"><a href="#站會日報的結構" class="headerlink" title="站會日報的結構"></a>站會日報的結構</h3><p>我們公司的站會日報格式很標準：</p>
+<ol>
+<li><strong>昨天做了什麼</strong></li>
+<li><strong>遇到什麼問題</strong></li>
+<li><strong>今天要做什麼</strong></li>
+</ol>
+<p>其中「遇到什麼問題」通常是空的（不是沒問題，是寫日報的時候想不起來），真正要花時間的是第一點和第三點。</p>
+<h3 id="第一版：太天真了"><a href="#第一版：太天真了" class="headerlink" title="第一版：太天真了"></a>第一版：太天真了</h3><p>最初的想法很簡單：讓 AI Agent 去讀 Google Calendar 昨天的事件 + 任務管理系統的完成項目，組裝成「昨天做了什麼」。</p>
+<p>結果第一版跑出來的日報有 18 項。</p>
+<p>為什麼？因為我把所有資料來源都倒進去了：日曆事件、個人待辦、公司任務清單。很多東西重複了——日曆上寫了「處理客戶 A 需求」，任務清單也有一條「客戶 A 功能開發」，結果日報裡出現兩次。</p>
+<h3 id="第二版：砍掉重複來源"><a href="#第二版：砍掉重複來源" class="headerlink" title="第二版：砍掉重複來源"></a>第二版：砍掉重複來源</h3><p>教訓很明確：<strong>資料來源要正交，不要重疊</strong>。</p>
+<p>分析一下各個來源的特性：</p>
+<ul>
+<li><strong>Google Calendar</strong>：記錄「我在哪裡、跟誰開會」，是時間軸上的事實</li>
+<li><strong>個人待辦</strong>：記錄「我打算做什麼」，是計劃</li>
+<li><strong>公司任務清單</strong>：記錄「公司指派了什麼」，跟個人待辦高度重疊</li>
+</ul>
+<p>重疊的部分主要是「公司任務清單」和「個人待辦」。因為我的習慣是把公司任務也拉到個人待辦裡管理（加上自己的排程和優先級），所以兩邊一定有重複。</p>
+<p>解法：<strong>「昨天做了什麼」只用日曆 + 工作筆記，不查公司任務清單。</strong></p>
+<p>日曆提供事件骨架（幾點到幾點做了什麼），工作筆記補充細節（具體做了哪些技術決策、解了什麼問題）。公司任務清單留給「今天要做什麼」用。</p>
+<p>砍完後，18 項變成 5 項。清爽多了。</p>
+<h3 id="「昨天」不只是昨天"><a href="#「昨天」不只是昨天" class="headerlink" title="「昨天」不只是昨天"></a>「昨天」不只是昨天</h3><p>另一個踩到的坑：<strong>週一的站會，「昨天」是指上週五</strong>。</p>
+<p>更精確地說，「昨天做了什麼」應該是「上次寫日報到昨天之間做的事」。如果中間有假日、請假、或者某天忘了寫，範圍要自動拉長。</p>
+<p>實作方式是去查日報資料庫裡最近一筆我寫的紀錄，用那個日期作為起點。這樣不管跨幾天，都能正確涵蓋。</p>
+<h3 id="「今天要做什麼」的資料來源"><a href="#「今天要做什麼」的資料來源" class="headerlink" title="「今天要做什麼」的資料來源"></a>「今天要做什麼」的資料來源</h3><p>這部分相對單純：</p>
+<ol>
+<li><strong>今天的日曆事件</strong>：已經排好的會議和行程</li>
+<li><strong>個人待辦中到期的項目</strong>：預計今天做的 + 今天截止的</li>
+</ol>
+<p>排序邏輯是行程在前（有明確時間的）、待辦在後（彈性安排的）。</p>
+<p>有一個小細節：有些待辦既沒有排程日期也沒有截止日期，這種就不放進日報。沒有時間壓力的事情不該出現在「今天要做什麼」裡，否則日報又會膨脹。</p>
+<h3 id="過濾非工作事項"><a href="#過濾非工作事項" class="headerlink" title="過濾非工作事項"></a>過濾非工作事項</h3><p>日曆上不全是工作。早餐約會、讀書會、公司尾牙——這些出現在站會日報裡就很奇怪。</p>
+<p>做法是維護一個排除清單，遇到這些關鍵字就跳過。不需要做得很精密，幾個常見的非工作事項過濾掉就好。偶爾有漏網之魚，AI Agent 通常也能從語意上判斷要不要放進去。</p>
+<h3 id="最終架構"><a href="#最終架構" class="headerlink" title="最終架構"></a>最終架構</h3><p>整理一下最終的資料流：</p>
+<p><strong>「昨天做了什麼」</strong></p>
+<ul>
+<li>來源 1：Google Calendar 事件（上次日報日 ~ 昨天）</li>
+<li>來源 2：每日工作筆記中的專案相關紀錄</li>
+<li>過濾：排除非工作事項</li>
+<li>排序：按時間順序</li>
+</ul>
+<p><strong>「今天要做什麼」</strong></p>
+<ul>
+<li>來源 1：Google Calendar 今天的事件</li>
+<li>來源 2：個人待辦（排程日 ≤ 今天 或 截止日 ≤ 今天，且未完成）</li>
+<li>排序：行程在前、待辦在後</li>
+</ul>
+<p><strong>不使用的來源</strong></p>
+<ul>
+<li>❌ 公司任務清單（跟個人待辦重複）</li>
+<li>❌ 工作筆記用於「今天要做什麼」（那是記錄不是計劃）</li>
+</ul>
+<h3 id="每天凌晨五點自動跑"><a href="#每天凌晨五點自動跑" class="headerlink" title="每天凌晨五點自動跑"></a>每天凌晨五點自動跑</h3><p>整個流程設成排程任務，每個工作日凌晨五點自動執行。Agent 起來後：</p>
+<ol>
+<li>算出「上次日報日」</li>
+<li>抓日曆事件和工作筆記</li>
+<li>組裝成站會格式</li>
+<li>寫入日報資料庫</li>
+</ol>
+<p>早上開站會的時候，日報已經在那裡了。有時候會微調幾個字，但 90% 的情況下直接用。</p>
+<h3 id="省下的不只是時間"><a href="#省下的不只是時間" class="headerlink" title="省下的不只是時間"></a>省下的不只是時間</h3><p>老實說，寫站會日報本身花不了多少時間，大概五到十分鐘。但它有一個隱性成本：<strong>每天早上要切換到「回想模式」</strong>。</p>
+<p>昨天做了什麼？嗯⋯⋯先打開日曆⋯⋯再看看 commit log⋯⋯好像還處理了一個客戶問題⋯⋯。這個回想過程打斷了早上的心流。</p>
+<p>自動化之後，早上打開電腦直接進入工作狀態，站會的時候掃一眼日報確認沒遺漏就好。</p>
+<h3 id="反思"><a href="#反思" class="headerlink" title="反思"></a>反思</h3><p>這個專案讓我學到的最重要的事，不是技術上的，而是：<strong>資料來源的選擇比演算法重要</strong>。</p>
+<p>第一版什麼都丟進去，結果是垃圾。不是 AI 不夠聰明，是我餵了重複的資料。砍掉重疊的來源之後，幾乎不需要什麼複雜的邏輯，日報品質就到位了。</p>
+<p>這跟很多 AI 應用的經驗一致——與其調 prompt、換模型、加後處理，不如先把輸入端整理乾淨。Garbage in, garbage out 永遠是真理。</p>
+<p>如果你也在做類似的自動化，建議先畫一張資料來源的 Venn 圖，看看哪些重疊了。砍掉重疊的部分，比寫去重邏輯省事多了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/%E7%AB%99%E6%9C%83/" rel="tag"># 站會</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B/" rel="tag"># 工作流程</a>
+              <a href="/tags/Notion/" rel="tag"># Notion</a>
+              <a href="/tags/Google-Calendar/" rel="tag"># Google Calendar</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020902/" rel="prev" title="AI Coding Assistant 的三層模型策略：省錢又高效的實戰心得">
+      <i class="fa fa-chevron-left"></i> AI Coding Assistant 的三層模型策略：省錢又高效的實戰心得
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026021001/" rel="next" title="用 Channel Topic 當 AI Agent 的上下文注入點，比 System Prompt 更優雅">
+      用 Channel Topic 當 AI Agent 的上下文注入點，比 System Prompt 更優雅 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AB%99%E6%9C%83%E6%97%A5%E5%A0%B1%E7%9A%84%E7%B5%90%E6%A7%8B"><span class="nav-number">1.</span> <span class="nav-text">站會日報的結構</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E7%89%88%EF%BC%9A%E5%A4%AA%E5%A4%A9%E7%9C%9F%E4%BA%86"><span class="nav-number">2.</span> <span class="nav-text">第一版：太天真了</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E7%89%88%EF%BC%9A%E7%A0%8D%E6%8E%89%E9%87%8D%E8%A4%87%E4%BE%86%E6%BA%90"><span class="nav-number">3.</span> <span class="nav-text">第二版：砍掉重複來源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E3%80%8C%E6%98%A8%E5%A4%A9%E3%80%8D%E4%B8%8D%E5%8F%AA%E6%98%AF%E6%98%A8%E5%A4%A9"><span class="nav-number">4.</span> <span class="nav-text">「昨天」不只是昨天</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E3%80%8C%E4%BB%8A%E5%A4%A9%E8%A6%81%E5%81%9A%E4%BB%80%E9%BA%BC%E3%80%8D%E7%9A%84%E8%B3%87%E6%96%99%E4%BE%86%E6%BA%90"><span class="nav-number">5.</span> <span class="nav-text">「今天要做什麼」的資料來源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%8E%E6%BF%BE%E9%9D%9E%E5%B7%A5%E4%BD%9C%E4%BA%8B%E9%A0%85"><span class="nav-number">6.</span> <span class="nav-text">過濾非工作事項</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%B5%82%E6%9E%B6%E6%A7%8B"><span class="nav-number">7.</span> <span class="nav-text">最終架構</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E5%A4%A9%E5%87%8C%E6%99%A8%E4%BA%94%E9%BB%9E%E8%87%AA%E5%8B%95%E8%B7%91"><span class="nav-number">8.</span> <span class="nav-text">每天凌晨五點自動跑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%81%E4%B8%8B%E7%9A%84%E4%B8%8D%E5%8F%AA%E6%98%AF%E6%99%82%E9%96%93"><span class="nav-number">9.</span> <span class="nav-text">省下的不只是時間</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E6%80%9D"><span class="nav-number">10.</span> <span class="nav-text">反思</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

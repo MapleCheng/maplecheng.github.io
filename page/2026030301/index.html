@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="分享設計 AI Agent Skill 系統的實戰經驗，從併發限制的坑、Cron 隔離策略，到讓 Agent 自動學習修正的機制設計，一步步打造可維護的 AI 工作流。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="當 AI Agent 學會自我進化：Skill 架構設計的踩坑與頓悟">
+<meta property="og:url" content="https://maplecheng.com/page/2026030301/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="分享設計 AI Agent Skill 系統的實戰經驗，從併發限制的坑、Cron 隔離策略，到讓 Agent 自動學習修正的機制設計，一步步打造可維護的 AI 工作流。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-03-02T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="Skill 架構">
+<meta property="article:tag" content="工作流設計">
+<meta property="article:tag" content="自動化">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026030301/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>當 AI Agent 學會自我進化：Skill 架構設計的踩坑與頓悟 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026030301/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          當 AI Agent 學會自我進化：Skill 架構設計的踩坑與頓悟
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-03-03 05:00:00" itemprop="dateCreated datePublished" datetime="2026-03-03T05:00:00+08:00">2026-03-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">分享設計 AI Agent Skill 系統的實戰經驗，從併發限制的坑、Cron 隔離策略，到讓 Agent 自動學習修正的機制設計，一步步打造可維護的 AI 工作流。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近花了幾個通宵重構手上 AI Agent 的 Skill 系統，過程中踩了一些很噁心的坑，也因此想通了一些架構上的事情。這篇不是教學文，比較像是一份踩坑實錄加上事後的設計反思。</p>
+<span id="more"></span>
+
+<h3 id="先說背景"><a href="#先說背景" class="headerlink" title="先說背景"></a>先說背景</h3><p>我日常用 AI Agent 處理不少自動化任務——晨報整理、技術新聞摘要、投資資訊彙整等等。這些任務原本是用一個「大 Skill」統包處理，裡面塞了十幾個報告模板、觸發邏輯、還有建立新報告的流程。</p>
+<p>聽起來很方便對吧？一個 Skill 搞定所有事。</p>
+<p>然後災難就開始了。</p>
+<h3 id="第一個坑：併發限制的靜默丟棄"><a href="#第一個坑：併發限制的靜默丟棄" class="headerlink" title="第一個坑：併發限制的靜默丟棄"></a>第一個坑：併發限制的靜默丟棄</h3><p>事情是這樣的。我有大約十個定時任務，分散在早上不同時段執行。原本的做法是一個排程觸發後，由一個 dispatcher 去 spawn 多個 sub-agent，每個負責一份報告。</p>
+<p>結果有些報告就是不會產出。沒有錯誤訊息、沒有 log、就是靜悄悄地消失了。</p>
+<p>查了好一陣子才搞懂：<strong>sub-agent 有併發上限，超過的 spawn 請求會被靜默丟棄</strong>。不排隊、不報錯、不通知。就像你在餐廳點了六道菜，廚房只收到四張單，但沒人跟你說另外兩張掉了。</p>
+<p>這個行為設計上可能有它的道理（避免無限排隊拖垮系統），但對使用者來說真的很陰險。你以為任務都跑了，其實有些根本沒啟動。</p>
+<p><strong>解法：每個報告獨立跑，不靠 dispatcher。</strong></p>
+<p>既然併發 spawn 不可靠，那就不要 spawn。每個報告各自是一個獨立的排程任務，各自啟動一個隔離的 session 來執行。彼此不依賴、不共享、不搶資源。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 之前（災難版）</span></span><br><span class="line"><span class="attribute">1</span> 個 cron → <span class="number">1</span> 個 dispatcher → spawn <span class="number">6</span> 個 sub-agent（超過上限就丟）</span><br><span class="line"></span><br><span class="line"><span class="comment"># 之後（穩定版）</span></span><br><span class="line"><span class="attribute">6</span> 個 cron → 各自 <span class="number">1</span> 個 isolated session（互不干擾）</span><br></pre></td></tr></table></figure>
+
+<p>代價是排程設定變多了，但換來的是<strong>每個任務都保證會跑</strong>。這個 trade-off 完全值得。</p>
+<h3 id="第二個頓悟：讀寫分離，Skill-也要"><a href="#第二個頓悟：讀寫分離，Skill-也要" class="headerlink" title="第二個頓悟：讀寫分離，Skill 也要"></a>第二個頓悟：讀寫分離，Skill 也要</h3><p>解決併發問題後，我開始重構 Skill 本身的結構。原本那個大 Skill 有個根本性的問題：<strong>執行邏輯和建立邏輯混在一起</strong>。</p>
+<p>什麼意思？同一個 Skill 檔案裡，既有「如何執行報告」的指令，也有「如何建立新報告模板」的流程。當排程觸發時，Agent 讀到的 Skill 裡包含了建立流程的描述，偶爾就會搞混——明明該去執行現有報告，結果跑去嘗試建立新的。</p>
+<p>這跟軟體工程裡的 CQRS（Command Query Responsibility Segregation）其實是同一個道理：</p>
+<ul>
+<li><strong>執行 Skill</strong>（Read&#x2F;Query）：排程專用，只負責讀取模板、產出報告。SKILL.md 裡零建立邏輯，Agent 看到的指令就是「找到模板 → 執行 → 輸出」，沒有任何分岔。</li>
+<li><strong>建立 Skill</strong>（Write&#x2F;Command）：手動觸發，只負責新增報告模板。有完整的互動流程、欄位驗證、模板生成。</li>
+</ul>
+<p>兩個 Skill 完全隔離。排程觸發的 Agent 永遠不會看到建立流程的描述，自然不會走歪。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart LR
+    subgraph 排程觸發
+        C1[Cron Job] --> E1[執行 Skill]
+        E1 --> R1[讀取模板]
+        R1 --> O1[產出報告]
+    end
+    subgraph 手動觸發
+        U1[使用者] --> E2[建立 Skill]
+        E2 --> R2[互動問答]
+        R2 --> O2[新增模板]
+    end
+          </pre>
+
+<p>這個設計看似多此一舉——不就是拆成兩個檔案嗎？但對 AI Agent 來說，<strong>context 裡有什麼，就可能做什麼</strong>。減少不相關的指令，等於減少 Agent 走歪的機率。</p>
+<h3 id="第三個發現：讓-Agent-自己學"><a href="#第三個發現：讓-Agent-自己學" class="headerlink" title="第三個發現：讓 Agent 自己學"></a>第三個發現：讓 Agent 自己學</h3><p>這是最讓我興奮的部分。</p>
+<p>傳統的做法是：Agent 犯錯 → 人類修正 → 人類事後去更新文件 → 下次 Agent 才不會再犯。問題是「人類事後去更新文件」這步，十次有八次會忘記。然後同樣的錯誤就會一犯再犯。</p>
+<p>新的做法是把「自我學習」寫進 Agent 的核心行為規範裡：</p>
+<blockquote>
+<p>執行任何任務時，如果收到人類的修正或回饋，<strong>當下就更新</strong>對應的參考文件。不需要人類額外說「記下來」，修正本身就是更新的觸發條件。</p>
+</blockquote>
+<p>具體的判斷邏輯：</p>
+<ul>
+<li>如果修正的是某個 Skill 內的寫法慣例（比如「Dialog 不要直接用 antd Modal，要用封裝好的元件」）→ 更新那個 Skill 的 reference 文件</li>
+<li>如果修正的是專案知識（比如「這個 API 的回傳格式其實是⋯⋯」）→ 更新專案的 knowledge 文件</li>
+<li>如果修正的是通用行為（比如「回信不要亂保證時間」）→ 更新行為規範</li>
+</ul>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[收到人類修正] --> B{修正類型？}
+    B -->|Skill 寫法慣例| C[更新 Skill Reference]
+    B -->|專案知識| D[更新 Knowledge 文件]
+    B -->|通用行為| E[更新行為規範]
+    C --> F[下次執行自動套用]
+    D --> F
+    E --> F
+          </pre>
+
+<p>這樣做的效果很明顯：同樣的錯不太會犯第二次。Agent 每次被修正後，知識庫就更完整一點，下次遇到類似情境就會做對。</p>
+<p>說實話，看著 Agent 自己更新文件的時候，有一種奇妙的感覺——它不是在「學習」，更像是在「長記性」。</p>
+<h3 id="第四個教訓：文件也要讀者分層"><a href="#第四個教訓：文件也要讀者分層" class="headerlink" title="第四個教訓：文件也要讀者分層"></a>第四個教訓：文件也要讀者分層</h3><p>最後一個心得跟文件撰寫有關。</p>
+<p>在重新設計技術文件的結構時，我意識到一份文件通常有很多種讀者：架構師想看全局設計、PM 想看驗收條件、測試想看操作流程、開發想看 API 規格、AI Agent 想看機器可讀的結構化資訊。</p>
+<p>以前的做法是全部混在一起，每個人都要自己從頭到尾掃一遍，找到跟自己相關的部分。這很浪費時間，對 AI Agent 來說更是災難——它會把所有資訊都當成同等重要，結果什麼都想處理。</p>
+<p>新的做法很簡單：<strong>用分隔線把文件分成上下兩半</strong>。</p>
+<ul>
+<li>分隔線上方 &#x3D; 非技術內容（需求描述、驗收條件、操作流程圖）</li>
+<li>分隔線下方 &#x3D; 技術規格（資料模型、API 設計、目錄結構、實作細節）</li>
+</ul>
+<p>PM 看到分隔線就可以停了。開發通常直接跳到下半部。AI Agent 可以根據任務類型決定要讀哪一段——如果是做 code review 就專注下半部，如果是寫測試案例就專注上半部。</p>
+<p>這不是什麼革命性的創新，就是很基本的資訊架構。但在 AI Agent 的 context 管理上，這種分層特別有價值，因為<strong>你能餵給 Agent 的 token 數是有限的</strong>，讓它只讀需要的部分，效率差很多。</p>
+<h3 id="整體回顧"><a href="#整體回顧" class="headerlink" title="整體回顧"></a>整體回顧</h3><p>把這幾天的重構經驗整理一下：</p>
+<ul>
+<li><strong>併發控制</strong>：不要假設 spawn 一定成功，尤其是有上限的系統。寧可多跑幾個獨立任務，也不要靠一個 dispatcher 統包</li>
+<li><strong>讀寫分離</strong>：AI Agent 的 Skill 跟程式碼一樣，職責要單一。執行就只管執行，建立就只管建立</li>
+<li><strong>自我學習</strong>：把「收到修正就更新文件」寫進 Agent 的行為規範，比事後人工更新可靠一百倍</li>
+<li><strong>讀者分層</strong>：文件不是寫給所有人的，用結構化的方式讓不同讀者（包括 AI）快速找到需要的資訊</li>
+</ul>
+<p>這些原則其實都不新。併發控制、讀寫分離、自我修正、資訊架構——都是軟體工程裡老掉牙的概念。但當你把它們套用到 AI Agent 的設計上，會發現意外地契合。</p>
+<p>畢竟，<strong>好的架構不分物種</strong>。不管是人寫的程式還是 AI 跑的工作流，乾淨的邊界、單一的職責、自動的回饋迴路，永遠是對的方向。</p>
+<p>如果你也在折騰 AI Agent 的自動化流程，希望這篇踩坑紀錄能幫你少走一些彎路。畢竟我的黑眼圈已經替你扛過了 😂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/Skill-%E6%9E%B6%E6%A7%8B/" rel="tag"># Skill 架構</a>
+              <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81%E8%A8%AD%E8%A8%88/" rel="tag"># 工作流設計</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026030101/" rel="prev" title="AI 多代理排程的隱形陷阱：當 Sub-Agent 被靜默丟棄">
+      <i class="fa fa-chevron-left"></i> AI 多代理排程的隱形陷阱：當 Sub-Agent 被靜默丟棄
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026030401/" rel="next" title="當你的 AI 供應商連掛兩天：多模型 Fallback Chain 實戰筆記">
+      當你的 AI 供應商連掛兩天：多模型 Fallback Chain 實戰筆記 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%88%E8%AA%AA%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">先說背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%80%8B%E5%9D%91%EF%BC%9A%E4%BD%B5%E7%99%BC%E9%99%90%E5%88%B6%E7%9A%84%E9%9D%9C%E9%BB%98%E4%B8%9F%E6%A3%84"><span class="nav-number">2.</span> <span class="nav-text">第一個坑：併發限制的靜默丟棄</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%80%8B%E9%A0%93%E6%82%9F%EF%BC%9A%E8%AE%80%E5%AF%AB%E5%88%86%E9%9B%A2%EF%BC%8CSkill-%E4%B9%9F%E8%A6%81"><span class="nav-number">3.</span> <span class="nav-text">第二個頓悟：讀寫分離，Skill 也要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%80%8B%E7%99%BC%E7%8F%BE%EF%BC%9A%E8%AE%93-Agent-%E8%87%AA%E5%B7%B1%E5%AD%B8"><span class="nav-number">4.</span> <span class="nav-text">第三個發現：讓 Agent 自己學</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E5%80%8B%E6%95%99%E8%A8%93%EF%BC%9A%E6%96%87%E4%BB%B6%E4%B9%9F%E8%A6%81%E8%AE%80%E8%80%85%E5%88%86%E5%B1%A4"><span class="nav-number">5.</span> <span class="nav-text">第四個教訓：文件也要讀者分層</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E9%AB%94%E5%9B%9E%E9%A1%A7"><span class="nav-number">6.</span> <span class="nav-text">整體回顧</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

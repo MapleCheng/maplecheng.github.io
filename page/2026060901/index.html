@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="當本地多模態模型和雲端 GPU 工作流同時成熟，企業導入 AI 不該只問要不要上雲，而要把資料敏感度、延遲、成本與任務型態拆開，設計一個能分工、能治理、能落地的混合架構。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="本地 AI 與雲端算力，不是二選一，而是分工設計">
+<meta property="og:url" content="https://maplecheng.com/page/2026060901/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="當本地多模態模型和雲端 GPU 工作流同時成熟，企業導入 AI 不該只問要不要上雲，而要把資料敏感度、延遲、成本與任務型態拆開，設計一個能分工、能治理、能落地的混合架構。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-06-08T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.343Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="技術管理">
+<meta property="article:tag" content="本地模型">
+<meta property="article:tag" content="系統架構">
+<meta property="article:tag" content="雲端算力">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026060901/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>本地 AI 與雲端算力，不是二選一，而是分工設計 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026060901/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          本地 AI 與雲端算力，不是二選一，而是分工設計
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-06-09 05:00:00" itemprop="dateCreated datePublished" datetime="2026-06-09T05:00:00+08:00">2026-06-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">當本地多模態模型和雲端 GPU 工作流同時成熟，企業導入 AI 不該只問要不要上雲，而要把資料敏感度、延遲、成本與任務型態拆開，設計一個能分工、能治理、能落地的混合架構。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看 AI 工具鏈的發展，我越來越覺得「本地模型」和「雲端算力」不該再被當成兩個互斥選項。以前討論 AI 架構，很容易變成站隊：資料不能出去，所以全部本地；或是本地硬體太弱，所以全部丟雲端。可是企業真正會遇到的場景，通常沒那麼乾淨。</p>
+<p>比較務實的答案是：哪些任務應該留在本地，哪些任務可以借用雲端，哪些任務必須在人和系統流程之間留下治理邊界。這不是模型選型問題而已，而是架構設計問題。</p>
+<span id="more"></span>
+
+<h3 id="本地模型的價值，不只是省-API-費"><a href="#本地模型的價值，不只是省-API-費" class="headerlink" title="本地模型的價值，不只是省 API 費"></a>本地模型的價值，不只是省 API 費</h3><p>很多人談本地模型，第一個想到的是成本：不用每次呼叫 API 付錢，或至少可以把高頻小任務留在自己的機器上。這當然有道理，但我覺得本地模型更重要的價值是「位置」。</p>
+<p>模型跑在哪裡，決定了它能自然接近哪些資料、哪些設備、哪些使用情境。</p>
+<p>如果是內部文件整理、桌面操作、錄音轉摘要、影像初步判讀、開發環境裡的輔助工具，本地模型有一個很大的優勢：資料不必先離開工作現場。它可以貼近檔案系統、內網服務、使用者桌面，甚至在網路不穩或政策限制比較多的環境裡繼續工作。</p>
+<p>這件事在企業裡很實際。不是所有資料都適合丟到外部 API，不是所有任務都值得為了更強的模型多繞一圈，也不是所有現場都能接受雲端服務的延遲和不可控性。</p>
+<p>所以我不太把本地模型看成「雲端模型的低配版」。更好的理解是：它是貼近資料與操作現場的執行層。它不一定要最聰明，但要夠近、夠快、夠可控。</p>
+<h3 id="雲端算力適合處理尖峰，而不是接管全部"><a href="#雲端算力適合處理尖峰，而不是接管全部" class="headerlink" title="雲端算力適合處理尖峰，而不是接管全部"></a>雲端算力適合處理尖峰，而不是接管全部</h3><p>另一邊，雲端 GPU 或遠端運算環境也不是敵人。</p>
+<p>企業內部很多 AI 任務其實不是每秒都要跑，而是偶爾需要比較大的算力：批次分析一批文件、跑一次較重的資料處理、產出訓練或評估結果、生成較大型的報告或多媒體 artifacts。這些工作如果硬要全部塞在本地機器上，會讓設備規格、維護成本和使用體驗都變得很尷尬。</p>
+<p>比較合理的做法，是讓本地 agent 負責日常互動、資料準備、任務切分與結果整合；需要重算力時，再把乾淨、可控、已脫敏或已授權的工作包送到雲端環境執行。</p>
+<p>這有點像公司內部的工作分派。不是每件事都交給外包，也不是每件事都自己硬做。日常判斷和敏感脈絡留在內部；需要大型設備或短時間高產能時，再把邊界清楚的工作送出去。</p>
+<p>重點是邊界要清楚。雲端不是「什麼都丟上去比較快」，而是「哪些資料可以出去、出去做什麼、結果怎麼回來、過程怎麼留下紀錄」。</p>
+<h3 id="混合架構最難的是切任務，不是接-API"><a href="#混合架構最難的是切任務，不是接-API" class="headerlink" title="混合架構最難的是切任務，不是接 API"></a>混合架構最難的是切任務，不是接 API</h3><p>我現在看 AI 架構，會先問幾個很土但很有用的問題。</p>
+<p>第一，這個任務需要接觸原始敏感資料嗎？如果需要，能不能在本地先做摘要、遮罩、過濾，再送出必要部分？</p>
+<p>第二，它對延遲有多敏感？使用者在等互動回覆、現場流程在等判斷、或只是晚上跑批次，架構會完全不同。</p>
+<p>第三，它的成本型態是高頻小任務，還是低頻重任務？前者適合本地或輕量模型，後者適合用雲端尖峰算力。</p>
+<p>第四，失敗時會怎樣？本地模型失敗，可能只是回覆品質差；雲端任務失敗，可能牽涉資料上傳、作業重跑、成本浪費、甚至流程卡住。兩者的補償設計不一樣。</p>
+<p>第五，結果能不能被驗證？不管本地或雲端，AI 產出的東西如果沒有來源、沒有版本、沒有輸入輸出紀錄，就很難放進正式流程。</p>
+<p>這些問題其實比「用哪個模型」更早出現。模型可以換，架構邊界如果一開始畫錯，後面會很難補。</p>
+<h3 id="不要把混合架構做成混亂架構"><a href="#不要把混合架構做成混亂架構" class="headerlink" title="不要把混合架構做成混亂架構"></a>不要把混合架構做成混亂架構</h3><p>混合架構聽起來很漂亮，但也最容易變成一坨混亂：一部分資料在本地，一部分資料在雲端；一部分任務由 agent 觸發，一部分由排程觸發；一部分結果寫回系統，一部分只留在聊天紀錄裡。剛開始 demo 很快，三個月後誰也不知道哪個版本才是正式結果。</p>
+<p>所以我會希望混合 AI 架構至少有幾個基本規則。</p>
+<p>第一，資料分級要先做。哪些可以離開本地，哪些只能在內網，哪些只能給人看不能給模型用，要明確。</p>
+<p>第二，任務要有 manifest。送到雲端的不是一團模糊 prompt，而是一個描述清楚的工作包：輸入是什麼、工具版本是什麼、允許做什麼、預期輸出是什麼。</p>
+<p>第三，結果要回到系統，而不是只回到對話。只存在聊天視窗裡的 AI 成果，很難被追蹤、重跑、審核或交接。</p>
+<p>第四，要保留人工接管點。當模型不確定、資料不足、成本異常或權限碰到邊界時，系統要能停下來，不要用自信語氣繼續往前衝。</p>
+<h3 id="CTO-視角：先設計責任，再設計能力"><a href="#CTO-視角：先設計責任，再設計能力" class="headerlink" title="CTO 視角：先設計責任，再設計能力"></a>CTO 視角：先設計責任，再設計能力</h3><p>如果從技術主管的角度看，我不會把未來的 AI 平台想成單一超強模型，而會想成一個分層系統：本地層負責接近資料、保護脈絡、處理高頻互動；雲端層負責重算力、批次分析、跨資料彙整；治理層負責權限、紀錄、成本、版本和審核。</p>
+<p>真正的關鍵不是哪一層比較厲害，而是哪一層該負責什麼。</p>
+<p>本地 AI 和雲端算力都會繼續進步。接下來的差異，不會只在模型分數，而在團隊能不能把它們放進一個清楚的工作系統裡。該留在現場的留在現場，該借用雲端的借用雲端，該讓人確認的就不要假裝可以全自動。</p>
+<p>AI 架構成熟後，最有價值的不是「全部都能做」，而是「每件事都知道應該在哪裡做、由誰負責、出了問題怎麼收」。這聽起來沒有 demo 那麼炫，但這才是能長期運作的系統。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E6%9E%B6%E6%A7%8B/" rel="tag"># 系統架構</a>
+              <a href="/tags/%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B/" rel="tag"># 本地模型</a>
+              <a href="/tags/%E9%9B%B2%E7%AB%AF%E7%AE%97%E5%8A%9B/" rel="tag"># 雲端算力</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026060801/" rel="prev" title="AI Agent 的權限設計，不該只有能不能，而要分成能做到哪一步">
+      <i class="fa fa-chevron-left"></i> AI Agent 的權限設計，不該只有能不能，而要分成能做到哪一步
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026061001/" rel="next" title="AI Agent 也需要安全模式：排錯時先把聰明關掉">
+      AI Agent 也需要安全模式：排錯時先把聰明關掉 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%83%B9%E5%80%BC%EF%BC%8C%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%9C%81-API-%E8%B2%BB"><span class="nav-number">1.</span> <span class="nav-text">本地模型的價值，不只是省 API 費</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%B2%E7%AB%AF%E7%AE%97%E5%8A%9B%E9%81%A9%E5%90%88%E8%99%95%E7%90%86%E5%B0%96%E5%B3%B0%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E6%8E%A5%E7%AE%A1%E5%85%A8%E9%83%A8"><span class="nav-number">2.</span> <span class="nav-text">雲端算力適合處理尖峰，而不是接管全部</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E6%9E%B6%E6%A7%8B%E6%9C%80%E9%9B%A3%E7%9A%84%E6%98%AF%E5%88%87%E4%BB%BB%E5%8B%99%EF%BC%8C%E4%B8%8D%E6%98%AF%E6%8E%A5-API"><span class="nav-number">3.</span> <span class="nav-text">混合架構最難的是切任務，不是接 API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E8%A6%81%E6%8A%8A%E6%B7%B7%E5%90%88%E6%9E%B6%E6%A7%8B%E5%81%9A%E6%88%90%E6%B7%B7%E4%BA%82%E6%9E%B6%E6%A7%8B"><span class="nav-number">4.</span> <span class="nav-text">不要把混合架構做成混亂架構</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTO-%E8%A6%96%E8%A7%92%EF%BC%9A%E5%85%88%E8%A8%AD%E8%A8%88%E8%B2%AC%E4%BB%BB%EF%BC%8C%E5%86%8D%E8%A8%AD%E8%A8%88%E8%83%BD%E5%8A%9B"><span class="nav-number">5.</span> <span class="nav-text">CTO 視角：先設計責任，再設計能力</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="AI coding agent 在開發過程中幻覺出資料庫不存在的欄位，汙染了 DataModel、SQL、BLL、DTO 整條鏈路。分享這次踩坑經驗，以及我們怎麼用自動化機制防堵這類問題。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI Coding Agent 的幻覺問題：當它無中生有了不存在的資料庫欄位">
+<meta property="og:url" content="https://maplecheng.com/page/2026021101/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="AI coding agent 在開發過程中幻覺出資料庫不存在的欄位，汙染了 DataModel、SQL、BLL、DTO 整條鏈路。分享這次踩坑經驗，以及我們怎麼用自動化機制防堵這類問題。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-10T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI 輔助開發">
+<meta property="article:tag" content="Code Review">
+<meta property="article:tag" content="Cursor">
+<meta property="article:tag" content="DataModel">
+<meta property="article:tag" content="踩坑經驗">
+<meta property="article:tag" content="軟體工程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026021101/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI Coding Agent 的幻覺問題：當它無中生有了不存在的資料庫欄位 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026021101/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI Coding Agent 的幻覺問題：當它無中生有了不存在的資料庫欄位
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-11 05:00:00" itemprop="dateCreated datePublished" datetime="2026-02-11T05:00:00+08:00">2026-02-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">AI coding agent 在開發過程中幻覺出資料庫不存在的欄位，汙染了 DataModel、SQL、BLL、DTO 整條鏈路。分享這次踩坑經驗，以及我們怎麼用自動化機制防堵這類問題。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在用 AI coding agent 開發功能的時候，踩了一個讓我差點翻桌的坑——它很認真地、很自信地，幫我生成了一整組資料庫根本不存在的欄位。</p>
+<span id="more"></span>
+
+<h3 id="事情是這樣的"><a href="#事情是這樣的" class="headerlink" title="事情是這樣的"></a>事情是這樣的</h3><p>我們的專案架構是 .NET Core + React，後端有一套 DataModel 層負責對應資料庫 schema。開發流程中，我把幾個功能需求丟給 AI coding agent 去實作，包含一些查詢頁面的改進。</p>
+<p>需求本身不複雜：幾個列表頁面需要顯示額外的資訊，像是操作人員名稱、時間戳記之類的。聽起來很直覺對吧？</p>
+<p>然後災難就開始了。</p>
+<h3 id="它到底做了什麼"><a href="#它到底做了什麼" class="headerlink" title="它到底做了什麼"></a>它到底做了什麼</h3><p>AI agent 拿到需求後，非常積極地開始工作。它分析了現有的程式碼結構，理解了我們的 DataModel pattern，然後——自己決定資料庫裡「應該」有哪些欄位。</p>
+<p>它無中生有了這些東西：</p>
+<ul>
+<li><code>ValidOperatorId</code>、<code>AcceptOperatorId</code>、<code>EndOperatorId</code></li>
+<li><code>ValidTime</code>、<code>AcceptTime</code>、<code>EndTime</code></li>
+<li><code>CreatorName</code>、<code>PermitterName</code>、<code>EndOperatorName</code></li>
+</ul>
+<p>看起來很合理對吧？命名規範也很標準。問題是：<strong>這些欄位在資料庫裡根本不存在。</strong></p>
+<p>更可怕的是，它不只改了 DataModel。它順著整條鏈路一路往上改：</p>
+<ul>
+<li><strong>DataModel</strong> — 加了假欄位的 property</li>
+<li><strong>SQL Query</strong> — 寫了 SELECT 這些不存在欄位的查詢</li>
+<li><strong>BLL（Business Logic Layer）</strong> — 用這些假欄位做邏輯判斷</li>
+<li><strong>DTO</strong> — 把假資料往前端送</li>
+</ul>
+<p>整條鏈路都被汙染了。如果沒有 code review 直接合併，上線後就是一連串的 SQL error。</p>
+<h3 id="為什麼-AI-會這樣做"><a href="#為什麼-AI-會這樣做" class="headerlink" title="為什麼 AI 會這樣做"></a>為什麼 AI 會這樣做</h3><p>這其實是 LLM 的經典問題——幻覺（hallucination）。</p>
+<p>AI agent 看到了現有的 DataModel 結構，理解了命名慣例（我們的欄位確實有類似的 pattern），然後根據需求「推理」出資料庫裡應該有這些欄位。它的邏輯鏈是：</p>
+<ol>
+<li>需求要顯示操作人員名稱 ✓</li>
+<li>現有 DataModel 有類似的 Operator 欄位 ✓</li>
+<li>所以資料庫裡「一定」有 <code>ValidOperatorId</code> 這種欄位 ✗</li>
+</ol>
+<p>第三步就是幻覺。它沒有能力去驗證資料庫 schema，所以只能靠推理。而推理的結果，看起來很合理，實際上完全錯誤。</p>
+<p>這跟你問 ChatGPT 一個它不確定的問題，它會很自信地給你一個聽起來正確但完全編造的答案，是一模一樣的機制。只是這次它編造的不是知識，是程式碼。</p>
+<h3 id="我們的防線：自動生成機制"><a href="#我們的防線：自動生成機制" class="headerlink" title="我們的防線：自動生成機制"></a>我們的防線：自動生成機制</h3><p>好在我們早就預料到這類問題，所以在架構上設了一道硬防線。</p>
+<p>我們的 DataModel 層有一個鐵規矩：<strong>所有 DataModel 只能由自動生成工具產出，絕對不能手動修改。</strong></p>
+<p>具體來說，我們有一個 <code>RenewDalController</code> 提供兩個 API：</p>
+<ul>
+<li><code>POST /aux/renew/dal/db</code> — 從資料庫 schema 直接生成 DataModel</li>
+<li><code>POST /aux/renew/dal/file</code> — 從 SQL query 檔案生成對應的 Model</li>
+</ul>
+<p>這意味著 DataModel 永遠是資料庫的真實映射。你不可能在 DataModel 裡加一個資料庫沒有的欄位，因為下次重新生成就會被覆蓋掉。</p>
+<p>這個機制在沒有 AI 的時代就已經存在了——當初是為了防止人類開發者手動改 DataModel 造成不一致。沒想到現在最大的受益場景，是防止 AI 幻覺。</p>
+<h3 id="修復過程"><a href="#修復過程" class="headerlink" title="修復過程"></a>修復過程</h3><p>發現問題後，處理方式其實很直接：</p>
+<ol>
+<li>把所有 AI 生成的假欄位全部清掉</li>
+<li>用 <code>RenewDalController</code> 重新生成正確的 DataModel</li>
+<li>在 BLL 層改用資料庫中實際存在的欄位來實現同樣的功能</li>
+<li>把整個 branch 的 commit 做 squash，清理掉汙染的歷史</li>
+</ol>
+<p>說實話，功能本身不難實現。資料庫裡有其他欄位可以達成同樣的目的，只是 AI 沒有去查，而是自己編了一組「看起來更漂亮」的欄位名稱。</p>
+<h3 id="從這次經驗學到的事"><a href="#從這次經驗學到的事" class="headerlink" title="從這次經驗學到的事"></a>從這次經驗學到的事</h3><h4 id="1-AI-最危險的不是寫錯，是寫得「很像對的」"><a href="#1-AI-最危險的不是寫錯，是寫得「很像對的」" class="headerlink" title="1. AI 最危險的不是寫錯，是寫得「很像對的」"></a>1. AI 最危險的不是寫錯，是寫得「很像對的」</h4><p>如果 AI 寫出明顯的語法錯誤，反而好辦——build 就會擋住。真正危險的是這種「語法正確、邏輯合理、但事實錯誤」的輸出。它通過了所有靜態檢查，code review 時如果不夠仔細，很容易就放行了。</p>
+<h4 id="2-架構層面的防線比人工-review-更可靠"><a href="#2-架構層面的防線比人工-review-更可靠" class="headerlink" title="2. 架構層面的防線比人工 review 更可靠"></a>2. 架構層面的防線比人工 review 更可靠</h4><p>我們的自動生成機制就是一個好例子。不管是人還是 AI 寫的程式碼，只要違反了「DataModel 必須自動生成」這個規則，就會在下次生成時被修正。這種架構層面的約束，比「記得要 review」強太多了。</p>
+<h4 id="3-AI-agent-需要存取資料庫-schema-的能力"><a href="#3-AI-agent-需要存取資料庫-schema-的能力" class="headerlink" title="3. AI agent 需要存取資料庫 schema 的能力"></a>3. AI agent 需要存取資料庫 schema 的能力</h4><p>這次的根本問題是 AI agent 無法驗證資料庫結構。如果它能查詢 DB schema，就不會幻覺出不存在的欄位。這給了我一個方向：以後在設定 AI coding agent 的工作環境時，應該把資料庫 schema 的查詢能力納入它的工具集。</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart LR
+    A[AI Agent 收到需求] --> B{能查 DB Schema?}
+    B -->|否| C[根據程式碼推理欄位]
+    C --> D[幻覺風險 ⚠️]
+    B -->|是| E[查詢實際 Schema]
+    E --> F[生成正確 DataModel]
+    F --> G[安全 ✅]
+    D --> H{有自動生成防線?}
+    H -->|是| I[下次生成時修正]
+    H -->|否| J[汙染上線 💀]
+          </pre>
+
+<h4 id="4-不要因為一次踩坑就否定-AI-輔助開發"><a href="#4-不要因為一次踩坑就否定-AI-輔助開發" class="headerlink" title="4. 不要因為一次踩坑就否定 AI 輔助開發"></a>4. 不要因為一次踩坑就否定 AI 輔助開發</h4><p>這很重要。我看到不少人因為 AI 寫出 bug 就說「AI 寫程式不靠譜」。但人類開發者也會寫 bug，也會記錯欄位名稱，也會假設資料庫有某個欄位。差別在於 AI 犯錯的模式跟人不一樣，所以我們需要針對 AI 的錯誤模式建立對應的防線。</p>
+<h3 id="給同樣在用-AI-輔助開發的人"><a href="#給同樣在用-AI-輔助開發的人" class="headerlink" title="給同樣在用 AI 輔助開發的人"></a>給同樣在用 AI 輔助開發的人</h3><p>幾個實際的建議：</p>
+<ul>
+<li><strong>建立不可手動修改的自動生成層</strong>：DataModel、API client、型別定義這些跟外部系統對接的程式碼，盡量用自動生成。這是防幻覺最有效的手段。</li>
+<li><strong>讓 AI 能存取它需要的事實來源</strong>：資料庫 schema、API 文件、型別定義。減少它需要「猜」的範圍。</li>
+<li><strong>特別注意「跨層汙染」</strong>：AI 不只會在一個檔案犯錯，它會順著程式碼結構一路錯下去。review 時要追蹤整條鏈路。</li>
+<li><strong>build 是最低標準，不是最終防線</strong>：能 build 過不代表邏輯正確。SQL query 裡查了不存在的欄位，build 是抓不到的。</li>
+</ul>
+<h3 id="寫在最後"><a href="#寫在最後" class="headerlink" title="寫在最後"></a>寫在最後</h3><p>AI coding agent 是我目前用過最強大的開發輔助工具，這點毫無疑問。但「強大」跟「可以無腦信任」之間還有一段距離。</p>
+<p>這次的經驗讓我更確信一件事：AI 輔助開發的關鍵不是 AI 有多聰明，而是你的架構有多健壯。好的架構能讓 AI 的錯誤被快速發現和修正，壞的架構會讓 AI 的錯誤悄悄滲透到每個角落。</p>
+<p>說到底，這跟管理人類團隊是一樣的道理——你不能期待每個人都不犯錯，但你可以建立一個犯錯後能快速修正的系統。</p>
+<p>如果你也在用 AI 寫程式，希望這篇血淚能幫你少踩一個坑 😂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Cursor/" rel="tag"># Cursor</a>
+              <a href="/tags/AI-%E8%BC%94%E5%8A%A9%E9%96%8B%E7%99%BC/" rel="tag"># AI 輔助開發</a>
+              <a href="/tags/%E8%B8%A9%E5%9D%91%E7%B6%93%E9%A9%97/" rel="tag"># 踩坑經驗</a>
+              <a href="/tags/DataModel/" rel="tag"># DataModel</a>
+              <a href="/tags/Code-Review/" rel="tag"># Code Review</a>
+              <a href="/tags/%E8%BB%9F%E9%AB%94%E5%B7%A5%E7%A8%8B/" rel="tag"># 軟體工程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026021001/" rel="prev" title="用 Channel Topic 當 AI Agent 的上下文注入點，比 System Prompt 更優雅">
+      <i class="fa fa-chevron-left"></i> 用 Channel Topic 當 AI Agent 的上下文注入點，比 System Prompt 更優雅
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026021301/" rel="next" title="我的資料庫不用 Foreign Key——一個技術主管的實戰心得">
+      我的資料庫不用 Foreign Key——一個技術主管的實戰心得 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E6%83%85%E6%98%AF%E9%80%99%E6%A8%A3%E7%9A%84"><span class="nav-number">1.</span> <span class="nav-text">事情是這樣的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%83%E5%88%B0%E5%BA%95%E5%81%9A%E4%BA%86%E4%BB%80%E9%BA%BC"><span class="nav-number">2.</span> <span class="nav-text">它到底做了什麼</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC-AI-%E6%9C%83%E9%80%99%E6%A8%A3%E5%81%9A"><span class="nav-number">3.</span> <span class="nav-text">為什麼 AI 會這樣做</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E5%80%91%E7%9A%84%E9%98%B2%E7%B7%9A%EF%BC%9A%E8%87%AA%E5%8B%95%E7%94%9F%E6%88%90%E6%A9%9F%E5%88%B6"><span class="nav-number">4.</span> <span class="nav-text">我們的防線：自動生成機制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E5%BE%A9%E9%81%8E%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">修復過程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%9E%E9%80%99%E6%AC%A1%E7%B6%93%E9%A9%97%E5%AD%B8%E5%88%B0%E7%9A%84%E4%BA%8B"><span class="nav-number">6.</span> <span class="nav-text">從這次經驗學到的事</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-AI-%E6%9C%80%E5%8D%B1%E9%9A%AA%E7%9A%84%E4%B8%8D%E6%98%AF%E5%AF%AB%E9%8C%AF%EF%BC%8C%E6%98%AF%E5%AF%AB%E5%BE%97%E3%80%8C%E5%BE%88%E5%83%8F%E5%B0%8D%E7%9A%84%E3%80%8D"><span class="nav-number">6.1.</span> <span class="nav-text">1. AI 最危險的不是寫錯，是寫得「很像對的」</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%9E%B6%E6%A7%8B%E5%B1%A4%E9%9D%A2%E7%9A%84%E9%98%B2%E7%B7%9A%E6%AF%94%E4%BA%BA%E5%B7%A5-review-%E6%9B%B4%E5%8F%AF%E9%9D%A0"><span class="nav-number">6.2.</span> <span class="nav-text">2. 架構層面的防線比人工 review 更可靠</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-AI-agent-%E9%9C%80%E8%A6%81%E5%AD%98%E5%8F%96%E8%B3%87%E6%96%99%E5%BA%AB-schema-%E7%9A%84%E8%83%BD%E5%8A%9B"><span class="nav-number">6.3.</span> <span class="nav-text">3. AI agent 需要存取資料庫 schema 的能力</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E4%B8%8D%E8%A6%81%E5%9B%A0%E7%82%BA%E4%B8%80%E6%AC%A1%E8%B8%A9%E5%9D%91%E5%B0%B1%E5%90%A6%E5%AE%9A-AI-%E8%BC%94%E5%8A%A9%E9%96%8B%E7%99%BC"><span class="nav-number">6.4.</span> <span class="nav-text">4. 不要因為一次踩坑就否定 AI 輔助開發</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%A6%E5%90%8C%E6%A8%A3%E5%9C%A8%E7%94%A8-AI-%E8%BC%94%E5%8A%A9%E9%96%8B%E7%99%BC%E7%9A%84%E4%BA%BA"><span class="nav-number">7.</span> <span class="nav-text">給同樣在用 AI 輔助開發的人</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%AB%E5%9C%A8%E6%9C%80%E5%BE%8C"><span class="nav-number">8.</span> <span class="nav-text">寫在最後</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

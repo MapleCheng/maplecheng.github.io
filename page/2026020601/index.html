@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="用 Graph API 發信結果收件人看到的是獨立新信？這篇分享從 sendMail 踩坑到 reply API 的實戰經驗，教你如何正確回覆郵件並保持 thread 連貫。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Microsoft Graph API 郵件回覆實戰：如何正確保持 Email Thread 連貫">
+<meta property="og:url" content="https://maplecheng.com/page/2026020601/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="用 Graph API 發信結果收件人看到的是獨立新信？這篇分享從 sendMail 踩坑到 reply API 的實戰經驗，教你如何正確回覆郵件並保持 thread 連貫。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-05T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="API">
+<meta property="article:tag" content="Email">
+<meta property="article:tag" content="Microsoft Graph">
+<meta property="article:tag" content="Office 365">
+<meta property="article:tag" content="踩坑紀錄">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020601/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Microsoft Graph API 郵件回覆實戰：如何正確保持 Email Thread 連貫 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020601/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Microsoft Graph API 郵件回覆實戰：如何正確保持 Email Thread 連貫
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-06 05:00:00" itemprop="dateCreated datePublished" datetime="2026-02-06T05:00:00+08:00">2026-02-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">用 Graph API 發信結果收件人看到的是獨立新信？這篇分享從 sendMail 踩坑到 reply API 的實戰經驗，教你如何正確回覆郵件並保持 thread 連貫。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在做一個自動化郵件處理系統，需要用 Microsoft Graph API 回覆客戶的來信。聽起來很簡單對吧？就是收到信、處理、回覆，標準流程。</p>
+<p>結果踩了一個讓我懷疑人生的坑：<strong>用 <code>sendMail</code> API 回覆，收件人看到的居然是一封全新的信，不在原本的 thread 裡面。</strong></p>
+<span id="more"></span>
+
+<h3 id="問題現象"><a href="#問題現象" class="headerlink" title="問題現象"></a>問題現象</h3><p>假設客戶寄了一封信給我，主旨是「專案進度確認」。我用 Graph API 的 <code>sendMail</code> 端點回覆：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">POST /users/<span class="punctuation">&#123;</span>userId<span class="punctuation">&#125;</span>/sendMail</span><br><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;subject&quot;</span><span class="punctuation">:</span> <span class="string">&quot;RE: 專案進度確認&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;body&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;contentType&quot;</span><span class="punctuation">:</span> <span class="string">&quot;HTML&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;p&gt;您好，以下是最新進度...&lt;/p&gt;&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;toRecipients&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;emailAddress&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;client@example.com&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>看起來沒問題吧？主旨有 <code>RE:</code>，收件人也對。</p>
+<p><strong>但客戶收到的是一封獨立的新信。</strong></p>
+<p>在他的信箱裡，這封「回覆」跟原本的詢問信是分開的，不在同一個 thread。如果後續還有來回，就會變成一堆散落的獨立郵件，完全失去 conversation 的脈絡。</p>
+<h3 id="根本原因：Email-Thread-不是靠主旨判斷的"><a href="#根本原因：Email-Thread-不是靠主旨判斷的" class="headerlink" title="根本原因：Email Thread 不是靠主旨判斷的"></a>根本原因：Email Thread 不是靠主旨判斷的</h3><p>這是我搞錯的第一個觀念。</p>
+<p>Email 的 thread（或稱 conversation）是靠 <strong>Message-ID</strong> 和 <strong>In-Reply-To &#x2F; References</strong> header 來串連的，不是靠主旨的 <code>RE:</code> 或 <code>FW:</code>。</p>
+<p>當你用 <code>sendMail</code> API 發信時：</p>
+<ul>
+<li>Graph API 會產生一個全新的 Message-ID</li>
+<li>不會自動帶上 In-Reply-To header</li>
+<li>就算主旨寫 <code>RE: xxx</code>，郵件系統還是認定這是新信</li>
+</ul>
+<p>所以收件人的信箱會把它當成獨立郵件處理。</p>
+<h3 id="正確做法：用-reply-API"><a href="#正確做法：用-reply-API" class="headerlink" title="正確做法：用 reply API"></a>正確做法：用 reply API</h3><p>Graph API 有專門的回覆端點：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POST /users/&#123;userId&#125;/messages/&#123;messageId&#125;/reply</span><br></pre></td></tr></table></figure>
+
+<p>或者如果要回覆給所有人（包括 CC）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POST /users/&#123;userId&#125;/messages/&#123;messageId&#125;/replyAll</span><br></pre></td></tr></table></figure>
+
+<p>用這個端點，Graph API 會自動：</p>
+<ol>
+<li>設定正確的 In-Reply-To header，指向原始郵件的 Message-ID</li>
+<li>維護 References header chain</li>
+<li>保持 <code>conversationId</code> 一致</li>
+</ol>
+<p>實際呼叫長這樣：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">POST /users/<span class="punctuation">&#123;</span>userId<span class="punctuation">&#125;</span>/messages/<span class="punctuation">&#123;</span>originalMessageId<span class="punctuation">&#125;</span>/reply</span><br><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;toRecipients&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;emailAddress&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;client@example.com&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;comment&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;p&gt;您好，以下是最新進度...&lt;/p&gt;&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>注意幾個差異：</p>
+<ul>
+<li>端點是 <code>/messages/&#123;messageId&#125;/reply</code>，需要原始郵件的 ID</li>
+<li>回覆內容放在 <code>comment</code> 欄位，不是 <code>message.body</code></li>
+<li>不需要指定 <code>subject</code>，會自動帶上 <code>RE:</code> + 原主旨</li>
+</ul>
+<h3 id="conversationId-的妙用"><a href="#conversationId-的妙用" class="headerlink" title="conversationId 的妙用"></a>conversationId 的妙用</h3><p>用 <code>reply</code> API 之後，會發現一個很棒的特性：同一個 email thread 裡的所有郵件，<code>conversationId</code> 都是一樣的。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;AAMkAGI2TG93AAA=&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;conversationId&quot;</span><span class="punctuation">:</span> <span class="string">&quot;AAQkAGI2TG93BBB=&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;subject&quot;</span><span class="punctuation">:</span> <span class="string">&quot;RE: 專案進度確認&quot;</span><span class="punctuation">,</span></span><br><span class="line">  ...</span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>這個 <code>conversationId</code> 可以拿來做很多事：</p>
+<ol>
+<li><strong>追蹤完整對話</strong>：用 <code>conversationId</code> 查詢，可以撈出整個 thread 的所有郵件</li>
+<li><strong>關聯內部系統</strong>：把 <code>conversationId</code> 存起來，跟 CRM、工單系統對應</li>
+<li><strong>避免重複處理</strong>：收到新信時，先查 <code>conversationId</code> 是否已存在</li>
+</ol>
+<p>我的做法是建一個 mapping table：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// thread-map.json</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;AAQkAGI2TG93BBB=&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;internalThreadId&quot;</span>: <span class="string">&quot;12345&quot;</span>,</span><br><span class="line">    <span class="string">&quot;firstReceivedAt&quot;</span>: <span class="string">&quot;2026-02-05T10:30:00Z&quot;</span>,</span><br><span class="line">    <span class="string">&quot;lastUpdatedAt&quot;</span>: <span class="string">&quot;2026-02-06T09:15:00Z&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每次收到新信，先查這個 mapping。如果 <code>conversationId</code> 存在，就是既有對話的後續；如果不存在，就是新的詢問。</p>
+<h3 id="完整流程範例"><a href="#完整流程範例" class="headerlink" title="完整流程範例"></a>完整流程範例</h3><pre class="mermaid" style="text-align: center;">
+            
+            sequenceDiagram
+    participant C as 客戶
+    participant G as Graph API
+    participant AI as AI 處理系統
+    participant D as Discord
+    C->>G: 寄送 Email
+    AI->>G: 讀取未讀郵件
+    G-->>AI: 郵件內容 + messageId
+    AI->>AI: 處理並產生回覆
+    AI->>G: POST /messages/{id}/reply
+    G->>C: 回覆（同一 Thread）
+    AI->>D: 同步到 Discord Thread
+    C->>G: 再次回覆
+    AI->>D: 更新 Discord Thread
+          </pre>
+
+<p>來看一個完整的自動回覆流程：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> msal <span class="keyword">import</span> ConfidentialClientApplication</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 取得 access token</span></span><br><span class="line">app = ConfidentialClientApplication(</span><br><span class="line">    client_id,</span><br><span class="line">    authority=<span class="string">f&quot;https://login.microsoftonline.com/<span class="subst">&#123;tenant_id&#125;</span>&quot;</span>,</span><br><span class="line">    client_credential=client_secret</span><br><span class="line">)</span><br><span class="line">token = app.acquire_token_for_client(</span><br><span class="line">    scopes=[<span class="string">&quot;https://graph.microsoft.com/.default&quot;</span>]</span><br><span class="line">)</span><br><span class="line">access_token = token[<span class="string">&quot;access_token&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 讀取收件匣的新郵件</span></span><br><span class="line">headers = &#123;<span class="string">&quot;Authorization&quot;</span>: <span class="string">f&quot;Bearer <span class="subst">&#123;access_token&#125;</span>&quot;</span>&#125;</span><br><span class="line">response = requests.get(</span><br><span class="line">    <span class="string">f&quot;https://graph.microsoft.com/v1.0/users/<span class="subst">&#123;user_id&#125;</span>/messages&quot;</span></span><br><span class="line">    <span class="string">&quot;?$filter=isRead eq false&amp;$orderby=receivedDateTime desc&quot;</span>,</span><br><span class="line">    headers=headers</span><br><span class="line">)</span><br><span class="line">messages = response.json()[<span class="string">&quot;value&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> msg <span class="keyword">in</span> messages:</span><br><span class="line">    message_id = msg[<span class="string">&quot;id&quot;</span>]</span><br><span class="line">    conversation_id = msg[<span class="string">&quot;conversationId&quot;</span>]</span><br><span class="line">    sender = msg[<span class="string">&quot;from&quot;</span>][<span class="string">&quot;emailAddress&quot;</span>][<span class="string">&quot;address&quot;</span>]</span><br><span class="line">    subject = msg[<span class="string">&quot;subject&quot;</span>]</span><br><span class="line">    body = msg[<span class="string">&quot;body&quot;</span>][<span class="string">&quot;content&quot;</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 3. 處理郵件內容（這邊放你的業務邏輯）</span></span><br><span class="line">    reply_content = process_and_generate_reply(body)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 4. 用 reply API 回覆</span></span><br><span class="line">    reply_response = requests.post(</span><br><span class="line">        <span class="string">f&quot;https://graph.microsoft.com/v1.0/users/<span class="subst">&#123;user_id&#125;</span>&quot;</span></span><br><span class="line">        <span class="string">f&quot;/messages/<span class="subst">&#123;message_id&#125;</span>/reply&quot;</span>,</span><br><span class="line">        headers=headers,</span><br><span class="line">        json=&#123;</span><br><span class="line">            <span class="string">&quot;message&quot;</span>: &#123;</span><br><span class="line">                <span class="string">&quot;toRecipients&quot;</span>: [</span><br><span class="line">                    &#123;<span class="string">&quot;emailAddress&quot;</span>: &#123;<span class="string">&quot;address&quot;</span>: sender&#125;&#125;</span><br><span class="line">                ]</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">&quot;comment&quot;</span>: reply_content</span><br><span class="line">        &#125;</span><br><span class="line">    )</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> reply_response.status_code == <span class="number">202</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;✅ 已回覆: <span class="subst">&#123;subject&#125;</span>&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 5. 記錄 conversationId mapping</span></span><br><span class="line">        save_thread_mapping(conversation_id, message_id)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 6. 標記為已讀</span></span><br><span class="line">    requests.patch(</span><br><span class="line">        <span class="string">f&quot;https://graph.microsoft.com/v1.0/users/<span class="subst">&#123;user_id&#125;</span>&quot;</span></span><br><span class="line">        <span class="string">f&quot;/messages/<span class="subst">&#123;message_id&#125;</span>&quot;</span>,</span><br><span class="line">        headers=headers,</span><br><span class="line">        json=&#123;<span class="string">&quot;isRead&quot;</span>: <span class="literal">True</span>&#125;</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+
+<h3 id="幾個注意事項"><a href="#幾個注意事項" class="headerlink" title="幾個注意事項"></a>幾個注意事項</h3><p><strong>1. reply vs replyAll</strong></p>
+<ul>
+<li><code>reply</code>：只回給寄件人</li>
+<li><code>replyAll</code>：回給寄件人 + 所有 CC</li>
+</ul>
+<p>如果原信有 CC 其他人，要考慮清楚用哪個。自動化系統通常用 <code>reply</code> 比較安全，避免不小心 spam 到不相關的人。</p>
+<p><strong>2. comment 欄位是 HTML</strong></p>
+<p><code>comment</code> 欄位支援 HTML，但 Graph API 會自動在回覆內容上方加上原始郵件的引用。如果你想完全控制格式，可以改用：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;body&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;contentType&quot;</span><span class="punctuation">:</span> <span class="string">&quot;HTML&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;p&gt;完全自訂的內容&lt;/p&gt;&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>但這樣就不會有自動引用原文的效果。</p>
+<p><strong>3. 權限需求</strong></p>
+<p>用 Application Permission（daemon app）呼叫 <code>reply</code> API 需要 <code>Mail.Send</code> 權限。如果是 Delegated Permission，則需要 <code>Mail.ReadWrite</code>。</p>
+<p><strong>4. 處理已刪除的原始郵件</strong></p>
+<p>如果原始郵件被刪了，<code>reply</code> API 會回 404。這時候只能 fallback 到 <code>sendMail</code>，但要有心理準備 thread 會斷掉。</p>
+<h3 id="延伸應用：整合到其他系統"><a href="#延伸應用：整合到其他系統" class="headerlink" title="延伸應用：整合到其他系統"></a>延伸應用：整合到其他系統</h3><p>我後來把這套機制跟 Discord 整合了。流程大概是：</p>
+<ol>
+<li>收到客戶來信 → 建立 Discord Forum thread</li>
+<li>在 Discord 討論、決定回覆內容</li>
+<li>觸發 bot → 用 Graph API <code>reply</code> 發回給客戶</li>
+<li>客戶再回 → 更新 Discord thread</li>
+</ol>
+<p>因為有 <code>conversationId</code> mapping，所以可以精準對應每個 email thread 到哪個 Discord thread。客戶的後續回覆會自動歸到正確的討論串，不會搞混。</p>
+<h3 id="總結"><a href="#總結" class="headerlink" title="總結"></a>總結</h3><p>用 Graph API 處理郵件回覆，記住這幾點：</p>
+<ul>
+<li>❌ 不要用 <code>sendMail</code> 來「回覆」，那只是發新信</li>
+<li>✅ 用 <code>/messages/&#123;id&#125;/reply</code> 端點</li>
+<li>✅ 善用 <code>conversationId</code> 追蹤整個對話</li>
+<li>✅ 記得處理原始郵件被刪除的 edge case</li>
+</ul>
+<p>這個坑我踩了大概半天才搞清楚，希望這篇能幫到有類似需求的人。</p>
+<p>如果你也在做 Office 365 &#x2F; Microsoft 365 的整合，歡迎留言交流。這領域的文件說實話不算友善，很多細節要自己試才知道。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Microsoft-Graph/" rel="tag"># Microsoft Graph</a>
+              <a href="/tags/API/" rel="tag"># API</a>
+              <a href="/tags/Email/" rel="tag"># Email</a>
+              <a href="/tags/Office-365/" rel="tag"># Office 365</a>
+              <a href="/tags/%E8%B8%A9%E5%9D%91%E7%B4%80%E9%8C%84/" rel="tag"># 踩坑紀錄</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020521/" rel="prev" title="一個早上，AI 幫我寫了 20 篇部落格：我學到的事">
+      <i class="fa fa-chevron-left"></i> 一個早上，AI 幫我寫了 20 篇部落格：我學到的事
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020701/" rel="next" title="AI 時代的任務估算：從「要花多久」到「有多難」">
+      AI 時代的任務估算：從「要花多久」到「有多難」 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%95%8F%E9%A1%8C%E7%8F%BE%E8%B1%A1"><span class="nav-number">1.</span> <span class="nav-text">問題現象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%9C%AC%E5%8E%9F%E5%9B%A0%EF%BC%9AEmail-Thread-%E4%B8%8D%E6%98%AF%E9%9D%A0%E4%B8%BB%E6%97%A8%E5%88%A4%E6%96%B7%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">根本原因：Email Thread 不是靠主旨判斷的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E7%A2%BA%E5%81%9A%E6%B3%95%EF%BC%9A%E7%94%A8-reply-API"><span class="nav-number">3.</span> <span class="nav-text">正確做法：用 reply API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#conversationId-%E7%9A%84%E5%A6%99%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">conversationId 的妙用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B%E7%AF%84%E4%BE%8B"><span class="nav-number">5.</span> <span class="nav-text">完整流程範例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%BE%E5%80%8B%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">6.</span> <span class="nav-text">幾個注意事項</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%B6%E4%BC%B8%E6%87%89%E7%94%A8%EF%BC%9A%E6%95%B4%E5%90%88%E5%88%B0%E5%85%B6%E4%BB%96%E7%B3%BB%E7%B5%B1"><span class="nav-number">7.</span> <span class="nav-text">延伸應用：整合到其他系統</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B8%BD%E7%B5%90"><span class="nav-number">8.</span> <span class="nav-text">總結</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

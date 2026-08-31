@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="AI 很會回答問題，但很容易忘記事情。分享我如何替 AI 助手設計三層記憶架構：daily memory、長期索引與向量知識庫，讓它不只會聊天，還能累積經驗、記住偏好，甚至把踩坑整理成可重用知識。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我怎麼幫 AI 助手做一套「不會失憶」的記憶系統">
+<meta property="og:url" content="https://maplecheng.com/page/2026040502/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="AI 很會回答問題，但很容易忘記事情。分享我如何替 AI 助手設計三層記憶架構：daily memory、長期索引與向量知識庫，讓它不只會聊天，還能累積經驗、記住偏好，甚至把踩坑整理成可重用知識。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-04-04T21:45:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="memory">
+<meta property="article:tag" content="workflow">
+<meta property="article:tag" content="系統設計">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026040502/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>我怎麼幫 AI 助手做一套「不會失憶」的記憶系統 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026040502/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          我怎麼幫 AI 助手做一套「不會失憶」的記憶系統
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-04-05 05:45:00" itemprop="dateCreated datePublished" datetime="2026-04-05T05:45:00+08:00">2026-04-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">AI 很會回答問題，但很容易忘記事情。分享我如何替 AI 助手設計三層記憶架構：daily memory、長期索引與向量知識庫，讓它不只會聊天，還能累積經驗、記住偏好，甚至把踩坑整理成可重用知識。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>做 AI 助手一段時間之後，我越來越確定一件事：<strong>模型夠不夠聰明，很多時候不是第一個問題；它記不記得，才是。</strong></p>
+<p>這種痛感很真實。</p>
+<p>昨天才講過的偏好，今天忘了。上週才踩過的坑，下次又重踩一次。明明已經討論過一輪的流程，換個 session 又要重新解釋。你會開始懷疑：這到底是助理，還是每次都要重新 onboarding 的實習生？</p>
+<p>所以我後來花了不少心力，不是在「讓 AI 更會講」，而是在「讓 AI 比較不會失憶」。</p>
+<p>這篇想分享的，就是我目前最有感的一個設計：<strong>三層記憶系統</strong>。</p>
+<span id="more"></span>
+
+<h3 id="為什麼單靠-context-window-不夠"><a href="#為什麼單靠-context-window-不夠" class="headerlink" title="為什麼單靠 context window 不夠"></a>為什麼單靠 context window 不夠</h3><p>很多人會直覺認為，大模型不是已經有很大的 context window 了嗎？那就把前面對話全塞進去不就好了？</p>
+<p>理論上好像可以，實際上問題很多。</p>
+<p>第一，<strong>成本高</strong>。你不可能每次都把整包歷史對話丟進去，尤其系統一大，日常對話、任務紀錄、工具輸出全部加起來很快就爆。</p>
+<p>第二，<strong>噪音太多</strong>。真正重要的資訊，常常只佔全部對話的 5%。剩下 95% 是當下脈絡、閒聊、重複確認、工具輸出。全部硬塞，只會讓模型更難抓重點。</p>
+<p>第三，<strong>記憶有保存期限</strong>。有些東西只今天有用，有些東西值得記一週，有些東西應該變成長期原則。這三種資料混在一起，最後通常就是一團亂。</p>
+<p>所以我後來接受一件事：<strong>AI 的記憶不能只靠 context window，要有自己的儲存結構。</strong></p>
+<h3 id="第一層：Daily-Memory"><a href="#第一層：Daily-Memory" class="headerlink" title="第一層：Daily Memory"></a>第一層：Daily Memory</h3><p>第一層是最接地氣的，叫做 daily memory。</p>
+<p>每天一個檔案，記錄這一天發生的重要事情：做了什麼、聊了什麼、踩了什麼坑、有哪些待跟進事項。格式很簡單，就是 markdown。</p>
+<p>這層的角色不是「高精度知識庫」，而是<strong>工作日誌</strong>。</p>
+<p>它的好處是很直觀：</p>
+<ul>
+<li>今天發生了什麼，一眼就能回顧</li>
+<li>最近兩三天的脈絡很容易補回來</li>
+<li>出問題時，可以快速追查是哪一天開始歪掉的</li>
+</ul>
+<p>我很喜歡這一層，因為它很像人的短期記憶。你不會把每件小事都永久記住，但最近發生過什麼，通常還會有印象。</p>
+<p>缺點也很明顯：<strong>會膨脹，而且會過期。</strong></p>
+<p>所以 daily memory 不能直接拿來當永久知識庫，它需要定期整理。</p>
+<h3 id="第二層：MEMORY-md-索引"><a href="#第二層：MEMORY-md-索引" class="headerlink" title="第二層：MEMORY.md 索引"></a>第二層：MEMORY.md 索引</h3><p>第二層是我很喜歡的一個折衷做法：<strong>長期記憶索引。</strong></p>
+<p>不是把所有細節都塞進一個超大的總檔案，而是用 <code>MEMORY.md</code> 當 index，底下再拆成 topic 與 project 檔案。</p>
+<p>例如：</p>
+<ul>
+<li>一份記開發慣例</li>
+<li>一份記 cron 與自動化規則</li>
+<li>一份記使用者偏好</li>
+<li>一份記不同專案或領域的長期背景</li>
+</ul>
+<p>這層的關鍵是：<strong>整理過、抽象過、可持續維護。</strong></p>
+<p>它不像 daily memory 那麼原始，而是會把重複出現的模式提煉出來。比如：</p>
+<ul>
+<li>某種流程每次都會踩同一個坑</li>
+<li>某個工具有固定的限制</li>
+<li>某位使用者一直有同樣的偏好</li>
+</ul>
+<p>這些東西如果還留在 daily memory，其實很浪費。因為你每次都要重新翻。整理進 topic 檔之後，AI 下次就能直接讀重點，不用再從原始對話考古。</p>
+<h3 id="第三層：Vector-Memory"><a href="#第三層：Vector-Memory" class="headerlink" title="第三層：Vector Memory"></a>第三層：Vector Memory</h3><p>第三層是向量記憶，也就是 semantic retrieval。</p>
+<p>老實說，這層一開始我沒有那麼信。因為很多人把向量資料庫講得很神，好像只要 embeddings 一下，AI 就突然變成會思考的知識管家。現實沒那麼夢幻。</p>
+<p>但用對地方，它真的很有價值。</p>
+<p>向量記憶最適合處理的是：<strong>我知道以前談過某件事，但我不記得它在哪裡。</strong></p>
+<p>這時候你用關鍵字搜，可能搜不到；但用語意相近的方式去找，就很有機會把相關片段撈出來。</p>
+<p>所以我把它定位成：</p>
+<ul>
+<li>不是主記憶</li>
+<li>不是唯一真相來源</li>
+<li>而是<strong>快速召回相關知識的輔助層</strong></li>
+</ul>
+<p>換句話說，daily memory 負責留原始脈絡，topic&#x2F;index 負責留結構化知識，vector memory 負責「想不起來時幫你撈」。</p>
+<h3 id="三層怎麼配合運作"><a href="#三層怎麼配合運作" class="headerlink" title="三層怎麼配合運作"></a>三層怎麼配合運作</h3><p>我後來把整體流程整理成這樣：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[日常對話 / 工具執行] --> B[寫入 Daily Memory]
+    B --> C[定期整理]
+    C --> D[提煉成 Topic / Project 檔]
+    C --> E[重要片段寫入 Vector Memory]
+    F[新任務 / 新對話] --> G[先讀必要檔案]
+    G --> H[需要近期脈絡時讀 Daily Memory]
+    G --> I[需要長期背景時讀 Topic / Project]
+    G --> J[找不到時做 Semantic Search]
+    H --> K[形成回應或決策]
+    I --> K
+    J --> K
+          </pre>
+
+<p>這個架構有幾個我很在意的特性。</p>
+<p><strong>第一，責任分層。</strong><br>不同類型的記憶放在不同地方，不會互相污染。</p>
+<p><strong>第二，可退化。</strong><br>就算向量層暫時壞掉，至少還有 daily memory 跟 topic files。系統不會整個失憶。</p>
+<p><strong>第三，人也看得懂。</strong><br>我很討厭一種系統：資料全都在某個很聰明但不可讀的黑盒子裡。哪天出事，你連它記了什麼都不知道。檔案型記憶雖然土，但人能直接打開看，這點非常重要。</p>
+<h3 id="真正有用的不是「記住」，而是「整理」"><a href="#真正有用的不是「記住」，而是「整理」" class="headerlink" title="真正有用的不是「記住」，而是「整理」"></a>真正有用的不是「記住」，而是「整理」</h3><p>做到後來，我最大的感想其實不是記憶系統本身，而是：<strong>記住很多事，不代表真的有知識。整理過，才有。</strong></p>
+<p>如果只是把每段對話都存起來，那叫歸檔，不叫記憶。</p>
+<p>真正讓系統變強的，是把踩坑整理成原則、把例外整理成規則、把零碎偏好整理成穩定習慣。這件事其實很像人寫筆記——不是抄一遍，而是重組一遍。</p>
+<p>這也是為什麼我現在很重視 memory cleanup 這類流程。因為 AI 不是只需要更多資料，它需要<strong>更乾淨、層次更清楚、能在對的時候被撈出來的資料。</strong></p>
+<h3 id="這套設計的限制"><a href="#這套設計的限制" class="headerlink" title="這套設計的限制"></a>這套設計的限制</h3><p>當然，這套東西也不是萬靈丹。</p>
+<p>最麻煩的地方在於：<strong>維護成本。</strong></p>
+<p>daily memory 要寫、topic files 要整理、向量記憶要控制品質。你如果沒有整理機制，最後只是從「AI 會失憶」變成「AI 記了一堆垃圾」。</p>
+<p>另一個問題是：<strong>召回不一定準。</strong></p>
+<p>向量搜尋很方便，但也可能撈到半相關的東西。如果沒有再經過人或更上層的規則過濾，AI 可能會一本正經地引用一段其實只沾到邊的舊資訊。</p>
+<p>所以我現在的態度很務實：</p>
+<ul>
+<li>檔案記憶當主幹</li>
+<li>語意檢索當輔助</li>
+<li>重要決策還是要有顯式規則</li>
+</ul>
+<h3 id="最後"><a href="#最後" class="headerlink" title="最後"></a>最後</h3><p>如果你也在做 AI 助手、agent workflow，或者任何需要長期互動的系統，我真的很建議你早一點面對「記憶」這件事。</p>
+<p>不要等到系統已經很大、對話已經很多、使用者開始抱怨「你怎麼又忘了」的時候，才回頭補這一塊。那時候通常會補得很痛苦。</p>
+<p>我目前的結論很簡單：</p>
+<p><strong>AI 要像助理，不只要會說話，還要有記性。</strong></p>
+<p>而這個記性，不是模型天生給你的，是你要自己替它設計出來的。</p>
+<p>如果這篇剛好也讓你開始想重做自己的 memory layer，那這篇就值回票價了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88/" rel="tag"># 系統設計</a>
+              <a href="/tags/memory/" rel="tag"># memory</a>
+              <a href="/tags/workflow/" rel="tag"># workflow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026040501/" rel="prev" title="讓 AI 助手秒回：如何優化 Session 啟動流程">
+      <i class="fa fa-chevron-left"></i> 讓 AI 助手秒回：如何優化 Session 啟動流程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026040601/" rel="next" title="當 AI 排程系統撞上配額與 Rate Limit，我怎麼把它改得沒那麼脆弱">
+      當 AI 排程系統撞上配額與 Rate Limit，我怎麼把它改得沒那麼脆弱 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E5%96%AE%E9%9D%A0-context-window-%E4%B8%8D%E5%A4%A0"><span class="nav-number">1.</span> <span class="nav-text">為什麼單靠 context window 不夠</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%A4%EF%BC%9ADaily-Memory"><span class="nav-number">2.</span> <span class="nav-text">第一層：Daily Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%A4%EF%BC%9AMEMORY-md-%E7%B4%A2%E5%BC%95"><span class="nav-number">3.</span> <span class="nav-text">第二層：MEMORY.md 索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%A4%EF%BC%9AVector-Memory"><span class="nav-number">4.</span> <span class="nav-text">第三層：Vector Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E5%B1%A4%E6%80%8E%E9%BA%BC%E9%85%8D%E5%90%88%E9%81%8B%E4%BD%9C"><span class="nav-number">5.</span> <span class="nav-text">三層怎麼配合運作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E6%9C%89%E7%94%A8%E7%9A%84%E4%B8%8D%E6%98%AF%E3%80%8C%E8%A8%98%E4%BD%8F%E3%80%8D%EF%BC%8C%E8%80%8C%E6%98%AF%E3%80%8C%E6%95%B4%E7%90%86%E3%80%8D"><span class="nav-number">6.</span> <span class="nav-text">真正有用的不是「記住」，而是「整理」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%99%E5%A5%97%E8%A8%AD%E8%A8%88%E7%9A%84%E9%99%90%E5%88%B6"><span class="nav-number">7.</span> <span class="nav-text">這套設計的限制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%BE%8C"><span class="nav-number">8.</span> <span class="nav-text">最後</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

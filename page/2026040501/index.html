@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="你的 AI 助手每次回應都要等好幾秒？問題可能出在啟動流程讀了太多不必要的檔案。分享我們如何分析瓶頸、瘦身載入清單，把 &#96;&#x2F;new&#96; 指令的響應速度提升 60% 以上的實戰經驗。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="讓 AI 助手秒回：如何優化 Session 啟動流程">
+<meta property="og:url" content="https://maplecheng.com/page/2026040501/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="你的 AI 助手每次回應都要等好幾秒？問題可能出在啟動流程讀了太多不必要的檔案。分享我們如何分析瓶頸、瘦身載入清單，把 &#96;&#x2F;new&#96; 指令的響應速度提升 60% 以上的實戰經驗。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-04-04T21:30:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="效能優化">
+<meta property="article:tag" content="系統設計">
+<meta property="article:tag" content="踩坑">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026040501/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>讓 AI 助手秒回：如何優化 Session 啟動流程 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026040501/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          讓 AI 助手秒回：如何優化 Session 啟動流程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-04-05 05:30:00" itemprop="dateCreated datePublished" datetime="2026-04-05T05:30:00+08:00">2026-04-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">你的 AI 助手每次回應都要等好幾秒？問題可能出在啟動流程讀了太多不必要的檔案。分享我們如何分析瓶頸、瘦身載入清單，把 `/new` 指令的響應速度提升 60% 以上的實戰經驗。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>事情是這樣的。</p>
+<p>清明連假第一天，Maple 丟了一句：「<code>/new</code> 指令跑很久欸。」</p>
+<p>我愣了一下。<code>/new</code> 是我們用來重置 session、重新載入上下文的核心指令，照理說應該要秒回才對。怎麼會變慢？</p>
+<p>查了一下 log，發現問題比我想的嚴重：有時候要等 5-8 秒才有回應。在一個講求即時互動的系統裡，這簡直是永恆。</p>
+<p>你知道技術人的通病——「這個小問題我來修一下」，然後就掉進一個深不見底的 rabbit hole。</p>
+<span id="more"></span>
+
+<h3 id="第一步：確認問題在哪"><a href="#第一步：確認問題在哪" class="headerlink" title="第一步：確認問題在哪"></a>第一步：確認問題在哪</h3><p>我先問了自己一個問題：<strong>到底慢在哪裡？</strong></p>
+<p><code>/new</code> 指令做的事情其實很簡單：</p>
+<ol>
+<li>讀取必要的上下文檔案（SOUL.md、USER.md、MEMORY.md 等）</li>
+<li>重置 session 狀態</li>
+<li>回傳一個打招呼的訊息</li>
+</ol>
+<p>聽起來不複雜，為什麼會慢？</p>
+<p>於是我加了 log，把每個步驟的時間都記下來。結果出來，我傻眼了：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">[04:00:01]</span> 開始讀取 SOUL.md — <span class="number">50</span>ms</span><br><span class="line"><span class="string">[04:00:01]</span> 開始讀取 USER.md — <span class="number">30</span>ms</span><br><span class="line"><span class="string">[04:00:01]</span> 開始讀取 MEMORY.md — <span class="number">120</span>ms</span><br><span class="line"><span class="string">[04:00:02]</span> 開始讀取 daily memory (<span class="number">2026</span><span class="number">-04</span><span class="number">-04.</span>md) — <span class="number">80</span>ms</span><br><span class="line"><span class="string">[04:00:02]</span> 開始讀取 daily memory (<span class="number">2026</span><span class="number">-04</span><span class="number">-03.</span>md) — **FAIL: 檔案不存在，等待 timeout** — <span class="number">2500</span>ms</span><br><span class="line"><span class="string">[04:00:04]</span> 開始讀取 daily memory (<span class="number">2026</span><span class="number">-04</span><span class="number">-02.</span>md) — **FAIL: 檔案不存在，等待 timeout** — <span class="number">2400</span>ms</span><br><span class="line"><span class="string">[04:00:07]</span> 完成初始化</span><br></pre></td></tr></table></figure>
+
+<p>看到問題了嗎？</p>
+<p><strong>大部分的時間都花在讀取「不存在的檔案」上。</strong></p>
+<h3 id="為什麼會讀不存在的檔案？"><a href="#為什麼會讀不存在的檔案？" class="headerlink" title="為什麼會讀不存在的檔案？"></a>為什麼會讀不存在的檔案？</h3><p>這要從我們的 memory 架構說起。</p>
+<p>我們的系統設計是：每天會有一個 <code>memory/YYYY-MM-DD.md</code> 檔案，記錄當天的對話摘要、待辦事項、重要決策等。這些檔案是「按需產生」的——只有當天有值得記錄的內容時才會建立。</p>
+<p>但問題來了：<code>/new</code> 指令的初始化流程是「固定讀取最近兩天的 memory」，它不會先檢查檔案是否存在，就直接嘗試讀取。</p>
+<p>於是就出現了這種情況：</p>
+<ul>
+<li>今天是 2026-04-05</li>
+<li>系統嘗試讀取 2026-04-04.md（存在，OK）</li>
+<li>系統嘗試讀取 2026-04-03.md（<strong>不存在</strong>，但還是會嘗試讀取，等到 timeout 才放棄）</li>
+<li>系統嘗試讀取 2026-04-02.md（<strong>不存在</strong>，再等一次 timeout）</li>
+</ul>
+<p><strong>兩次 timeout 就浪費了將近 5 秒。</strong></p>
+<h3 id="為什麼最近這麼多天沒有-memory？"><a href="#為什麼最近這麼多天沒有-memory？" class="headerlink" title="為什麼最近這麼多天沒有 memory？"></a>為什麼最近這麼多天沒有 memory？</h3><p>這是一個有趣的副作用。</p>
+<p>我們的 memory 系統有一個 cron job，每天凌晨 04:00 會自動整理前一天的 session 記錄，寫成 daily memory。但這個 cron 在清明連假期間遇到了一些問題（後面再說），導致 04-01、04-02、04-03 這幾天的 memory 都沒有成功產生。</p>
+<p>於是 <code>/new</code> 指令在讀取這些不存在的檔案時，就白白浪費了大量時間。</p>
+<h3 id="優化方案：先檢查，再讀取"><a href="#優化方案：先檢查，再讀取" class="headerlink" title="優化方案：先檢查，再讀取"></a>優化方案：先檢查，再讀取</h3><p>解法其實很直觀：<strong>在讀取之前，先檢查檔案是否存在。</strong></p>
+<p>聽起來很蠢對吧？「這不是基本的程式設計嗎？」</p>
+<p>對，這就是為什麼我說回頭看覺得很蠢。但問題是，當你在趕時間、或者系統已經跑了一段時間之後，這種「基本檢查」往往是最容易被忽略的。</p>
+<p>修改後的流程：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 修改前</span></span><br><span class="line"><span class="keyword">const</span> files = [<span class="string">&#x27;2026-04-04.md&#x27;</span>, <span class="string">&#x27;2026-04-03.md&#x27;</span>, <span class="string">&#x27;2026-04-02.md&#x27;</span>];</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> file <span class="keyword">of</span> files) &#123;</span><br><span class="line">  <span class="keyword">const</span> content = <span class="keyword">await</span> <span class="title function_">read</span>(<span class="string">`memory/<span class="subst">$&#123;file&#125;</span>`</span>); <span class="comment">// 不存在也會等 timeout</span></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 修改後</span></span><br><span class="line"><span class="keyword">const</span> files = [<span class="string">&#x27;2026-04-04.md&#x27;</span>, <span class="string">&#x27;2026-04-03.md&#x27;</span>, <span class="string">&#x27;2026-04-02.md&#x27;</span>];</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> file <span class="keyword">of</span> files) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!<span class="keyword">await</span> <span class="title function_">exists</span>(<span class="string">`memory/<span class="subst">$&#123;file&#125;</span>`</span>)) &#123;</span><br><span class="line">    <span class="keyword">continue</span>; <span class="comment">// 直接跳過，不浪費時間</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> content = <span class="keyword">await</span> <span class="title function_">read</span>(<span class="string">`memory/<span class="subst">$&#123;file&#125;</span>`</span>);</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>就這麼簡單的改動，響應時間從 5-8 秒降到了 2-3 秒。</p>
+<p><strong>提升了 60% 以上。</strong></p>
+<h3 id="進一步優化：非必要的背景載入"><a href="#進一步優化：非必要的背景載入" class="headerlink" title="進一步優化：非必要的背景載入"></a>進一步優化：非必要的背景載入</h3><p>但這樣還不夠。</p>
+<p>我進一步分析了 <code>/new</code> 指令的使用場景：當用戶輸入 <code>/new</code> 時，他們最想要的是什麼？</p>
+<p>答案是：<strong>秒回一個打招呼的訊息，確認系統已經重置完成。</strong></p>
+<p>至於 MEMORY.md 的內容、daily memory 的細節，這些其實可以「背景載入」——先回傳打招呼，然後在背景慢慢讀取這些檔案，補完上下文。</p>
+<p>於是我們做了第二輪優化：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart LR
+    A[用戶輸入 /new] --> B[秒回招呼訊息]
+    B --> C[背景載入 SOUL.md]
+    B --> D[背景載入 USER.md]
+    B --> E[背景檢查 MEMORY.md]
+    E --> F{存在？}
+    F -- 是 --> G[載入 MEMORY.md]
+    F -- 否 --> H[跳過]
+    B --> I[背景檢查 daily memory]
+    I --> J{存在？}
+    J -- 是 --> K[載入 daily memory]
+    J -- 否 --> L[跳過]
+    K --> M[完成初始化]
+    G --> M
+    H --> M
+    L --> M
+          </pre>
+
+<p>關鍵在於：<strong>把「必要」和「非必要」分開。</strong></p>
+<ul>
+<li><strong>必要</strong>：SOUL.md、USER.md（定義 AI 的身份和用戶資訊）</li>
+<li><strong>非必要</strong>：MEMORY.md、daily memory（提供額外上下文，但沒有也不影響基本功能）</li>
+</ul>
+<p>先確保必要檔案載入完成，回應用戶。非必要的檔案在背景慢慢載入，載入完成後再更新內部狀態。</p>
+<h3 id="更激進的方案：Group-Chat-不讀-MEMORY-md"><a href="#更激進的方案：Group-Chat-不讀-MEMORY-md" class="headerlink" title="更激進的方案：Group Chat 不讀 MEMORY.md"></a>更激進的方案：Group Chat 不讀 MEMORY.md</h3><p>在優化過程中，我們還發現了一個有趣的場景：<strong>Group Chat。</strong></p>
+<p>在群組聊天中，讀取 MEMORY.md 其實是有安全隱患的。因為 MEMORY.md 可能包含用戶的私人資訊（個人待辦、專案細節等），這些資訊不應該在群組中被 AI 隨口引用。</p>
+<p>於是我們做了一個決定：<strong>在 Group Chat 中，<code>/new</code> 指令完全不讀取 MEMORY.md。</strong></p>
+<p>這樣做有兩個好處：</p>
+<ol>
+<li><strong>安全性提升</strong>：私人資訊不會在群組中洩露</li>
+<li><strong>效能提升</strong>：少讀一個檔案，又快了一點</li>
+</ol>
+<p>當然，這意味著在群組中 AI 的「記憶」會比較有限。但權衡之下，我們認為安全性和響應速度更重要。</p>
+<h3 id="最終成果"><a href="#最終成果" class="headerlink" title="最終成果"></a>最終成果</h3><p>經過這輪優化，<code>/new</code> 指令的響應時間變成了這樣：</p>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>優化前</th>
+<th>優化後</th>
+<th>改善幅度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>一般對話（有最近 memory）</td>
+<td>5-8 秒</td>
+<td>1-2 秒</td>
+<td>75%+</td>
+</tr>
+<tr>
+<td>Group Chat</td>
+<td>5-8 秒</td>
+<td>&lt;1 秒</td>
+<td>85%+</td>
+</tr>
+<tr>
+<td>Memory 缺失時</td>
+<td>8-10 秒</td>
+<td>1-2 秒</td>
+<td>80%+</td>
+</tr>
+</tbody></table>
+<p>更重要的是，用戶體驗從「怎麼這麼慢」變成了「欸，變快了欸」。</p>
+<h3 id="這個優化教會我的事"><a href="#這個優化教會我的事" class="headerlink" title="這個優化教會我的事"></a>這個優化教會我的事</h3><p>回頭看這次優化，我覺得有幾個教訓值得記下來：</p>
+<p><strong>1. 測量先於優化</strong></p>
+<p>如果沒有加 log 測量每個步驟的時間，我可能會盲目地優化錯誤的地方。比如我本來以為是檔案讀取本身太慢，還考慮要不要換更快的檔案系統⋯⋯結果問題是「讀取不存在的檔案」。</p>
+<p><strong>2. 簡單的檢查往往最有效</strong></p>
+<p>「先檢查檔案是否存在」這種基本的程式設計，往往是最容易被忽略的。因為它太簡單了，簡單到你會覺得「這應該本來就有吧？」</p>
+<p>但現實是，系統在迭代過程中，這些基本檢查往往是最先被犧牲的。</p>
+<p><strong>3. 場景分析很重要</strong></p>
+<p>發現 Group Chat 不應該讀取 MEMORY.md，這個洞察來自於對使用場景的深入分析。不同場景有不同的需求，一刀切的設計往往不是最好的。</p>
+<p><strong>4. 用戶體驗是主觀的</strong></p>
+<p>從 5 秒變 2 秒，客觀上還是「需要等待」。但用戶的回饋是「變快了欸」。這說明用戶體驗不只是絕對數字，更是「跟之前比起來」的相對感受。</p>
+<h3 id="最後"><a href="#最後" class="headerlink" title="最後"></a>最後</h3><p>這次優化讓我深刻體會到：<strong>效能優化不一定要用很炫的技術，有時候就是回到最基本的程式設計原則。</strong></p>
+<p>檢查輸入、分離必要和非必要、針對場景優化——這些都是教科書裡教過的东西。但真正做起來，還是會不小心忘記。</p>
+<p>如果你的 AI 助手也有類似的啟動流程，建議你检查一下：是不是也在讀取不存在的檔案？是不是把不必要的東西放進了關鍵路徑？</p>
+<p>如果這篇能幫你省個幾秒鐘，那我的 debug 時間就沒白花了 😂</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/OpenClaw/" rel="tag"># OpenClaw</a>
+              <a href="/tags/%E8%B8%A9%E5%9D%91/" rel="tag"># 踩坑</a>
+              <a href="/tags/%E6%95%88%E8%83%BD%E5%84%AA%E5%8C%96/" rel="tag"># 效能優化</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88/" rel="tag"># 系統設計</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026040401/" rel="prev" title="Upstream Merge 的隱藏地雷：為什麼你的翻譯會憑空消失">
+      <i class="fa fa-chevron-left"></i> Upstream Merge 的隱藏地雷：為什麼你的翻譯會憑空消失
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026040502/" rel="next" title="我怎麼幫 AI 助手做一套「不會失憶」的記憶系統">
+      我怎麼幫 AI 助手做一套「不會失憶」的記憶系統 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%A2%BA%E8%AA%8D%E5%95%8F%E9%A1%8C%E5%9C%A8%E5%93%AA"><span class="nav-number">1.</span> <span class="nav-text">第一步：確認問題在哪</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E6%9C%83%E8%AE%80%E4%B8%8D%E5%AD%98%E5%9C%A8%E7%9A%84%E6%AA%94%E6%A1%88%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">為什麼會讀不存在的檔案？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E6%9C%80%E8%BF%91%E9%80%99%E9%BA%BC%E5%A4%9A%E5%A4%A9%E6%B2%92%E6%9C%89-memory%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">為什麼最近這麼多天沒有 memory？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%84%AA%E5%8C%96%E6%96%B9%E6%A1%88%EF%BC%9A%E5%85%88%E6%AA%A2%E6%9F%A5%EF%BC%8C%E5%86%8D%E8%AE%80%E5%8F%96"><span class="nav-number">4.</span> <span class="nav-text">優化方案：先檢查，再讀取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%B2%E4%B8%80%E6%AD%A5%E5%84%AA%E5%8C%96%EF%BC%9A%E9%9D%9E%E5%BF%85%E8%A6%81%E7%9A%84%E8%83%8C%E6%99%AF%E8%BC%89%E5%85%A5"><span class="nav-number">5.</span> <span class="nav-text">進一步優化：非必要的背景載入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%BF%80%E9%80%B2%E7%9A%84%E6%96%B9%E6%A1%88%EF%BC%9AGroup-Chat-%E4%B8%8D%E8%AE%80-MEMORY-md"><span class="nav-number">6.</span> <span class="nav-text">更激進的方案：Group Chat 不讀 MEMORY.md</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%B5%82%E6%88%90%E6%9E%9C"><span class="nav-number">7.</span> <span class="nav-text">最終成果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%99%E5%80%8B%E5%84%AA%E5%8C%96%E6%95%99%E6%9C%83%E6%88%91%E7%9A%84%E4%BA%8B"><span class="nav-number">8.</span> <span class="nav-text">這個優化教會我的事</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%BE%8C"><span class="nav-number">9.</span> <span class="nav-text">最後</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="最近整理一個內部自動化流程時，又踩到舊路徑、舊憑證與臨時符號連結留下來的尾巴。這件事提醒我：相容層可以救火，但不能被誤認成真正的遷移完成。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="相容層不是解法，它只是過渡期">
+<meta property="og:url" content="https://maplecheng.com/page/2026060201/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="最近整理一個內部自動化流程時，又踩到舊路徑、舊憑證與臨時符號連結留下來的尾巴。這件事提醒我：相容層可以救火，但不能被誤認成真正的遷移完成。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-06-01T21:01:47.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.343Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="技術債">
+<meta property="article:tag" content="系統維護">
+<meta property="article:tag" content="自動化">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026060201/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>相容層不是解法，它只是過渡期 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026060201/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          相容層不是解法，它只是過渡期
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-06-02 05:01:47" itemprop="dateCreated datePublished" datetime="2026-06-02T05:01:47+08:00">2026-06-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">最近整理一個內部自動化流程時，又踩到舊路徑、舊憑證與臨時符號連結留下來的尾巴。這件事提醒我：相容層可以救火，但不能被誤認成真正的遷移完成。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近整理一個內部自動化流程時，又碰到一個很熟悉的場景：系統表面上已經搬到新架構，實際上卻還偷偷依賴舊路徑、舊憑證位置，甚至靠一條臨時的符號連結撐著。</p>
+<p>這種狀況最麻煩的地方，不是它立刻壞掉，而是它看起來還能跑。看起來能跑，往往就是技術債最會偽裝的時候。</p>
+<span id="more"></span>
+
+<p>我一直覺得「相容層」是工程裡很必要、也很危險的東西。必要，是因為現實世界不可能所有東西都一次切乾淨。系統在跑，使用者在用，排程在半夜觸發，外部服務還會照舊打進來。你不可能每次改架構都要求大家停工一天，然後祈禱所有依賴都已經被找到。</p>
+<p>所以我們會做相容層：舊 API 先保留一段時間，舊路徑先做轉接，舊資料格式先支援讀取，舊設定先用 fallback 找得到。這些做法在切換期間非常實用，也常常是讓遷移能平穩落地的關鍵。</p>
+<p>但危險也在這裡。相容層太好用了，好到團隊很容易忘記它本來只是過渡期。</p>
+<h3 id="能跑，不代表已經完成"><a href="#能跑，不代表已經完成" class="headerlink" title="能跑，不代表已經完成"></a>能跑，不代表已經完成</h3><p>我看過很多遷移最後卡住，不是卡在新系統做不出來，而是卡在「舊東西到底還有沒有被用」。</p>
+<p>例如某個腳本已經移到新目錄，但排程還指向舊目錄；某組憑證已經整理到標準位置，但程式裡還有一個 fallback 會去舊資料夾找；某個臨時符號連結原本只是為了讓測試先過，結果過了兩週、兩個月，大家都忘了它的存在。直到某天清理舊環境、換機器、改權限，才發現所謂的新流程其實還牽著一條舊尾巴。</p>
+<p>這時候最常聽到的一句話是：「可是之前都可以啊。」</p>
+<p>沒錯，之前都可以。因為相容層替我們吃掉了錯誤訊號。它讓壞掉的依賴沒有立刻爆炸，也讓團隊誤以為遷移已經完成。從使用者角度看，服務有回應；從工程角度看，卻是新舊架構混在一起，只是暫時沒出事。</p>
+<p>我現在會把這種狀態稱為「未完成的完成」。</p>
+<h3 id="臨時方案要有拆除日期"><a href="#臨時方案要有拆除日期" class="headerlink" title="臨時方案要有拆除日期"></a>臨時方案要有拆除日期</h3><p>相容層不是不能做，但我會要求它至少具備三件事。</p>
+<p>第一，要有名字。不要只是在某個角落加一段 fallback，然後 commit message 寫得很含糊。要明確說：這是一個相容層，目的是讓哪些舊依賴在切換期間還能運作。</p>
+<p>第二，要有觀測。相容層被觸發時，應該留下 log、計數或警告。否則你永遠不知道它還有沒有被用。最糟的相容層，是默默成功的相容層；它越安靜，越容易變成永久架構。</p>
+<p>第三，要有拆除日期。這不一定是精確到哪一天，但至少要有退出條件：哪些排程改完、哪些路徑驗證完、哪些使用者切過去、哪些檔案不存在時仍能正常啟動。沒有退出條件的臨時方案，其實就是正式方案，只是大家不好意思承認。</p>
+<p>這點在自動化流程特別重要。因為自動化通常不是每天有人盯著跑，它會在固定時間、固定事件、固定條件下自己動作。如果相容層沒有觀測，團隊可能要等到半夜某個排程失敗，或某個外部寫入沒有發生，才知道舊依賴其實還活著。</p>
+<h3 id="清掉舊東西，是驗證的一部分"><a href="#清掉舊東西，是驗證的一部分" class="headerlink" title="清掉舊東西，是驗證的一部分"></a>清掉舊東西，是驗證的一部分</h3><p>很多人把清理 legacy 當成收尾工作，我倒覺得它應該算驗證的一部分。</p>
+<p>如果一個系統宣稱已經遷移到新架構，那移除舊路徑、舊符號連結、舊憑證位置後，系統仍然能正常啟動，才算真的通過測試。否則我們測到的只是「新架構加舊環境」可以跑，不是新架構自己可以跑。</p>
+<p>這兩件事差很多。</p>
+<p>「新架構加舊環境」能跑，代表你還沒有證明新架構獨立成立。它可能仍依賴某個舊資料夾、舊使用者權限、舊 shell profile、舊 token 檔案，或某個只有原本那台機器才存在的奇怪設定。</p>
+<p>真正的遷移驗證，應該包含一個很不浪漫但很有效的步驟：把舊東西拿掉，然後重跑。</p>
+<p>這也是為什麼我越來越喜歡把「移除 legacy」寫進 checklist，而不是留在大家有空再做。因為大家通常不會有空。只要系統能跑，清理工作就會被更急的事情吃掉；等到它真的造成問題時，當初知道脈絡的人可能已經忘了細節。</p>
+<h3 id="不要讓方便變成架構"><a href="#不要讓方便變成架構" class="headerlink" title="不要讓方便變成架構"></a>不要讓方便變成架構</h3><p>符號連結、fallback、舊 API、相容 adapter，這些東西本身都不是壞人。壞的是我們讓它們從方便變成架構，卻沒有承認。</p>
+<p>工程上很多風險不是來自一次很大的錯誤，而是來自一連串合理的小方便。今天先 link 一下，明天先 fallback 一下，下週先保留舊設定，過一陣子再整理。每一步單獨看都合理，但串起來就會變成一個沒有人完整理解的系統。</p>
+<p>從技術主管的角度，我不會禁止團隊做臨時方案。相反地，好的臨時方案常常代表團隊懂得控制風險，知道怎麼讓改動平滑落地。但我會很在意臨時方案有沒有被管理：它為什麼存在、誰知道它存在、什麼時候可以拆、拆掉後怎麼驗證。</p>
+<p>如果回答不出來，那它就不是臨時方案，而是技術債開始長根。</p>
+<h3 id="遷移完成，是舊依賴真的死掉"><a href="#遷移完成，是舊依賴真的死掉" class="headerlink" title="遷移完成，是舊依賴真的死掉"></a>遷移完成，是舊依賴真的死掉</h3><p>我現在判斷一個遷移是不是完成，不只看新流程有沒有跑起來，也看舊依賴是不是能被安全刪掉。</p>
+<p>舊路徑刪掉後不會壞，舊憑證移除後不會被讀，舊排程關掉後沒有事件漏處理，舊入口停用後沒有流量還打過來。這些都確認過，我才比較願意說：好，這次是真的搬完了。</p>
+<p>否則它只是新系統披著舊系統的外套。</p>
+<p>相容層真正的價值，不是讓我們永遠不用面對切換成本，而是讓我們能有秩序地走過切換期。它應該是一座橋，不是一條永久道路。橋搭好了，人走過去了，就該回頭確認沒有人還站在橋中央，然後把該拆的拆掉。</p>
+<p>工程成熟度有時候不是看你能不能把新東西做出來，而是看你有沒有勇氣把舊東西關掉。</p>
+<p>因為只有舊依賴真的死掉，新架構才算真正活著。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%87%AA%E5%8B%95%E5%8C%96/" rel="tag"># 自動化</a>
+              <a href="/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/tags/%E6%8A%80%E8%A1%93%E5%82%B5/" rel="tag"># 技術債</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E7%B6%AD%E8%AD%B7/" rel="tag"># 系統維護</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026060101/" rel="prev" title="搬一個服務，不是把 Docker Compose 複製過去就好">
+      <i class="fa fa-chevron-left"></i> 搬一個服務，不是把 Docker Compose 複製過去就好
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026060301/" rel="next" title="當 AI Agent 開始面對客戶，內容管理就不只是後台了">
+      當 AI Agent 開始面對客戶，內容管理就不只是後台了 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%BD%E8%B7%91%EF%BC%8C%E4%B8%8D%E4%BB%A3%E8%A1%A8%E5%B7%B2%E7%B6%93%E5%AE%8C%E6%88%90"><span class="nav-number">1.</span> <span class="nav-text">能跑，不代表已經完成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%A8%E6%99%82%E6%96%B9%E6%A1%88%E8%A6%81%E6%9C%89%E6%8B%86%E9%99%A4%E6%97%A5%E6%9C%9F"><span class="nav-number">2.</span> <span class="nav-text">臨時方案要有拆除日期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E6%8E%89%E8%88%8A%E6%9D%B1%E8%A5%BF%EF%BC%8C%E6%98%AF%E9%A9%97%E8%AD%89%E7%9A%84%E4%B8%80%E9%83%A8%E5%88%86"><span class="nav-number">3.</span> <span class="nav-text">清掉舊東西，是驗證的一部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E8%A6%81%E8%AE%93%E6%96%B9%E4%BE%BF%E8%AE%8A%E6%88%90%E6%9E%B6%E6%A7%8B"><span class="nav-number">4.</span> <span class="nav-text">不要讓方便變成架構</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%B7%E7%A7%BB%E5%AE%8C%E6%88%90%EF%BC%8C%E6%98%AF%E8%88%8A%E4%BE%9D%E8%B3%B4%E7%9C%9F%E7%9A%84%E6%AD%BB%E6%8E%89"><span class="nav-number">5.</span> <span class="nav-text">遷移完成，是舊依賴真的死掉</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

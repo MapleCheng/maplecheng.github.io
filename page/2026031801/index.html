@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="昨天花了一整天跟 Git submodule 搏鬥，只因為一個看似無害的 .claude 目錄。這篇文章記錄整個踩坑過程、錯誤做法，以及最終的正確解法。如果你也在 track 不該 track 的東西，這篇能幫你省掉幾小時的頭髮。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git Submodule 踩坑血淚史：當 .claude 目錄開始鬧彆扭">
+<meta property="og:url" content="https://maplecheng.com/page/2026031801/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="昨天花了一整天跟 Git submodule 搏鬥，只因為一個看似無害的 .claude 目錄。這篇文章記錄整個踩坑過程、錯誤做法，以及最終的正確解法。如果你也在 track 不該 track 的東西，這篇能幫你省掉幾小時的頭髮。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-03-18T01:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.341Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="git">
+<meta property="article:tag" content="submodule">
+<meta property="article:tag" content="踩坑經驗">
+<meta property="article:tag" content="開發流程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026031801/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Git Submodule 踩坑血淚史：當 .claude 目錄開始鬧彆扭 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026031801/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Git Submodule 踩坑血淚史：當 .claude 目錄開始鬧彆扭
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-03-18 09:00:00" itemprop="dateCreated datePublished" datetime="2026-03-18T09:00:00+08:00">2026-03-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">昨天花了一整天跟 Git submodule 搏鬥，只因為一個看似無害的 .claude 目錄。這篇文章記錄整個踩坑過程、錯誤做法，以及最終的正確解法。如果你也在 track 不該 track 的東西，這篇能幫你省掉幾小時的頭髮。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>事情是這樣的。昨天我花了一整天跟 Git submodule 搏鬥，只因為一個看似無害的 <code>.claude</code> 目錄。</p>
+<p>聽起來很簡單對吧？不就是個目錄嘛，刪掉就好。結果一動就炸了，整個 merge 過程讓我懷疑人生。</p>
+<p>這篇文章記錄整個踩坑過程、錯誤做法，以及最終的正確解法。如果你也在 track 不該 track 的東西，這篇能幫你省掉幾小時的頭髮。</p>
+<span id="more"></span>
+
+<h2 id="問題起源"><a href="#問題起源" class="headerlink" title="問題起源"></a>問題起源</h2><p>我們有個專案 <code>BcTVIC</code>，upstream 是 <code>BcStack</code>。Upstream 把 <code>.claude/</code> 設成 submodule，這本身沒問題——問題出在我們專案<strong>根本不應該 track 這個 submodule</strong>。</p>
+<p>某天我突然發現，<code>.claude/</code> 目錄開始出現在 git status 裡，而且每次 pull upstream 都會冒出奇怪的衝突。更慘的是，git log 裡开始出现 160000 模式的 commit entries（這是 Git 表示 submodule 的方式）。</p>
+<p>這時候我犯了第一個錯誤：<strong>直接刪掉 <code>.gitmodules</code> 裡的 <code>.claude</code> sections</strong>。</p>
+<h2 id="錯誤做法示範"><a href="#錯誤做法示範" class="headerlink" title="錯誤做法示範"></a>錯誤做法示範</h2><p>我當時心想：「好啦，既然我們不需要這個 submodule，那就徹底刪乾淨嘛。」於是我很乾脆地：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ❌ 錯誤做法</span></span><br><span class="line"><span class="comment"># 編輯 .gitmodules，把 [.claude] 整個 section 刪掉</span></span><br><span class="line"><span class="comment"># 然後 commit</span></span><br><span class="line">git add .gitmodules</span><br><span class="line">git commit -m <span class="string">&quot;remove .claude submodule&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>結果災難就開始了。</p>
+<p>每次 merge upstream 的時候，Git 都會說：「嘿，你這邊刪了 .gitmodules 的 section，但 upstream 還有欸。」然後就是無止盡的衝突。更糟的是，index 裡還卡著 160000 模式的 submodule entries，怎麼刪都刪不掉。</p>
+<p>我試過各種方法：</p>
+<ul>
+<li><code>git rm .claude</code> → 沒用</li>
+<li><code>git submodule deinit .claude</code> → 還是卡著</li>
+<li>手動編輯 index → 越弄越亂</li>
+</ul>
+<p>整個 debug 過程讓我深刻體會到：<strong>Git 的 submodule 機制，真的不是給普通人設計的。</strong></p>
+<h2 id="正確解法"><a href="#正確解法" class="headerlink" title="正確解法"></a>正確解法</h2><p>折腾了一整天，最後終於找到正確的做法。關鍵在於理解兩件事：</p>
+<ol>
+<li><strong><code>.gitmodules</code> 是定義 submodule 來源的</strong>，本地 <code>git submodule init</code> 需要它</li>
+<li><strong>我們只是不要 track <code>.claude/</code> 的內容</strong>，不是要否定 upstream 的設定</li>
+</ol>
+<p>正確步驟如下：</p>
+<h3 id="步驟-1：從-index-移除-claude，但保留檔案"><a href="#步驟-1：從-index-移除-claude，但保留檔案" class="headerlink" title="步驟 1：從 index 移除 .claude，但保留檔案"></a>步驟 1：從 index 移除 .claude，但保留檔案</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ✅ 正確做法</span></span><br><span class="line">git <span class="built_in">rm</span> -r --cached .claude/</span><br></pre></td></tr></table></figure>
+
+<p>這個命令只會從 Git index 移除 <code>.claude/</code> 的追蹤，<strong>不會刪除本地檔案</strong>。<code>--cached</code> 是關鍵。</p>
+<h3 id="步驟-2：確保-gitignore-有設"><a href="#步驟-2：確保-gitignore-有設" class="headerlink" title="步驟 2：確保 .gitignore 有設"></a>步驟 2：確保 .gitignore 有設</h3><p>檢查 <code>.gitignore</code> 是否有：</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">.claude/</span></span><br></pre></td></tr></table></figure>
+
+<p>如果沒有，加進去。這樣未來就不會再不小心 add 到。</p>
+<h3 id="步驟-3：保留-gitmodules"><a href="#步驟-3：保留-gitmodules" class="headerlink" title="步驟 3：保留 .gitmodules"></a>步驟 3：保留 .gitmodules</h3><p><strong>千萬不要刪掉 <code>.gitmodules</code> 裡的 <code>.claude</code> sections</strong>。讓它留著，因為：</p>
+<ul>
+<li>Upstream 還是用這個設定</li>
+<li>未來 merge 的時候不會產生不必要的衝突</li>
+<li>萬一哪天需要 submodule，設定還在</li>
+</ul>
+<h3 id="步驟-4：Commit"><a href="#步驟-4：Commit" class="headerlink" title="步驟 4：Commit"></a>步驟 4：Commit</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git add .gitignore</span><br><span class="line">git commit -m <span class="string">&quot;chore: remove .claude from tracking (keep .gitmodules)&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Merge-衝突處理原則"><a href="#Merge-衝突處理原則" class="headerlink" title="Merge 衝突處理原則"></a>Merge 衝突處理原則</h2><p>處理完上面的步驟後，未來 merge upstream 時還是可能遇到衝突。我們的原則是：</p>
+<ul>
+<li><strong><code>.claude/</code> 相關的 modify&#x2F;delete 衝突</strong> → accept deletion（main 已移除）</li>
+<li><strong><code>docs/</code> 目錄衝突</strong> → keep feature branch</li>
+<li><strong>DataModels（如 <code>Pda*.cs</code>）add&#x2F;add 衝突</strong> → use main</li>
+</ul>
+<p>這個原則幫助我們在保持 upstream 同步的同時，不會被 submodule 問題拖垮。</p>
+<h2 id="最終狀態"><a href="#最終狀態" class="headerlink" title="最終狀態"></a>最終狀態</h2><p>折騰一整天後，我們達到這個狀態：</p>
+<ul>
+<li><strong>main branch</strong>: <code>8c3b24f</code> — 移除 .claude submodule tracking（<code>.gitmodules</code> 保留，只移除 index 裡的 160000 commit entries）</li>
+<li><strong>feature&#x2F;pda-module</strong>: <code>ed9c791</code> — merge main into feature&#x2F;pda-module，build 通過</li>
+</ul>
+<p>整個團隊終於可以正常開發，不用再跟 submodule 搏鬥。</p>
+<h2 id="教訓總結"><a href="#教訓總結" class="headerlink" title="教訓總結"></a>教訓總結</h2><p>這次踩坑學到的幾件事：</p>
+<ol>
+<li>**不要刪 <code>.gitmodules</code>**，除非你確定永遠不需要那個 submodule</li>
+<li><strong>用 <code>git rm --cached</code></strong> 來停止追蹤檔案，而不是直接刪檔案或改設定</li>
+<li><strong>理解 Git index 和 working tree 的區別</strong>，這是很多 Git 問題的根源</li>
+<li><strong>當 submodule 開始出問題，先查 <code>git ls-files --stage</code></strong> 看 index 裡的 160000 entries</li>
+</ol>
+<p>最後，如果這篇文章能幫你避開同樣的坑，那我的血淚就沒白流了。😂</p>
+<p>Git 很強大，但 submodule 真的是……嗯，用過的人都懂。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/git/" rel="tag"># git</a>
+              <a href="/tags/%E8%B8%A9%E5%9D%91%E7%B6%93%E9%A9%97/" rel="tag"># 踩坑經驗</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E6%B5%81%E7%A8%8B/" rel="tag"># 開發流程</a>
+              <a href="/tags/submodule/" rel="tag"># submodule</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026031501/" rel="prev" title="當你的 AI 助理需要一個團隊：多 Agent 協作架構的設計思路">
+      <i class="fa fa-chevron-left"></i> 當你的 AI 助理需要一個團隊：多 Agent 協作架構的設計思路
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026031802/" rel="next" title="用 Python 自動產出 Notion 工時報表：告別手動複製貼上">
+      用 Python 自動產出 Notion 工時報表：告別手動複製貼上 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%95%8F%E9%A1%8C%E8%B5%B7%E6%BA%90"><span class="nav-number">1.</span> <span class="nav-text">問題起源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%8C%AF%E8%AA%A4%E5%81%9A%E6%B3%95%E7%A4%BA%E7%AF%84"><span class="nav-number">2.</span> <span class="nav-text">錯誤做法示範</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E7%A2%BA%E8%A7%A3%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">正確解法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%A9%9F-1%EF%BC%9A%E5%BE%9E-index-%E7%A7%BB%E9%99%A4-claude%EF%BC%8C%E4%BD%86%E4%BF%9D%E7%95%99%E6%AA%94%E6%A1%88"><span class="nav-number">3.1.</span> <span class="nav-text">步驟 1：從 index 移除 .claude，但保留檔案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%A9%9F-2%EF%BC%9A%E7%A2%BA%E4%BF%9D-gitignore-%E6%9C%89%E8%A8%AD"><span class="nav-number">3.2.</span> <span class="nav-text">步驟 2：確保 .gitignore 有設</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%A9%9F-3%EF%BC%9A%E4%BF%9D%E7%95%99-gitmodules"><span class="nav-number">3.3.</span> <span class="nav-text">步驟 3：保留 .gitmodules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%A9%9F-4%EF%BC%9ACommit"><span class="nav-number">3.4.</span> <span class="nav-text">步驟 4：Commit</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Merge-%E8%A1%9D%E7%AA%81%E8%99%95%E7%90%86%E5%8E%9F%E5%89%87"><span class="nav-number">4.</span> <span class="nav-text">Merge 衝突處理原則</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E7%B5%82%E7%8B%80%E6%85%8B"><span class="nav-number">5.</span> <span class="nav-text">最終狀態</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%99%E8%A8%93%E7%B8%BD%E7%B5%90"><span class="nav-number">6.</span> <span class="nav-text">教訓總結</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

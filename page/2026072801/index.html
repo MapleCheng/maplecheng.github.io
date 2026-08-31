@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="刪除資料庫紀錄不代表作業系統立刻拿回空間。從邏輯刪除、備份、物理回收、重建到還原驗證，資料生命週期必須涵蓋儲存引擎與基礎設施，才不會讓一次清理變成下一次事故。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="資料刪掉了，磁碟為什麼還是滿的？">
+<meta property="og:url" content="https://maplecheng.com/page/2026072801/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="刪除資料庫紀錄不代表作業系統立刻拿回空間。從邏輯刪除、備份、物理回收、重建到還原驗證，資料生命週期必須涵蓋儲存引擎與基礎設施，才不會讓一次清理變成下一次事故。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-07-27T21:03:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.345Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="CTO筆記">
+<meta property="article:tag" content="MongoDB">
+<meta property="article:tag" content="SRE">
+<meta property="article:tag" content="備份還原">
+<meta property="article:tag" content="資料生命週期">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026072801/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>資料刪掉了，磁碟為什麼還是滿的？ | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026072801/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          資料刪掉了，磁碟為什麼還是滿的？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-07-28 05:03:00" itemprop="dateCreated datePublished" datetime="2026-07-28T05:03:00+08:00">2026-07-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">技術管理
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">刪除資料庫紀錄不代表作業系統立刻拿回空間。從邏輯刪除、備份、物理回收、重建到還原驗證，資料生命週期必須涵蓋儲存引擎與基礎設施，才不會讓一次清理變成下一次事故。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近處理一個內部服務的儲存空間問題時，我又碰到一個很典型、也很容易讓人誤判的場景：資料庫裡大量紀錄已經刪掉，查詢結果也確認不存在了，但磁碟空間幾乎沒有回來。</p>
+<p>從應用程式看，清理成功；從作業系統看，什麼都沒發生。兩邊都沒有說謊，只是各自在描述不同層次的事。這也提醒我，資料生命週期如果只管「紀錄還在不在」，其實只做了一半。真正完整的清理，還要一路管到儲存引擎如何配置檔案、空間何時歸還，以及系統能不能在重建後正確恢復。</p>
+<span id="more"></span>
+
+<h2 id="刪除紀錄，不等於歸還磁碟"><a href="#刪除紀錄，不等於歸還磁碟" class="headerlink" title="刪除紀錄，不等於歸還磁碟"></a>刪除紀錄，不等於歸還磁碟</h2><p>很多應用團隊對資料庫的直覺，來自檔案系統：檔案刪掉，空間就應該釋放。資料庫通常不是這樣運作。</p>
+<p>以常見的儲存引擎來說，資料被刪除後，頁面可能只是被標記為可重用。這些空間可以留給同一個資料庫未來寫入，但底層資料檔不一定縮小，作業系統自然也不會立刻看到更多可用容量。這是合理的設計，因為頻繁縮放檔案會帶來額外 I&#x2F;O、碎片與效能抖動；對持續成長的工作負載而言，保留已配置空間通常比反覆交還更有效率。</p>
+<p>問題出在兩種「可用空間」被混在一起了。</p>
+<p>第一種是資料庫內部可重用的空間；第二種是作業系統可以分配給其他服務的空間。當主機磁碟快滿、容器 volume 持續膨脹，或資料庫要縮編時，我們需要的是第二種。只看 collection 筆數、邏輯資料量或刪除指令成功與否，無法證明實體容量真的回來。</p>
+<p>因此，「我已經把舊資料刪了」不能當成維運工作的完成條件。更精確的問題應該是：資料庫內還有多少有效資料？資料檔實際占多少？volume 占多少？主機剩多少？刪除後的空間是留在引擎內重用，還是已經交還作業系統？</p>
+<h2 id="清理之前，先決定什麼才是真相"><a href="#清理之前，先決定什麼才是真相" class="headerlink" title="清理之前，先決定什麼才是真相"></a>清理之前，先決定什麼才是真相</h2><p>這類事故真正困難的地方，往往不是下刪除指令，而是判斷哪些資料可以消失。</p>
+<p>一個運作一段時間的系統，常會同時累積交易紀錄、快取、分析結果、排程執行歷史、暫存報表、觀測日誌與各種為了除錯留下的快照。它們可能都放在同一套資料庫裡，卻有完全不同的保存價值。若只用「最近沒查到」判斷，很容易把冷資料誤當垃圾，也可能把其實能重算的衍生資料保留多年。</p>
+<p>我現在會先把資料分成幾類：</p>
+<ul>
+<li><strong>權威資料</strong>：無法從其他來源重建，必須備份與驗證。</li>
+<li><strong>衍生資料</strong>：可由權威資料重新計算，必要時可以丟棄。</li>
+<li><strong>快取與暫存</strong>：有明確失效條件，應自動淘汰。</li>
+<li><strong>稽核與追溯資料</strong>：依風險、法規與營運需求設定保存期。</li>
+<li><strong>除錯產物</strong>：預設短期保存，不應無限成長。</li>
+</ul>
+<p>這個分類比「哪張表最大」重要。沒有先定義 source of truth，清理就只是對著容量壓力做猜測；運氣好是省到空間，運氣不好則是在事故中製造另一場事故。</p>
+<p>同樣地，備份也不能只做整庫打包。若真正需要保留的只有少量權威資料，就應該把備份範圍、還原順序與驗證方式寫清楚。備份檔存在，不代表它可用；只有實際確認能讀取、筆數與關鍵欄位正確，才算有還原能力。</p>
+<h2 id="有時候，重建比原地壓縮更乾淨"><a href="#有時候，重建比原地壓縮更乾淨" class="headerlink" title="有時候，重建比原地壓縮更乾淨"></a>有時候，重建比原地壓縮更乾淨</h2><p>當大量歷史資料已刪除，但底層檔案仍然龐大時，通常會面臨幾種選擇：等待空間被未來寫入重用、執行 compact、做 resync，或將必要資料匯出後重建儲存空間。</p>
+<p>沒有一個答案適合所有環境。原地 compact 可能需要額外暫存容量，也可能鎖住資源或帶來長時間 I&#x2F;O；等待重用則無法解決主機已經接近滿載的問題。若資料量已大幅縮小，而且停機窗口、備份與還原路徑都可控，重建 volume 反而常是最容易理解、也最能確定結果的做法。</p>
+<p>但「刪掉 volume 再建一個」絕對不該是臨場反應。它應該被拆成一條可驗證流程：</p>
+<ol>
+<li>盤點並凍結權威資料的寫入範圍。</li>
+<li>匯出備份，並在刪除前確認備份可讀。</li>
+<li>記錄關鍵集合、筆數、索引與服務設定。</li>
+<li>停止會持續寫入的應用程式與排程。</li>
+<li>重建儲存空間並還原必要資料。</li>
+<li>驗證資料庫角色、健康狀態、索引與查詢結果。</li>
+<li>啟動應用程式，執行端到端 smoke test。</li>
+<li>比較資料庫、volume 與主機三層容量，確認空間真的回收。</li>
+</ol>
+<p>這套流程的重點不是命令，而是每一步都有「可以停下來檢查」的證據。尤其在刪除舊 volume 前，備份可讀與還原條件必須先成立；重建後，也不能只看到 container healthy 就宣布完成。資料庫健康、應用程式能查到正確資料、排程不會立刻把垃圾灌回來，才算真的恢復。</p>
+<h2 id="容量治理不能等到磁碟告警"><a href="#容量治理不能等到磁碟告警" class="headerlink" title="容量治理不能等到磁碟告警"></a>容量治理不能等到磁碟告警</h2><p>事後回頭看，磁碟占滿通常不是單一 bug，而是資料生命週期缺了一截。系統知道怎麼寫入，卻不知道資料何時過期；知道怎麼刪除紀錄，卻不知道儲存引擎是否歸還空間；有備份，卻沒有定期還原演練；有容量告警，卻沒有依成長速度估算還剩多少時間。</p>
+<p>因此，我會把容量治理至少做成四件事。</p>
+<p>第一，為每類非權威資料設定 TTL、保留期或批次清理規則，別讓人工整理成為唯一出口。第二，同時監控邏輯資料量、資料檔大小、volume 使用量與主機容量，避免只看單一層。第三，對異常成長設定趨勢告警；剩餘 20% 只是結果，過去一週每天增加多少，往往更能提早發現問題。第四，把 compact、重建與還原演練寫進 runbook，並說清楚何時使用、需要多少額外空間、可接受多少停機時間。</p>
+<p>如果服務跑在容器裡，還要特別注意：刪除 collection 不代表 Docker volume 變小；重建資料庫也不代表應用服務自動拿回正確連線、權限與啟動順序。資料層、容器層和主機層是三個不同的觀測面，缺一個都可能得到「看起來好了」的假象。</p>
+<h2 id="真正的完成，是能證明資料與空間都對"><a href="#真正的完成，是能證明資料與空間都對" class="headerlink" title="真正的完成，是能證明資料與空間都對"></a>真正的完成，是能證明資料與空間都對</h2><p>這次經驗讓我再次確認，維運裡最危險的字之一就是「已刪除」。它只說明某個動作執行過，沒有說明資料是否安全、容量是否回收、服務是否恢復，也沒有說明同樣的問題會不會再發生。</p>
+<p>身為技術主管，我更在意的是一條完整證據鏈：保留的資料有清楚的權威來源，刪除的資料有保存政策，備份已驗證可還原，重建後查詢與服務正常，實體容量確實下降，而且未來有自動淘汰與成長告警。</p>
+<p>資料生命週期不是從 create 到 delete，而是從建立、使用、保存、淘汰，一直到實體空間回收與還原能力被驗證。把最後這一段補上，清理才不只是暫時止血，而是系統真的恢復到可持續運作的狀態。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SRE/" rel="tag"># SRE</a>
+              <a href="/tags/CTO%E7%AD%86%E8%A8%98/" rel="tag"># CTO筆記</a>
+              <a href="/tags/MongoDB/" rel="tag"># MongoDB</a>
+              <a href="/tags/%E8%B3%87%E6%96%99%E7%94%9F%E5%91%BD%E9%80%B1%E6%9C%9F/" rel="tag"># 資料生命週期</a>
+              <a href="/tags/%E5%82%99%E4%BB%BD%E9%82%84%E5%8E%9F/" rel="tag"># 備份還原</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026072601/" rel="prev" title="當 AI 幫你審 PR，PR 本身就是不可信輸入">
+      <i class="fa fa-chevron-left"></i> 當 AI 幫你審 PR，PR 本身就是不可信輸入
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026072901/" rel="next" title="企業真正願意付費的，不是 Agent，而是控制層">
+      企業真正願意付費的，不是 Agent，而是控制層 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%AA%E9%99%A4%E7%B4%80%E9%8C%84%EF%BC%8C%E4%B8%8D%E7%AD%89%E6%96%BC%E6%AD%B8%E9%82%84%E7%A3%81%E7%A2%9F"><span class="nav-number">1.</span> <span class="nav-text">刪除紀錄，不等於歸還磁碟</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B8%85%E7%90%86%E4%B9%8B%E5%89%8D%EF%BC%8C%E5%85%88%E6%B1%BA%E5%AE%9A%E4%BB%80%E9%BA%BC%E6%89%8D%E6%98%AF%E7%9C%9F%E7%9B%B8"><span class="nav-number">2.</span> <span class="nav-text">清理之前，先決定什麼才是真相</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E6%99%82%E5%80%99%EF%BC%8C%E9%87%8D%E5%BB%BA%E6%AF%94%E5%8E%9F%E5%9C%B0%E5%A3%93%E7%B8%AE%E6%9B%B4%E4%B9%BE%E6%B7%A8"><span class="nav-number">3.</span> <span class="nav-text">有時候，重建比原地壓縮更乾淨</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E9%87%8F%E6%B2%BB%E7%90%86%E4%B8%8D%E8%83%BD%E7%AD%89%E5%88%B0%E7%A3%81%E7%A2%9F%E5%91%8A%E8%AD%A6"><span class="nav-number">4.</span> <span class="nav-text">容量治理不能等到磁碟告警</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E7%9A%84%E5%AE%8C%E6%88%90%EF%BC%8C%E6%98%AF%E8%83%BD%E8%AD%89%E6%98%8E%E8%B3%87%E6%96%99%E8%88%87%E7%A9%BA%E9%96%93%E9%83%BD%E5%B0%8D"><span class="nav-number">5.</span> <span class="nav-text">真正的完成，是能證明資料與空間都對</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

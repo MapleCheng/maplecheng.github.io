@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="多人共用 AI Agent 時，畫面上的頻道分隔只是入口；真正的隔離還要涵蓋身份、Session、記憶、工具權限、執行紀錄與子對話路由。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="開三個聊天頻道，不等於有三個 AI 助理">
+<meta property="og:url" content="https://maplecheng.com/page/2026072401/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="多人共用 AI Agent 時，畫面上的頻道分隔只是入口；真正的隔離還要涵蓋身份、Session、記憶、工具權限、執行紀錄與子對話路由。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-07-23T21:00:53.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.345Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="CTO 筆記">
+<meta property="article:tag" content="多租戶架構">
+<meta property="article:tag" content="權限設計">
+<meta property="article:tag" content="記憶治理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026072401/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>開三個聊天頻道，不等於有三個 AI 助理 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026072401/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          開三個聊天頻道，不等於有三個 AI 助理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-07-24 05:00:53" itemprop="dateCreated datePublished" datetime="2026-07-24T05:00:53+08:00">2026-07-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">多人共用 AI Agent 時，畫面上的頻道分隔只是入口；真正的隔離還要涵蓋身份、Session、記憶、工具權限、執行紀錄與子對話路由。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在整理多人使用的 AI 助理時，我又碰到一個很容易讓人誤判的畫面：替不同使用者開好各自的聊天頻道，看起來乾乾淨淨，大家互相看不到對方的對話，於是直覺上會覺得「隔離完成了」。</p>
+<p>但站在後端看，事情可能完全不是這樣。三個頻道如果最後都進到同一份 Session、同一個使用者 Profile、同一套長期記憶，那其實不是三個 AI 助理，只是一個助理開了三扇門。</p>
+<span id="more"></span>
+
+<h3 id="UI-分開，不代表狀態分開"><a href="#UI-分開，不代表狀態分開" class="headerlink" title="UI 分開，不代表狀態分開"></a>UI 分開，不代表狀態分開</h3><p>傳統聊天系統裡，頻道主要負責整理對話與控制可見性。對人來說，只要成員權限設好，A 看不到 B 的頻道，邊界大致就成立了。</p>
+<p>AI Agent 多了一個麻煩：它會在訊息之外累積狀態。它可能保存對話摘要、使用者偏好、任務進度、常用文件、工具授權與人工修正。這些狀態不一定存在聊天平台裡，而是落在 Agent runtime 的資料庫、檔案、向量索引或快取中。</p>
+<p>因此，聊天平台的 ACL 只能回答「誰看得到哪個畫面」，不能回答「模型這次拿到了誰的上下文」。如果後端仍以同一個預設身份處理所有頻道，畫面上的隔間只是佈景，資料還是住在同一個房間。</p>
+<p>這也是我現在檢查多人 Agent 時，第一個不看的反而是畫面。我會直接往 request 進入後的路由看：系統如何從伺服器、工作區、頻道、討論串與使用者身份，推導出真正的 runtime scope？</p>
+<h3 id="真正要隔離的是一整串狀態"><a href="#真正要隔離的是一整串狀態" class="headerlink" title="真正要隔離的是一整串狀態"></a>真正要隔離的是一整串狀態</h3><p>一個可以長期使用的個人 AI 助理，至少有六類東西需要明確歸屬。</p>
+<p>第一是 <strong>身份</strong>。後端必須知道目前服務的是哪一個人或哪一個工作群組，不能只知道訊息來自哪個頻道。頻道 ID 可以是路由線索，但不應直接等於業務身份；兩者之間要有可檢查、可撤銷的對應關係。</p>
+<p>第二是 <strong>Session</strong>。不同使用者的短期上下文必須分開，包含對話歷史、摘要與尚未完成的任務。否則即使長期記憶沒有共用，模型仍可能在壓縮上下文或恢復任務時，把上一個人的脈絡帶進來。</p>
+<p>第三是 <strong>記憶</strong>。偏好、常用資料與人工更正都要有 scope。多人共用同一個向量索引並非一定錯，但檢索前必須先以身份與權限縮小範圍，不能撈出內容後再叫模型「不要引用別人的資料」。資料一旦進入 prompt，邊界其實已經失守。</p>
+<p>第四是 <strong>工具與憑證</strong>。每個人能呼叫哪些工具、看到哪些資料、能否執行寫入，不該因為大家都在使用同一個 Bot 就自動相同。共用入口不代表共用權限，更不代表可以共用個人憑證。</p>
+<p>第五是 <strong>產物與稽核紀錄</strong>。Agent 產生的檔案、任務結果、工具呼叫與錯誤紀錄，也要帶著相同 scope。否則前面隔離得很努力，最後卻在共用輸出目錄或管理後台裡全部混回去。</p>
+<p>第六是 <strong>生命週期</strong>。新增使用者時建立哪些資源？停用時撤銷哪些路由與權限？記憶要保留、匯出還是刪除？如果沒有明確的 provisioning 與 deprovisioning，隔離很容易只在建立當下正確，之後逐漸漂移。</p>
+<h3 id="討論串是最容易漏掉的縫"><a href="#討論串是最容易漏掉的縫" class="headerlink" title="討論串是最容易漏掉的縫"></a>討論串是最容易漏掉的縫</h3><p>多人聊天入口還有一個很實際的坑：子對話不一定會自動繼承父層的 Agent 路由。</p>
+<p>對使用者來說，頻道底下開一個討論串，只是把某件事獨立出來談；他自然會期待同一個 AI 助理、同一份個人記憶與同一組權限繼續存在。但後端若只用目前的 channel ID 查路由，討論串會得到一個新的 ID，最後不是掉回預設 Profile，就是根本找不到身份。</p>
+<p>更危險的是掉回預設值。完全失敗至少看得見；悄悄使用共用 Profile，表面上仍會正常回答，卻可能讀到錯誤的記憶或使用錯誤的工具範圍。</p>
+<p>所以路由規則不能只寫「這個頻道對應這個 Profile」，還要定義繼承語意：若訊息來自討論串，是否先查自身明確設定，再回溯父頻道？父層停用後，既有討論串是否同步失效？路由決策有沒有留下紀錄？這些才是系統真正的隔離邏輯。</p>
+<h3 id="我偏好的路由順序"><a href="#我偏好的路由順序" class="headerlink" title="我偏好的路由順序"></a>我偏好的路由順序</h3><p>實作上，我會把這件事當成多租戶系統，而不是聊天功能。每次請求進來，都先解析一個明確的 execution context，再讓 Agent 開始工作。概念上的順序大致是：</p>
+<ol>
+<li>驗證平台上的使用者與工作區身份。</li>
+<li>解析目前入口，包含父頻道與討論串關係。</li>
+<li>找出被允許的 Profile，而不是套用方便的全域預設值。</li>
+<li>以 Profile 決定 Session、Memory、工具 Policy、憑證與輸出空間。</li>
+<li>記錄這次路由為何成立，以及最後實際使用了哪個 scope。</li>
+<li>找不到明確路由時拒絕或降級，不要默默進入高權限的共用環境。</li>
+</ol>
+<p>這裡最重要的設計原則是 <strong>fail closed</strong>。多人 Agent 最糟的錯誤通常不是「沒有回答」，而是「回答得很順，但用了不屬於這個人的上下文」。</p>
+<h3 id="隔離要用測試證明，不靠畫面感覺"><a href="#隔離要用測試證明，不靠畫面感覺" class="headerlink" title="隔離要用測試證明，不靠畫面感覺"></a>隔離要用測試證明，不靠畫面感覺</h3><p>這類功能也不能只測「A 頻道收到 A 的回覆」。我會特別做交叉測試：先讓 A 留下一個只有 A 知道的偏好，再從 B 詢問；從父頻道建立子討論串，確認仍落到相同 scope；移除路由後，確認舊討論串不會退回預設 Profile；最後檢查日誌、產物與工具權限是否也沒有跨界。</p>
+<p>換句話說，測試的不是聊天有沒有通，而是資訊有沒有可能穿牆。</p>
+<p>站在 CTO 的角度，我越來越不把「每人一個頻道」視為多人 AI 助理的完成條件。那只是入口配置。真正的產品邊界存在後端：身份怎麼解析、狀態怎麼分區、子對話怎麼繼承、權限怎麼縮限，以及錯誤時系統選擇拒絕還是猜測。</p>
+<p>AI Agent 很會讓介面看起來有人格、有歸屬感，這也是它迷人的地方。但系統不能只靠感覺提供隱私。當一個助理開始替不同的人記住事情、使用工具與執行工作時，我們需要的不是三扇不同顏色的門，而是門後真的有三個不會互通的房間。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E6%AC%8A%E9%99%90%E8%A8%AD%E8%A8%88/" rel="tag"># 權限設計</a>
+              <a href="/tags/CTO-%E7%AD%86%E8%A8%98/" rel="tag"># CTO 筆記</a>
+              <a href="/tags/%E8%A8%98%E6%86%B6%E6%B2%BB%E7%90%86/" rel="tag"># 記憶治理</a>
+              <a href="/tags/%E5%A4%9A%E7%A7%9F%E6%88%B6%E6%9E%B6%E6%A7%8B/" rel="tag"># 多租戶架構</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026072301/" rel="prev" title="當 Agent 開始碰到實體世界，答案不再是交付物">
+      <i class="fa fa-chevron-left"></i> 當 Agent 開始碰到實體世界，答案不再是交付物
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026072601/" rel="next" title="當 AI 幫你審 PR，PR 本身就是不可信輸入">
+      當 AI 幫你審 PR，PR 本身就是不可信輸入 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#UI-%E5%88%86%E9%96%8B%EF%BC%8C%E4%B8%8D%E4%BB%A3%E8%A1%A8%E7%8B%80%E6%85%8B%E5%88%86%E9%96%8B"><span class="nav-number">1.</span> <span class="nav-text">UI 分開，不代表狀態分開</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E8%A6%81%E9%9A%94%E9%9B%A2%E7%9A%84%E6%98%AF%E4%B8%80%E6%95%B4%E4%B8%B2%E7%8B%80%E6%85%8B"><span class="nav-number">2.</span> <span class="nav-text">真正要隔離的是一整串狀態</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E4%B8%B2%E6%98%AF%E6%9C%80%E5%AE%B9%E6%98%93%E6%BC%8F%E6%8E%89%E7%9A%84%E7%B8%AB"><span class="nav-number">3.</span> <span class="nav-text">討論串是最容易漏掉的縫</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E5%81%8F%E5%A5%BD%E7%9A%84%E8%B7%AF%E7%94%B1%E9%A0%86%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text">我偏好的路由順序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%94%E9%9B%A2%E8%A6%81%E7%94%A8%E6%B8%AC%E8%A9%A6%E8%AD%89%E6%98%8E%EF%BC%8C%E4%B8%8D%E9%9D%A0%E7%95%AB%E9%9D%A2%E6%84%9F%E8%A6%BA"><span class="nav-number">5.</span> <span class="nav-text">隔離要用測試證明，不靠畫面感覺</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="當 AI Agent 掛上 skills、plugins、hooks、MCP 與長期記憶後，排錯不能只看模型回答，而要先能切回乾淨狀態。安全模式不是退步，而是讓系統可維運、可隔離、可驗證的必要設計。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI Agent 也需要安全模式：排錯時先把聰明關掉">
+<meta property="og:url" content="https://maplecheng.com/page/2026061001/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="當 AI Agent 掛上 skills、plugins、hooks、MCP 與長期記憶後，排錯不能只看模型回答，而要先能切回乾淨狀態。安全模式不是退步，而是讓系統可維運、可隔離、可驗證的必要設計。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-06-09T21:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.344Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="工程管理">
+<meta property="article:tag" content="系統維運">
+<meta property="article:tag" content="除錯">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026061001/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>AI Agent 也需要安全模式：排錯時先把聰明關掉 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026061001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI Agent 也需要安全模式：排錯時先把聰明關掉
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-06-10 05:00:00" itemprop="dateCreated datePublished" datetime="2026-06-10T05:00:00+08:00">2026-06-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">當 AI Agent 掛上 skills、plugins、hooks、MCP 與長期記憶後，排錯不能只看模型回答，而要先能切回乾淨狀態。安全模式不是退步，而是讓系統可維運、可隔離、可驗證的必要設計。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看 AI Agent 工具鏈的演進，我覺得有一個功能雖然不華麗，但非常重要：安全模式。不是資安宣傳裡那種「我們很安全」的口號，而是很工程、很土、也很救命的能力——當系統怪怪的時候，能不能把外掛、記憶、規則、hook、工具連線先關掉，回到一個最小可運作狀態。</p>
+<p>這件事聽起來像小功能，但我越做越覺得，它其實決定 AI Agent 能不能從玩具變成真正可維運的系統。</p>
+<span id="more"></span>
+
+<h3 id="Agent-變強以後，故障也會變複雜"><a href="#Agent-變強以後，故障也會變複雜" class="headerlink" title="Agent 變強以後，故障也會變複雜"></a>Agent 變強以後，故障也會變複雜</h3><p>早期使用 AI 工具，故障原因通常很單純：模型回答不好、prompt 沒寫清楚、上下文太長、工具沒有接好。這種問題雖然煩，但至少邊界還算清楚。</p>
+<p>可是現在的 Agent 不一樣了。它可能同時載入系統提示、個人記憶、專案規則、技能文件、外掛、MCP server、排程設定、工具權限、hooks，甚至還會根據不同任務自動選擇工作流。這些東西加起來，Agent 確實變得更像一個能做事的助理；但同時，它也變成一個有很多相依關係的軟體系統。</p>
+<p>當它開始出錯時，問題就不一定在模型本身。</p>
+<p>有可能是某個 skill 過期了，還在教它用舊指令；有可能是 plugin 攔截了流程；有可能是 hook 在背景修改了輸入；有可能是記憶裡某段舊規則覆蓋了新約定；也有可能是 MCP server 回傳格式變了，Agent 卻還以為工具正常。</p>
+<p>這時候如果只問「模型為什麼笨了」，通常會問錯方向。真正該問的是：它現在到底吃了哪些上下文？哪些外掛有動作？哪些工具參與了決策？哪些規則影響了輸出？</p>
+<h3 id="排錯第一步，是減少變因"><a href="#排錯第一步，是減少變因" class="headerlink" title="排錯第一步，是減少變因"></a>排錯第一步，是減少變因</h3><p>我自己做系統維運很怕一種場景：一個問題看起來像偶發，但背後其實是好幾層東西交互作用。你改了一個設定，現象消失了，但不知道為什麼；過兩天換另一個流程又炸一次。</p>
+<p>AI Agent 更容易遇到這種狀況，因為它的「行為」不是只由程式碼決定，而是由模型、prompt、上下文、工具回傳、歷史記憶一起決定。這讓它很靈活，也讓它很難除錯。</p>
+<p>所以我越來越認同一個做法：排錯時先把聰明關掉。</p>
+<p>不要一開始就讓它載入所有技能、所有記憶、所有外掛，然後期待它自己解釋自己為什麼錯。比較可靠的方式，是先切回最小環境：只保留模型和基本工具，確認核心行為正常；再一層一層打開記憶、skill、plugin、MCP、hook。哪一層打開後現象復現，問題範圍就縮小了。</p>
+<p>這跟傳統系統的 safe mode 很像。作業系統進安全模式，不是因為安全模式比較好用，而是因為它把非必要驅動和啟動項目先拿掉，讓你能判斷問題是不是出在核心系統。AI Agent 也需要同樣的設計。</p>
+<h3 id="安全模式不是少功能，而是維運能力"><a href="#安全模式不是少功能，而是維運能力" class="headerlink" title="安全模式不是少功能，而是維運能力"></a>安全模式不是少功能，而是維運能力</h3><p>很多團隊做 AI Agent 時，會把重點放在「能接多少工具」、「能記多少東西」、「能不能自動完成更多任務」。這些當然重要，但如果沒有安全模式，功能越多，維運風險就越高。</p>
+<p>因為每多一個擴充點，就多一個可能失效的地方。每多一份上下文，就多一個可能互相衝突的規則。每多一個自動化 hook，就多一個可能在你沒注意時改變流程的因素。</p>
+<p>這不是說不要擴充，而是要承認擴充有成本。真正成熟的系統，不是永遠不出錯，而是出錯時能拆解、能隔離、能驗證。</p>
+<p>我會希望一個可維運的 Agent 至少具備幾種能力：</p>
+<p>第一，能明確列出這次 session 載入了哪些規則、skills、plugins 和工具。不要讓操作者只能憑感覺猜。</p>
+<p>第二，能用安全模式啟動，暫時停用非核心擴充，讓排錯有乾淨基準線。</p>
+<p>第三，能逐層重新開啟功能，讓問題可以被二分搜尋，而不是每次都在整鍋湯裡撈一根看不見的針。</p>
+<p>第四，能留下足夠的操作紀錄。Agent 做了什麼、用了什麼工具、哪個 hook 被觸發、哪段記憶被引用，至少要有跡可循。</p>
+<p>第五，當工具或上下文不可用時，要誠實承認邊界，而不是硬編一個看起來合理的答案。</p>
+<h3 id="技術主管要看的不是-demo，而是故障模式"><a href="#技術主管要看的不是-demo，而是故障模式" class="headerlink" title="技術主管要看的不是 demo，而是故障模式"></a>技術主管要看的不是 demo，而是故障模式</h3><p>我現在看 AI 工具，已經不太只看 demo 影片裡它能完成多神奇的任務。demo 當然有參考價值，但真正要放進工作流，我更在意它壞掉時長什麼樣子。</p>
+<p>它會不會因為一個外掛異常就整個流程卡住？會不會在工具失敗時假裝成功？會不會把舊記憶當成最新規則？會不會在權限不足時繞路做危險操作？會不會讓我有辦法快速回到乾淨環境重現問題？</p>
+<p>這些問題很無聊，但它們才是企業系統每天會面對的現實。</p>
+<p>AI Agent 一旦開始碰到內部資料、排程、文件、通知、工單、程式碼、部署流程，它就不再只是「比較會聊天的工具」。它變成一個半自動操作者。操作者越有能力，就越需要暫停、隔離、降級與回復機制。</p>
+<p>安全模式的價值就在這裡。它不是讓 Agent 變笨，而是讓我們在必要時可以把複雜度關小，重新看清楚系統本體。</p>
+<h3 id="把可排錯性當成功能設計"><a href="#把可排錯性當成功能設計" class="headerlink" title="把可排錯性當成功能設計"></a>把可排錯性當成功能設計</h3><p>我覺得未來做 AI Agent，不能只把可排錯性當成工程師自己的事。它應該是產品功能的一部分。</p>
+<p>使用者不一定懂什麼是 MCP、hook、system prompt 或 context injection，但他會遇到「今天怎麼怪怪的」。如果系統只能回答「請重新整理看看」，那就還停在玩具階段。更好的設計，是讓使用者或維運者可以切換到診斷模式：先停用外掛、檢查工具、顯示最近引用的規則、重跑同一個任務、比較安全模式與正常模式的差異。</p>
+<p>這聽起來不浪漫，卻很可靠。</p>
+<p>真正能長期使用的 AI 系統，不是永遠最聰明，而是知道什麼時候該退回基本盤。平常它可以帶著記憶、技能和工具到處跑；出事時，它必須能把這些加成一個一個卸下來，讓人看懂問題在哪裡。</p>
+<p>對我來說，這就是 AI Agent 從「魔法」走向「工程」的一個關鍵分水嶺。</p>
+<p>功能做得多，會讓人驚艷；但故障時能被拆開檢查，才會讓人放心。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/%E5%B7%A5%E7%A8%8B%E7%AE%A1%E7%90%86/" rel="tag"># 工程管理</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E7%B6%AD%E9%81%8B/" rel="tag"># 系統維運</a>
+              <a href="/tags/%E9%99%A4%E9%8C%AF/" rel="tag"># 除錯</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026060901/" rel="prev" title="本地 AI 與雲端算力，不是二選一，而是分工設計">
+      <i class="fa fa-chevron-left"></i> 本地 AI 與雲端算力，不是二選一，而是分工設計
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026061101/" rel="next" title="狀態訊息不是文案，是系統對人的承諾">
+      狀態訊息不是文案，是系統對人的承諾 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Agent-%E8%AE%8A%E5%BC%B7%E4%BB%A5%E5%BE%8C%EF%BC%8C%E6%95%85%E9%9A%9C%E4%B9%9F%E6%9C%83%E8%AE%8A%E8%A4%87%E9%9B%9C"><span class="nav-number">1.</span> <span class="nav-text">Agent 變強以後，故障也會變複雜</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E9%8C%AF%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%8C%E6%98%AF%E6%B8%9B%E5%B0%91%E8%AE%8A%E5%9B%A0"><span class="nav-number">2.</span> <span class="nav-text">排錯第一步，是減少變因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E6%A8%A1%E5%BC%8F%E4%B8%8D%E6%98%AF%E5%B0%91%E5%8A%9F%E8%83%BD%EF%BC%8C%E8%80%8C%E6%98%AF%E7%B6%AD%E9%81%8B%E8%83%BD%E5%8A%9B"><span class="nav-number">3.</span> <span class="nav-text">安全模式不是少功能，而是維運能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E4%B8%BB%E7%AE%A1%E8%A6%81%E7%9C%8B%E7%9A%84%E4%B8%8D%E6%98%AF-demo%EF%BC%8C%E8%80%8C%E6%98%AF%E6%95%85%E9%9A%9C%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">技術主管要看的不是 demo，而是故障模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%8A%E5%8F%AF%E6%8E%92%E9%8C%AF%E6%80%A7%E7%95%B6%E6%88%90%E5%8A%9F%E8%83%BD%E8%A8%AD%E8%A8%88"><span class="nav-number">5.</span> <span class="nav-text">把可排錯性當成功能設計</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

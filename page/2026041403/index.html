@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="面對重做型任務，最危險的不是做太慢，而是太快進場。我這幾年越來越確定，先把規劃與架構拆出來，反而是避免第二次重做的最低成本做法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重做型任務最怕直接開幹，先拆規劃與架構才不會重做第二次">
+<meta property="og:url" content="https://maplecheng.com/page/2026041403/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="面對重做型任務，最危險的不是做太慢，而是太快進場。我這幾年越來越確定，先把規劃與架構拆出來，反而是避免第二次重做的最低成本做法。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-04-13T21:01:02.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.342Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="團隊協作">
+<meta property="article:tag" content="系統設計">
+<meta property="article:tag" content="軟體開發">
+<meta property="article:tag" content="重構">
+<meta property="article:tag" content="開發流程">
+<meta property="article:tag" content="風險管理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026041403/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>重做型任務最怕直接開幹，先拆規劃與架構才不會重做第二次 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026041403/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          重做型任務最怕直接開幹，先拆規劃與架構才不會重做第二次
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-04-14 05:01:02" itemprop="dateCreated datePublished" datetime="2026-04-14T05:01:02+08:00">2026-04-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">面對重做型任務，最危險的不是做太慢，而是太快進場。我這幾年越來越確定，先把規劃與架構拆出來，反而是避免第二次重做的最低成本做法。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>技術人有一個很常見的通病：看到一個舊東西很亂，第一反應不是先想清楚，而是很想直接重寫。</p>
+<p>我完全懂那種心情。真的。尤其當你已經被歷史包袱折磨很久，看到一段舊流程、舊模組、舊畫面，心裡常常只剩一句話：這東西不如砍掉重來。</p>
+<p>問題是，重做型任務最危險的地方，往往不是技術難度，而是大家太早開始動手。看起來很有效率，實際上只是更早進入錯的方向。等做到一半才發現邊界沒釐清、依賴沒盤乾淨、流程理解有落差，就會開始出現那種熟悉的惡夢：不是在重做舊系統，而是在替下一次重做鋪路。</p>
+<span id="more"></span>
+
+<h3 id="「直接開幹」為什麼這麼有吸引力"><a href="#「直接開幹」為什麼這麼有吸引力" class="headerlink" title="「直接開幹」為什麼這麼有吸引力"></a>「直接開幹」為什麼這麼有吸引力</h3><p>因為它很爽。</p>
+<p>真的很爽。</p>
+<p>你可以很快建立一個新專案、拉一套新架構、寫幾個漂亮的元件，然後整個人瞬間有一種「我終於離開舊世界」的幻覺。這種感覺很容易讓人誤以為自己正在前進。</p>
+<p>但這種前進常常只發生在程式碼層，沒有發生在問題定義層。</p>
+<p>而重做型任務最怕的，就是問題都還沒定義完整，解法卻已經跑出好幾公里。</p>
+<p>常見徵兆通常長這樣：</p>
+<ul>
+<li>一開始只說「這套要重做」，沒說清楚為什麼</li>
+<li>需求邊界模糊，大家各自腦補</li>
+<li>舊系統哪些是痛點、哪些其實不能動，沒先盤清楚</li>
+<li>外部依賴、資料流、角色權限，做一段才慢慢補</li>
+<li>開發進度看起來很熱鬧，但共識其實很薄</li>
+</ul>
+<p>這時候團隊很容易掉進一種陷阱：每個人都很努力，但努力的方向不一定一致。最後 code 寫了不少，風險卻沒有真的下降。</p>
+<h3 id="重做不是-coding-問題，先把它當成設計題"><a href="#重做不是-coding-問題，先把它當成設計題" class="headerlink" title="重做不是 coding 問題，先把它當成設計題"></a>重做不是 coding 問題，先把它當成設計題</h3><p>我現在看到重做型任務，第一個反應通常不是「怎麼實作」，而是「先拆段」。</p>
+<p>至少要先拆出兩層：</p>
+<ul>
+<li>規劃層：重做的目標、範圍、限制、成功條件</li>
+<li>架構層：模組切分、資料流、整合邊界、遷移策略</li>
+</ul>
+<p>這兩層如果沒先站穩，後面的開發就很容易變成賭運氣。</p>
+<p>我自己現在偏好的節奏，比較像這樣：</p>
+<pre class="mermaid" style="text-align: center;">
+            
+            flowchart TD
+    A[確認為何要重做] --> B[盤點現況與痛點]
+    B --> C[定義範圍與不做清單]
+    C --> D[拆出規劃文件]
+    D --> E[設計架構與模組邊界]
+    E --> F[確認遷移策略]
+    F --> G[再進入開發]
+          </pre>
+
+<p>這條路看起來比較慢，但它通常是整體最便宜的走法。因為很多真正昂貴的錯誤，都是寫下去之後才發現自己根本不該那樣切。</p>
+<h3 id="規劃階段最重要的，不是把需求寫漂亮"><a href="#規劃階段最重要的，不是把需求寫漂亮" class="headerlink" title="規劃階段最重要的，不是把需求寫漂亮"></a>規劃階段最重要的，不是把需求寫漂亮</h3><p>很多人聽到「先做規劃」，第一個擔心是會不會變成很空的文件工程。這個擔心完全合理。規劃如果只是把大家早就知道的廢話寫成文件，確實只是在拖進度。</p>
+<p>所以我認為規劃階段要處理的不是作文，而是決策。</p>
+<p>要回答的問題應該很具體：</p>
+<ul>
+<li>為什麼這個東西值得重做，而不是局部修補</li>
+<li>這次要解決哪些核心痛點</li>
+<li>哪些舊邏輯是必要相容，哪些可以趁機淘汰</li>
+<li>這次的成功標準是什麼</li>
+<li>哪些範圍刻意不做，避免失控</li>
+</ul>
+<p>尤其「不做清單」超級重要。沒有不做清單的重做任務，通常都會默默膨脹。今天順手多改一點、明天覺得這個一起整理比較乾淨，最後範圍一邊長、一邊還以為自己只是順便。</p>
+<p>然後災難就開始了。</p>
+<h3 id="架構階段真正要解的，是未來的衝突點"><a href="#架構階段真正要解的，是未來的衝突點" class="headerlink" title="架構階段真正要解的，是未來的衝突點"></a>架構階段真正要解的，是未來的衝突點</h3><p>如果規劃是在回答「做什麼」，那架構就是在回答「做了之後怎麼不要撞死」。</p>
+<p>我很常看到團隊把架構討論壓縮到很後面，甚至邊做邊決定。不是不能這樣，但前提是任務真的小。只要是重做型任務，牽涉的通常都不是單一畫面，而是角色、流程、資料、整合點一起變動。這種情況下，架構不先想，後面幾乎一定會補到懷疑人生。</p>
+<p>我現在在架構階段通常最在意五件事：</p>
+<ul>
+<li>模組邊界怎麼切，誰對誰負責</li>
+<li>資料流怎麼走，哪裡是單一真實來源</li>
+<li>舊系統與新系統的過渡期怎麼共存</li>
+<li>錯誤發生時，回退策略是什麼</li>
+<li>哪些地方未來最可能變，現在要不要預留彈性</li>
+</ul>
+<p>這些事情如果晚點再想，不是不能補，而是補的成本會很高。因為一旦開發已經展開，每個決策都會牽動更多實作細節，修正就不只是改圖，而是動到一串已經寫下去的東西。</p>
+<h3 id="真正的速度，來自減少返工，不是提早寫-code"><a href="#真正的速度，來自減少返工，不是提早寫-code" class="headerlink" title="真正的速度，來自減少返工，不是提早寫 code"></a>真正的速度，來自減少返工，不是提早寫 code</h3><p>這件事我以前也容易搞錯。總覺得先動手比較務實，先做出來再調整就好。聽起來很 agile，實際上很多時候只是把設計成本延後支付，而且還加利息。</p>
+<p>重做型任務如果一開始就先把規劃和架構拆出來，開發未必會提早開始，但返工通常會少很多。這才是真正的速度。</p>
+<p>因為你少掉的是這些東西：</p>
+<ul>
+<li>開發到一半才重新定義需求</li>
+<li>元件寫完後才發現模組邊界錯了</li>
+<li>API 做出來才知道流程不成立</li>
+<li>測試階段才驚覺舊資料很難遷移</li>
+<li>上線前才發現還有外部依賴沒盤到</li>
+</ul>
+<p>這些返工都不是「調一下」而已，它會連帶消耗團隊信心。做越久越心虛，最後大家開始怕改、怕碰、怕再討論，然後一個本來想改善的重做任務，又慢慢長回新的包袱。</p>
+<h3 id="技術主管最該守住的，是進場節奏"><a href="#技術主管最該守住的，是進場節奏" class="headerlink" title="技術主管最該守住的，是進場節奏"></a>技術主管最該守住的，是進場節奏</h3><p>如果你是帶團隊的人，我覺得你最重要的責任之一，不是第一個跳下去寫，而是守住節奏。</p>
+<p>當團隊對舊系統很不耐煩時，大家通常都會想趕快離開現況。這時候主管很容易一起被情緒帶著走，覺得先做點什麼比較安心。但真正該做的，往往是反過來踩煞車。</p>
+<p>不是為了拖，而是為了把錯誤的快速，換成正確的穩定。</p>
+<p>有時候你只需要多撐幾個討論點：</p>
+<ul>
+<li>目標真的講清楚了嗎</li>
+<li>範圍有沒有失控</li>
+<li>依賴有沒有盤完整</li>
+<li>遷移策略是不是可行</li>
+<li>哪一段值得先做 proof of concept</li>
+</ul>
+<p>這些問題當下看起來像在阻擋進度，但其實是在替團隊買保險。因為重做型任務最怕的不是慢，而是做了很久之後，才發現一開始方向就偏了。</p>
+<h3 id="先拆規劃與架構，不是保守，是尊重成本"><a href="#先拆規劃與架構，不是保守，是尊重成本" class="headerlink" title="先拆規劃與架構，不是保守，是尊重成本"></a>先拆規劃與架構，不是保守，是尊重成本</h3><p>所以我現在對重做型任務的態度很簡單：越想直接開幹，越要先停一下。</p>
+<p>不是因為我變保守，而是因為看過太多「想用一次重做解決所有歷史問題」的劇情，最後都演成下一輪維護地獄。先拆規劃與架構，並不是文書作業，而是把不確定性提前暴露出來。</p>
+<p>這其實是一種很務實的尊重：尊重團隊時間、尊重開發成本、也尊重未來還要接這套系統的人。</p>
+<p>如果你手上剛好也有一個看了就想砍掉重來的東西，我的建議會是：先別急著開新專案。先把規劃和架構拆出來，讓問題先長出輪廓，再讓程式碼進場。</p>
+<p>這樣做不一定最痛快，但很可能是最不會重做第二次的路。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%BB%9F%E9%AB%94%E9%96%8B%E7%99%BC/" rel="tag"># 軟體開發</a>
+              <a href="/tags/%E5%9C%98%E9%9A%8A%E5%8D%94%E4%BD%9C/" rel="tag"># 團隊協作</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E6%B5%81%E7%A8%8B/" rel="tag"># 開發流程</a>
+              <a href="/tags/%E9%A2%A8%E9%9A%AA%E7%AE%A1%E7%90%86/" rel="tag"># 風險管理</a>
+              <a href="/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88/" rel="tag"># 系統設計</a>
+              <a href="/tags/%E9%87%8D%E6%A7%8B/" rel="tag"># 重構</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026040702/" rel="prev" title="看起來像備註，其實是業務開關：我怎麼追一個欄位追到流程真相">
+      <i class="fa fa-chevron-left"></i> 看起來像備註，其實是業務開關：我怎麼追一個欄位追到流程真相
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026041402/" rel="next" title="企業 AI 的主戰場，不是聊天介面，而是流程、權限與資料整合">
+      企業 AI 的主戰場，不是聊天介面，而是流程、權限與資料整合 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E3%80%8C%E7%9B%B4%E6%8E%A5%E9%96%8B%E5%B9%B9%E3%80%8D%E7%82%BA%E4%BB%80%E9%BA%BC%E9%80%99%E9%BA%BC%E6%9C%89%E5%90%B8%E5%BC%95%E5%8A%9B"><span class="nav-number">1.</span> <span class="nav-text">「直接開幹」為什麼這麼有吸引力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%81%9A%E4%B8%8D%E6%98%AF-coding-%E5%95%8F%E9%A1%8C%EF%BC%8C%E5%85%88%E6%8A%8A%E5%AE%83%E7%95%B6%E6%88%90%E8%A8%AD%E8%A8%88%E9%A1%8C"><span class="nav-number">2.</span> <span class="nav-text">重做不是 coding 問題，先把它當成設計題</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%8F%E5%8A%83%E9%9A%8E%E6%AE%B5%E6%9C%80%E9%87%8D%E8%A6%81%E7%9A%84%EF%BC%8C%E4%B8%8D%E6%98%AF%E6%8A%8A%E9%9C%80%E6%B1%82%E5%AF%AB%E6%BC%82%E4%BA%AE"><span class="nav-number">3.</span> <span class="nav-text">規劃階段最重要的，不是把需求寫漂亮</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%A7%8B%E9%9A%8E%E6%AE%B5%E7%9C%9F%E6%AD%A3%E8%A6%81%E8%A7%A3%E7%9A%84%EF%BC%8C%E6%98%AF%E6%9C%AA%E4%BE%86%E7%9A%84%E8%A1%9D%E7%AA%81%E9%BB%9E"><span class="nav-number">4.</span> <span class="nav-text">架構階段真正要解的，是未來的衝突點</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E7%9A%84%E9%80%9F%E5%BA%A6%EF%BC%8C%E4%BE%86%E8%87%AA%E6%B8%9B%E5%B0%91%E8%BF%94%E5%B7%A5%EF%BC%8C%E4%B8%8D%E6%98%AF%E6%8F%90%E6%97%A9%E5%AF%AB-code"><span class="nav-number">5.</span> <span class="nav-text">真正的速度，來自減少返工，不是提早寫 code</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E4%B8%BB%E7%AE%A1%E6%9C%80%E8%A9%B2%E5%AE%88%E4%BD%8F%E7%9A%84%EF%BC%8C%E6%98%AF%E9%80%B2%E5%A0%B4%E7%AF%80%E5%A5%8F"><span class="nav-number">6.</span> <span class="nav-text">技術主管最該守住的，是進場節奏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%88%E6%8B%86%E8%A6%8F%E5%8A%83%E8%88%87%E6%9E%B6%E6%A7%8B%EF%BC%8C%E4%B8%8D%E6%98%AF%E4%BF%9D%E5%AE%88%EF%BC%8C%E6%98%AF%E5%B0%8A%E9%87%8D%E6%88%90%E6%9C%AC"><span class="nav-number">7.</span> <span class="nav-text">先拆規劃與架構，不是保守，是尊重成本</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

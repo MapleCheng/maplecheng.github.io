@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="企業導入 AI 若只看帳號數、使用次數與模型單價，很難證明真正價值。技術主管應先建立流程基準線，再用完成時間、返工、例外與結果成本判斷 AI 是否真的改善工作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="導入 AI 前，先把原本的流程量清楚">
+<meta property="og:url" content="https://maplecheng.com/page/2026080401/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="企業導入 AI 若只看帳號數、使用次數與模型單價，很難證明真正價值。技術主管應先建立流程基準線，再用完成時間、返工、例外與結果成本判斷 AI 是否真的改善工作。">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-08-03T21:01:25.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.346Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="企業 AI">
+<meta property="article:tag" content="可觀測性">
+<meta property="article:tag" content="成本治理">
+<meta property="article:tag" content="技術管理">
+<meta property="article:tag" content="流程改善">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026080401/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>導入 AI 前，先把原本的流程量清楚 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026080401/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          導入 AI 前，先把原本的流程量清楚
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-08-04 05:01:25" itemprop="dateCreated datePublished" datetime="2026-08-04T05:01:25+08:00">2026-08-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI-%E8%88%87%E4%BC%81%E6%A5%AD%E7%B3%BB%E7%B5%B1/" itemprop="url" rel="index"><span itemprop="name">AI 與企業系統
+                    
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">企業導入 AI 若只看帳號數、使用次數與模型單價，很難證明真正價值。技術主管應先建立流程基準線，再用完成時間、返工、例外與結果成本判斷 AI 是否真的改善工作。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>企業開始導入 AI 時，最容易取得的數字通常是買了多少席次、每週有多少人使用、呼叫了多少次模型，以及每個月花了多少錢。這些數字很適合放進簡報，卻不一定能回答真正重要的問題：工作有沒有因此做得更快、更準，或更容易被管理？</p>
+<p>我越來越認為，AI 導入最該先做的不是挑模型，而是把原本的流程量清楚。沒有導入前的基準線，導入後看到的每一個「提升」，都可能只是感覺、宣傳，或把成本從一個部門移到另一個部門。</p>
+<span id="more"></span>
+
+<h2 id="使用率不是成果，只是入口有被打開"><a href="#使用率不是成果，只是入口有被打開" class="headerlink" title="使用率不是成果，只是入口有被打開"></a>使用率不是成果，只是入口有被打開</h2><p>席次啟用率、每日活躍使用者、對話數與 token 用量並非沒有價值。它們能告訴我們工具是否被看見、員工是否願意嘗試，也能協助估算基礎設施負載。但這些都是使用行為，不是業務成果。</p>
+<p>一位同仁每天打開 AI 十次，可能是工作效率變高，也可能是答案不穩定，必須來回追問十次。某個部門用量突然增加，可能代表流程成功普及，也可能只是把原本一次能完成的事情，拆成更多模型呼叫。只看活躍度，很容易把「系統很忙」誤認成「系統有價值」。</p>
+<p>這和早期企業軟體導入很像。帳號有登入，不代表流程有改善；表單電子化，也不代表等待、重工與溝通成本消失。AI 只是讓這個誤判更容易發生，因為生成的內容看起來很有產出感。</p>
+<h2 id="先建立一條不完美但可信的基準線"><a href="#先建立一條不完美但可信的基準線" class="headerlink" title="先建立一條不完美但可信的基準線"></a>先建立一條不完美但可信的基準線</h2><p>所謂流程基準線，不需要一開始就做成昂貴的流程探勘專案。先挑一個邊界清楚、頻率夠高的工作，回答幾個基本問題就很有幫助：</p>
+<ul>
+<li>一件工作從進件到完成，日曆時間要多久？</li>
+<li>人真正投入處理的時間是多少，等待時間又是多少？</li>
+<li>中間經過幾次交接、補件與人工確認？</li>
+<li>有多少案件第一次就完成，有多少需要返工？</li>
+<li>哪些例外最常發生，最後由誰接手處理？</li>
+<li>錯誤被發現時，修正成本與影響範圍多大？</li>
+</ul>
+<p>這些數字不必假裝精準到小數點。重點是定義一致、取樣方式固定，而且團隊對「開始」「完成」「返工」有共同語意。若連完成是什麼都說不清楚，後面再漂亮的 AI ROI 都只是試算表上的想像。</p>
+<p>我通常也會把端到端時間和實際處理時間分開。AI 很可能讓撰寫摘要從二十分鐘降到三分鐘，卻沒有縮短案件在部門間等待兩天的時間。如果只量局部操作，會得到七成以上的效率提升；從客戶或內部使用者的角度看，整體流程可能幾乎沒變。</p>
+<h2 id="AI-常把成本移位，而不是直接消失"><a href="#AI-常把成本移位，而不是直接消失" class="headerlink" title="AI 常把成本移位，而不是直接消失"></a>AI 常把成本移位，而不是直接消失</h2><p>生成速度變快，並不代表總成本一定下降。AI 產生初稿後，可能增加事實核對、格式整理、權限確認與責任簽核；第一線省下時間，卻讓資深人員承擔更多覆判；自動分類提高吞吐量，也可能把少數錯誤送進更下游，直到代價更高時才被發現。</p>
+<p>所以我不會只問「模型一次呼叫多少錢」，而會看一件工作完整完成的成本。它至少包含模型與平台費用、人工操作時間、審核時間、例外處理、失敗重跑，以及錯誤造成的返工。若還涉及正式資料或外部承諾，稽核、撤銷與風險控制也不是免費的。</p>
+<p>這也是為什麼按使用量比較供應商，常常會得到錯誤結論。單次推論便宜的方案，如果需要更多重試與人工覆判，最終每件完成工作的成本可能更高。反過來，模型單價較高，卻能降低交接、返工與等待，整體反而更划算。</p>
+<p>真正適合管理的單位，不是每百萬 token，而是每個可驗證成果。</p>
+<h2 id="指標要跟著流程階段分層"><a href="#指標要跟著流程階段分層" class="headerlink" title="指標要跟著流程階段分層"></a>指標要跟著流程階段分層</h2><p>我會把 AI 工作流的指標分成四層。</p>
+<p>第一層是系統層：可用率、延遲、錯誤率、模型與工具成本。它回答平台是否健康。</p>
+<p>第二層是操作層：採用率、建議接受率、人工修改幅度、重試次數與工具呼叫成功率。它回答人和 AI 是否能順利合作。</p>
+<p>第三層是流程層：完成時間、等待時間、一次完成率、返工率、例外率與轉人工比例。它回答工作流是否真的改善。</p>
+<p>第四層才是成果層：交付速度、服務品質、營運風險、收入、成本或使用者滿意度。它回答這項改善是否值得企業持續投資。</p>
+<p>分層的好處，是發現數字變動時不必急著下結論。建議接受率下降，可能是模型退步，也可能是員工開始把 AI 用在更困難的案件；轉人工比例上升，可能是失敗，也可能是風險規則更成熟，成功攔下不該自動處理的例外。指標必須搭配流程脈絡解讀，不能只追求全部往同一個方向變漂亮。</p>
+<h2 id="先做影子量測，再談全面自動化"><a href="#先做影子量測，再談全面自動化" class="headerlink" title="先做影子量測，再談全面自動化"></a>先做影子量測，再談全面自動化</h2><p>在高風險流程裡，我偏好先讓 AI 以建議或草稿模式運作。它可以產生判斷，但不直接寫入正式結果；系統同時記錄人工原本怎麼做、AI 建議什麼、最後採用哪個版本，以及差異出在哪裡。</p>
+<p>這段影子期的價值，不只是驗證準確率。它能幫助團隊看見例外分布、資料缺口、人工判斷規則與真正耗時的地方。有時候跑完才會發現，流程最大的瓶頸根本不在內容生成，而在資料要跨三個系統查找，或完成後仍要等待另一個角色核准。這時候，優先改善整合與流程設計，可能比換更大的模型有效。</p>
+<p>等基準線、風險邊界與人工接手機制都穩定，再逐步提高自動化程度。不是因為保守，而是只有這樣，團隊才知道自動化拿掉了哪些成本，又新增了哪些成本。</p>
+<h2 id="技術主管要管理的是改善證據"><a href="#技術主管要管理的是改善證據" class="headerlink" title="技術主管要管理的是改善證據"></a>技術主管要管理的是改善證據</h2><p>企業 AI 最後一定會遇到預算問題：要不要續約、要不要擴大、哪個流程值得投資、哪個實驗應該停止。到了那一刻，模型展示多驚豔、員工用了多少次，都不足以支持決策。</p>
+<p>技術主管真正需要準備的是改善證據：導入前後採用相同定義量測，差異能追溯到流程，失敗與例外沒有被排除在統計之外，而且成本包含必要的人工與治理工作。即使結果顯示某個 AI 專案沒有價值，這套量測仍然有價值，因為它讓團隊可以及早停止，而不是靠期待繼續燒預算。</p>
+<p>我不反對用使用率觀察推廣，也不反對比較模型價格。但這些都只能是儀表板的一部分。真正成熟的 AI 導入，應該能清楚回答：原本的工作怎麼完成，現在改變了哪一步，總時間與總成本如何變化，錯誤去了哪裡，以及這個改變是否值得長期保留。</p>
+<p>在回答這些問題之前，先不要急著說 AI 提升了多少生產力。先把原本的流程量清楚，才有資格知道我們到底改善了什麼。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86/" rel="tag"># 技術管理</a>
+              <a href="/tags/%E4%BC%81%E6%A5%AD-AI/" rel="tag"># 企業 AI</a>
+              <a href="/tags/%E6%88%90%E6%9C%AC%E6%B2%BB%E7%90%86/" rel="tag"># 成本治理</a>
+              <a href="/tags/%E6%B5%81%E7%A8%8B%E6%94%B9%E5%96%84/" rel="tag"># 流程改善</a>
+              <a href="/tags/%E5%8F%AF%E8%A7%80%E6%B8%AC%E6%80%A7/" rel="tag"># 可觀測性</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026080301/" rel="prev" title="買一台智慧設備，也買下了十年的軟體供應鏈">
+      <i class="fa fa-chevron-left"></i> 買一台智慧設備，也買下了十年的軟體供應鏈
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026080601/" rel="next" title="即時 AI Agent 的負載，不是一條連線而已">
+      即時 AI Agent 的負載，不是一條連線而已 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%8E%87%E4%B8%8D%E6%98%AF%E6%88%90%E6%9E%9C%EF%BC%8C%E5%8F%AA%E6%98%AF%E5%85%A5%E5%8F%A3%E6%9C%89%E8%A2%AB%E6%89%93%E9%96%8B"><span class="nav-number">1.</span> <span class="nav-text">使用率不是成果，只是入口有被打開</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E5%BB%BA%E7%AB%8B%E4%B8%80%E6%A2%9D%E4%B8%8D%E5%AE%8C%E7%BE%8E%E4%BD%86%E5%8F%AF%E4%BF%A1%E7%9A%84%E5%9F%BA%E6%BA%96%E7%B7%9A"><span class="nav-number">2.</span> <span class="nav-text">先建立一條不完美但可信的基準線</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AI-%E5%B8%B8%E6%8A%8A%E6%88%90%E6%9C%AC%E7%A7%BB%E4%BD%8D%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E7%9B%B4%E6%8E%A5%E6%B6%88%E5%A4%B1"><span class="nav-number">3.</span> <span class="nav-text">AI 常把成本移位，而不是直接消失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E6%A8%99%E8%A6%81%E8%B7%9F%E8%91%97%E6%B5%81%E7%A8%8B%E9%9A%8E%E6%AE%B5%E5%88%86%E5%B1%A4"><span class="nav-number">4.</span> <span class="nav-text">指標要跟著流程階段分層</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E5%81%9A%E5%BD%B1%E5%AD%90%E9%87%8F%E6%B8%AC%EF%BC%8C%E5%86%8D%E8%AB%87%E5%85%A8%E9%9D%A2%E8%87%AA%E5%8B%95%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">先做影子量測，再談全面自動化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E4%B8%BB%E7%AE%A1%E8%A6%81%E7%AE%A1%E7%90%86%E7%9A%84%E6%98%AF%E6%94%B9%E5%96%84%E8%AD%89%E6%93%9A"><span class="nav-number">6.</span> <span class="nav-text">技術主管要管理的是改善證據</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

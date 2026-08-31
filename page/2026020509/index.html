@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="深入介紹 Cursor Agent CLI 工具 cursor-agent 的用法、三種模式、對話管理、輸出控制，以及在自動化流程中的實際應用場景">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cursor Agent CLI 深度探索：不只是 IDE 裡的 AI，它還能在終端機裡跑">
+<meta property="og:url" content="https://maplecheng.com/page/2026020509/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="深入介紹 Cursor Agent CLI 工具 cursor-agent 的用法、三種模式、對話管理、輸出控制，以及在自動化流程中的實際應用場景">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2026-02-05T03:30:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.339Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="CLI">
+<meta property="article:tag" content="Coding Agent">
+<meta property="article:tag" content="Cursor">
+<meta property="article:tag" content="開發工具">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020509/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Cursor Agent CLI 深度探索：不只是 IDE 裡的 AI，它還能在終端機裡跑 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020509/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Cursor Agent CLI 深度探索：不只是 IDE 裡的 AI，它還能在終端機裡跑
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-05 11:30:00" itemprop="dateCreated datePublished" datetime="2026-02-05T11:30:00+08:00">2026-02-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai/" itemprop="url" rel="index"><span itemprop="name">
+                      人工智慧
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">深入介紹 Cursor Agent CLI 工具 cursor-agent 的用法、三種模式、對話管理、輸出控制，以及在自動化流程中的實際應用場景</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>提到 Cursor，大部分人想到的是那個 AI-first 的程式碼編輯器——在 IDE 裡面跟 AI 對話、讓它幫你改 code、解釋 code。但其實 Cursor 還有一個很多人不知道（或知道但沒深入用過）的東西：<strong>Cursor Agent CLI</strong>，也就是 <code>cursor-agent</code> 這個命令列工具。它把 Cursor 的 AI 能力從 GUI 帶到了終端機，這意味著你可以在腳本裡呼叫它、在 CI&#x2F;CD pipeline 裡用它、甚至讓另一個 AI 來呼叫它。</p>
+<p>這件事聽起來好像只是「換個介面」，但它打開了一個全新的可能性：AI coding 不再綁定在「人坐在 IDE 前面」這個場景。它可以變成自動化流程的一環，被其他程式、其他 agent 來呼叫。這才是真正讓我興奮的地方。</p>
+<span id="more"></span>
+
+<h3 id="為什麼要用-CLI？"><a href="#為什麼要用-CLI？" class="headerlink" title="為什麼要用 CLI？"></a>為什麼要用 CLI？</h3><p>直覺的問題是：IDE 裡面用得好好的，為什麼要搬到 CLI？</p>
+<p>幾個原因：</p>
+<ul>
+<li><strong>自動化</strong>：IDE 需要人坐在前面操作，CLI 可以被腳本驅動</li>
+<li><strong>可組合</strong>：CLI 工具天生就能跟其他工具串接（shell pipe、程式呼叫）</li>
+<li><strong>輕量</strong>：不用開一整個 Electron app，在 server 上或 CI 環境就能跑</li>
+<li><strong>可控制</strong>：輸出格式可以指定為 JSON，方便程式解析</li>
+<li><strong>批量操作</strong>：可以同時開多個 cursor-agent process 處理不同任務</li>
+</ul>
+<p>我自己最常用的場景是在另一個 AI 助理裡呼叫 cursor-agent 來做 codebase 分析和程式碼修改。比起自己寫 AST parser 或 grep 大法，讓一個理解 code 的 agent 來回答問題實在方便太多了。</p>
+<h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><p>最簡單的用法就是一行指令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent -p <span class="string">&quot;幫我看一下 src/utils.js 有沒有未使用的 function&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>-p</code> 就是 prompt，跟你在 IDE 裡打的 chat 一樣。執行後 cursor-agent 會分析你當前目錄的 codebase，然後回答你的問題或直接改 code。</p>
+<p>這個指令看起來簡單，但背後 agent 做的事情不少：它會掃描當前目錄的檔案結構、讀取相關的程式碼、分析你的問題、然後決定要回答還是動手改。如果是改 code 的請求，它還會自己找到要改的檔案、做出修改、甚至跑 build 確認沒有壞掉。</p>
+<h4 id="指定模型"><a href="#指定模型" class="headerlink" title="指定模型"></a>指定模型</h4><p>cursor-agent 支援多種 LLM 模型，可以用 <code>--model</code> 指定：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent -p <span class="string">&quot;重構這個 function&quot;</span> --model sonnet-4.5-thinking</span><br></pre></td></tr></table></figure>
+
+<p>目前支援超過 20 種模型，包括 GPT-5.2、Claude 4.5、Gemini 3 等主流模型。不同模型的特性不同，像是需要深度思考的問題我會用 thinking 系列的模型，簡單的格式調整就用比較快的模型。</p>
+<p>模型的選擇其實對結果影響蠻大的。我的經驗是：</p>
+<ul>
+<li>簡單的格式修改、rename 之類的 → 用快速模型，省時省錢</li>
+<li>複雜的邏輯重構、架構分析 → 用 thinking 模型，品質差很多</li>
+<li>不確定的時候 → 先用 ask mode + 快速模型看看回答品質，不夠好再換</li>
+</ul>
+<h4 id="Force-模式"><a href="#Force-模式" class="headerlink" title="Force 模式"></a>Force 模式</h4><p>預設情況下，cursor-agent 在執行有副作用的操作前會先問你確認。如果你確定要讓它放手去做，可以加 <code>--force</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent -p <span class="string">&quot;把所有 var 改成 const&quot;</span> --force</span><br></pre></td></tr></table></figure>
+
+<p><strong>這個很危險但很高效</strong>。建議只在你有 git 保護（可以隨時 revert）的情況下使用。我自己的習慣是：local 開發可以 force，production 相關的絕對不 force。</p>
+<p>我有過一次慘痛經驗：在一個沒有 commit 的狀態下用了 <code>--force</code>，agent 改了一堆檔案，結果有幾個改壞了。因為沒有 commit point 可以 revert，只好手動一個一個檔案去比對修復。從此之後我養成了一個鐵律：<strong>force 之前先 commit，或至少 stash。</strong></p>
+<h4 id="PTY-限制"><a href="#PTY-限制" class="headerlink" title="PTY 限制"></a>PTY 限制</h4><p>有一個蠻重要的限制：cursor-agent <strong>必須在 PTY（pseudo-terminal）環境下跑</strong>。你不能直接用 pipe 把 prompt 導進去，像這樣是不行的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 這不會正常運作</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;分析 code&quot;</span> | cursor-agent</span><br></pre></td></tr></table></figure>
+
+<p>原因是 cursor-agent 的互動介面需要 terminal 的控制能力（顏色、游標位置等）。如果你要在程式裡呼叫它，需要用 PTY library 來包裝，比如 Node.js 的 <code>node-pty</code> 或 Python 的 <code>pexpect</code>。</p>
+<p>這一點在自動化整合的時候特別要注意，我一開始沒注意到這個限制，試了好幾種 spawn 方式都失敗，後來才發現要用 PTY。錯誤訊息也不是很直觀，它不會告訴你「需要 PTY」，而是直接 hang 住或輸出亂碼，讓你摸不著頭緒。</p>
+<h3 id="三種模式"><a href="#三種模式" class="headerlink" title="三種模式"></a>三種模式</h3><p>cursor-agent 有三種操作模式，各有各的適用場景：</p>
+<h4 id="1-Code-Mode（預設）"><a href="#1-Code-Mode（預設）" class="headerlink" title="1. Code Mode（預設）"></a>1. Code Mode（預設）</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent -p <span class="string">&quot;新增一個 retry mechanism 到 API client&quot;</span> --mode code</span><br></pre></td></tr></table></figure>
+
+<p>這是最常用的模式。agent 會分析你的 codebase，然後<strong>直接寫 code 並執行修改</strong>。它會讀檔、改檔、甚至跑 build 和 test。</p>
+<p>適合的場景：你已經知道要做什麼，讓 agent 去實作。</p>
+<p>Code mode 的厲害之處在於它不只是生成 code 片段讓你貼上去——它會自己找到要修改的檔案、判斷修改位置、處理 import、甚至調整相關的 test。這跟在 IDE 裡用 AI 的體驗是不一樣的，因為 CLI 的 agent 有更大的自主權。</p>
+<h4 id="2-Plan-Mode"><a href="#2-Plan-Mode" class="headerlink" title="2. Plan Mode"></a>2. Plan Mode</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent -p <span class="string">&quot;怎麼把這個 monorepo 拆成 microservices&quot;</span> --mode plan</span><br></pre></td></tr></table></figure>
+
+<p>Plan mode 只會產出<strong>計畫</strong>，不會實際動任何檔案。它會分析 codebase，然後告訴你「我打算做 A、B、C 這幾件事，改這些檔案」。</p>
+<p>這個模式我超愛。尤其是面對比較大的重構，我會先讓 agent 出個 plan，自己 review 一遍確認方向對了，然後才切回 code mode 去執行。</p>
+<p>它也很適合團隊協作：讓 agent 出 plan → 丟給團隊 review → 確認後再執行。這樣 AI 不是在「偷偷改 code」，而是先提案、再執行，人對結果有完全的掌控。</p>
+<p>我在用的時候通常會先跑 plan，把產出的 plan 存起來，然後帶著 plan 再用 code mode 執行。有點像先畫設計圖再施工的感覺。</p>
+<h4 id="3-Ask-Mode"><a href="#3-Ask-Mode" class="headerlink" title="3. Ask Mode"></a>3. Ask Mode</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent -p <span class="string">&quot;這個 useEffect 的 dependency array 為什麼要放這些值？&quot;</span> --mode ask</span><br></pre></td></tr></table></figure>
+
+<p>Ask mode 是<strong>唯讀</strong>的。agent 只回答問題，完全不動 code。適合用在：</p>
+<ul>
+<li>理解不熟悉的 codebase</li>
+<li>查某個 function 的邏輯</li>
+<li>問架構相關的問題</li>
+<li>讓另一個 AI 透過 cursor-agent 來了解 codebase</li>
+</ul>
+<p>我最常在另一個 AI 助理裡用 ask mode 來做 codebase 查詢。比如「這個專案用了哪些 npm packages 跟 authentication 有關？」這類問題，ask mode 回答得又快又準。</p>
+<h3 id="對話管理"><a href="#對話管理" class="headerlink" title="對話管理"></a>對話管理</h3><p>跟 IDE 裡面的 chat 一樣，cursor-agent 的對話也可以持續和恢復。</p>
+<h4 id="恢復之前的對話"><a href="#恢復之前的對話" class="headerlink" title="恢復之前的對話"></a>恢復之前的對話</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent --resume abc123def</span><br></pre></td></tr></table></figure>
+
+<p>對話歷史存在 <code>~/.cursor/chats/</code> 目錄下。你可以用 <code>--resume</code> 加上 chatId 來恢復之前的對話。這在多 session 工作時很有用——比如今天做了一半的重構，明天繼續。</p>
+<h4 id="繼續上一次對話"><a href="#繼續上一次對話" class="headerlink" title="繼續上一次對話"></a>繼續上一次對話</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent --<span class="built_in">continue</span> -p <span class="string">&quot;上次那個 API client 的 retry 做好了嗎？&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>--continue</code> 會自動接續最近一次的對話，不需要手動找 chatId。</p>
+<p>這個功能讓 cursor-agent 可以在多個 session 間保持 context。agent 會記得之前的討論、改過的檔案、做過的決定。這比每次都重新給 context 省事多了。</p>
+<p>不過要注意的是，如果你 resume 一個很長的對話，context window 可能已經很滿了，agent 的表現會開始下降。我的經驗是：如果對話超過十幾個 turn，不如開一個新的對話，把之前的結論帶過去就好。</p>
+<h3 id="輸出控制"><a href="#輸出控制" class="headerlink" title="輸出控制"></a>輸出控制</h3><p>如果你要在程式裡解析 cursor-agent 的輸出，可以控制它的輸出格式：</p>
+<h4 id="純文字"><a href="#純文字" class="headerlink" title="純文字"></a>純文字</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent -p <span class="string">&quot;列出所有 TODO 註解&quot;</span> --<span class="built_in">print</span> text</span><br></pre></td></tr></table></figure>
+
+<p>就是乾淨的文字，沒有顏色碼和控制字元。</p>
+<h4 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent -p <span class="string">&quot;分析這個 function 的複雜度&quot;</span> --<span class="built_in">print</span> json</span><br></pre></td></tr></table></figure>
+
+<p>回傳結構化的 JSON，包含 agent 的回答、修改的檔案列表、執行的命令等。適合程式解析。</p>
+<h4 id="Stream-JSON"><a href="#Stream-JSON" class="headerlink" title="Stream JSON"></a>Stream JSON</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent -p <span class="string">&quot;重構所有 utils&quot;</span> --<span class="built_in">print</span> stream-json</span><br></pre></td></tr></table></figure>
+
+<p>即時串流 JSON，每一步操作都會即時輸出一個 JSON object。適合需要即時顯示進度的應用——比如在 web UI 裡顯示 agent 正在做什麼。</p>
+<h3 id="實際應用場景"><a href="#實際應用場景" class="headerlink" title="實際應用場景"></a>實際應用場景</h3><p>聊完功能，來說說我實際怎麼用。</p>
+<h4 id="AI-助理-cursor-agent-做-codebase-分析"><a href="#AI-助理-cursor-agent-做-codebase-分析" class="headerlink" title="AI 助理 + cursor-agent 做 codebase 分析"></a>AI 助理 + cursor-agent 做 codebase 分析</h4><p>我目前的設定是讓一個 AI 助理（不是 Cursor）在需要理解 codebase 的時候呼叫 cursor-agent 的 ask mode。流程大概是：</p>
+<ol>
+<li>使用者問：「某專案的 API rate limiting 邏輯怎麼寫的？」</li>
+<li>AI 助理判斷這個問題需要看 code</li>
+<li>呼叫 <code>cursor-agent --mode ask -p &quot;API rate limiting 邏輯在哪裡？怎麼實作的？&quot;</code></li>
+<li>解析回傳結果，整理成使用者看得懂的回答</li>
+</ol>
+<p>這比自己寫 code search 強太多了。而且因為 cursor-agent 理解程式碼的語意，它可以追蹤 function call chain、理解 import 關係，給出的答案比 grep 精確得多。</p>
+<h4 id="自動化開發流程"><a href="#自動化開發流程" class="headerlink" title="自動化開發流程"></a>自動化開發流程</h4><p>另一個我很常用的場景是用 cursor-agent 做自動化開發。搭配一個 PM 角色的 AI 來拆任務：</p>
+<ol>
+<li>PM agent 把一個 feature 拆成幾個小任務</li>
+<li>每個任務都送給 cursor-agent 用 plan mode 先出方案</li>
+<li>Review 方案（人工或自動）</li>
+<li>通過後用 code mode 執行</li>
+<li>自動跑 <code>npm run build</code> 和 <code>npm run lint</code></li>
+<li>如果 build 或 lint 失敗，把錯誤訊息回傳給 cursor-agent 讓它修</li>
+<li>全部通過後自動 commit</li>
+</ol>
+<p>這套流程我在幾個小專案上試過，效果蠻好的。但有個重要的前提：<strong>任務要拆得夠小。</strong> 如果你丟一個「幫我做一個完整的 CRUD API」給 cursor-agent，它有時候會迷路。但如果拆成「建立 model」「建立 route handler」「加上 validation」「寫 unit test」這樣的小任務，每一步的品質都高很多。</p>
+<h4 id="批量重構"><a href="#批量重構" class="headerlink" title="批量重構"></a>批量重構</h4><p>有一次要把專案裡所有的 callback style 改成 async&#x2F;await。手動改太累，直接：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor-agent -p <span class="string">&quot;把 src/ 下所有使用 callback 的非同步函式改成 async/await，一個檔案一個檔案處理&quot;</span> --force</span><br></pre></td></tr></table></figure>
+
+<p>agent 自己找到所有需要改的檔案，逐一修改，還會自動調整相關的 error handling。整個過程大概十分鐘搞定，手動的話可能要花半天。</p>
+<p>不過批量重構有個風險：agent 有時候會「過度修改」。比如你只想改 callback，但它順手把一些不相關的東西也改了。所以跑完之後一定要用 <code>git diff</code> 仔細 review。我的習慣是：跑完批量修改後，先整體看一遍 diff，確認改動範圍符合預期，再 commit。</p>
+<h3 id="Prompt-工程：寫好指令很重要"><a href="#Prompt-工程：寫好指令很重要" class="headerlink" title="Prompt 工程：寫好指令很重要"></a>Prompt 工程：寫好指令很重要</h3><p>用 cursor-agent 跟用 IDE 裡的 AI chat 不太一樣。在 IDE 裡你可以用滑鼠選 code、用 @ 標記檔案，但 CLI 只有文字。所以 prompt 要寫得更精確。</p>
+<p>幾個我學到的技巧：</p>
+<ul>
+<li><strong>指定檔案範圍</strong>：「只修改 <code>src/api/</code> 目錄下的檔案」，不要讓 agent 亂改其他地方</li>
+<li><strong>說明預期行為</strong>：「修改後 <code>npm test</code> 應該全部通過」，給 agent 一個驗證標準</li>
+<li><strong>分步驟指示</strong>：「先列出所有需要修改的檔案，然後一個一個處理」，這比一句「全部改好」效果好得多</li>
+<li><strong>指定不要做什麼</strong>：「不要修改 test 檔案」「不要改變函式的公開介面」</li>
+</ul>
+<h3 id="注意事項"><a href="#注意事項" class="headerlink" title="注意事項"></a>注意事項</h3><p>最後提幾個使用前要知道的事：</p>
+<ul>
+<li><strong>需要 Cursor 帳號和訂閱</strong>：cursor-agent 不是免費的，它用的是你 Cursor 訂閱的額度</li>
+<li><strong>CLI config</strong>：設定檔在 <code>~/.cursor/cli-config.json</code>，可以設定預設模型、預設模式等</li>
+<li><strong>雲端執行</strong>：加 <code>--cloud</code> 可以把計算放到雲端跑，不佔本地資源。適合在輕量機器上使用</li>
+<li><strong>沙箱模式</strong>：加 <code>--sandbox</code> 會在隔離環境中執行，agent 的所有操作都在沙箱裡，不會影響你本地的檔案。適合測試或不確定 agent 會做什麼的時候用</li>
+<li><strong>費用管理</strong>：每次 cursor-agent 呼叫都會消耗額度，如果你用在自動化流程裡，要注意控制呼叫頻率和 token 用量</li>
+</ul>
+<h3 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h3><p>Cursor Agent CLI 把 AI coding 從「坐在 IDE 前面跟 AI 對話」延伸到了「在任何自動化流程裡呼叫 AI 來寫 code」。這個轉變聽起來微妙，但實際影響很大——它讓 AI coding 不再是一個「人機互動」的場景，而是可以變成「機器對機器」的自動化環節。</p>
+<p>當然，目前還有一些限制（PTY 需求、需要訂閱、偶爾的 hallucination），但整體來說，cursor-agent 是我目前用過最實用的 coding agent CLI。如果你已經在用 Cursor IDE，強烈建議試試它的 CLI 版本——你會發現一個全新的工作流。</p>
+<p>說真的，第一次看到一個 AI agent 呼叫另一個 AI agent 來寫 code，那個感覺很奇妙。有點像是看到未來的工作方式——人負責定方向和做決策，AI 之間自己協作把事情做完。雖然現在還沒完全到那個程度，但 cursor-agent 讓這個畫面變得越來越清晰了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/Cursor/" rel="tag"># Cursor</a>
+              <a href="/tags/Coding-Agent/" rel="tag"># Coding Agent</a>
+              <a href="/tags/CLI/" rel="tag"># CLI</a>
+              <a href="/tags/%E9%96%8B%E7%99%BC%E5%B7%A5%E5%85%B7/" rel="tag"># 開發工具</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020508/" rel="prev" title="Notion API 雙 Workspace 踩坑記：Token 搞混、批量操作與去重實戰">
+      <i class="fa fa-chevron-left"></i> Notion API 雙 Workspace 踩坑記：Token 搞混、批量操作與去重實戰
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020510/" rel="next" title="MCP vs Skills：AI Agent 工具擴展的兩條路，我怎麼選？">
+      MCP vs Skills：AI Agent 工具擴展的兩條路，我怎麼選？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E8%A6%81%E7%94%A8-CLI%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">為什麼要用 CLI？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">基本用法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">指定模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Force-%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.2.</span> <span class="nav-text">Force 模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PTY-%E9%99%90%E5%88%B6"><span class="nav-number">2.3.</span> <span class="nav-text">PTY 限制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E7%A8%AE%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">三種模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Code-Mode%EF%BC%88%E9%A0%90%E8%A8%AD%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">1. Code Mode（預設）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Plan-Mode"><span class="nav-number">3.2.</span> <span class="nav-text">2. Plan Mode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Ask-Mode"><span class="nav-number">3.3.</span> <span class="nav-text">3. Ask Mode</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8D%E8%A9%B1%E7%AE%A1%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">對話管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%81%A2%E5%BE%A9%E4%B9%8B%E5%89%8D%E7%9A%84%E5%B0%8D%E8%A9%B1"><span class="nav-number">4.1.</span> <span class="nav-text">恢復之前的對話</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B9%BC%E7%BA%8C%E4%B8%8A%E4%B8%80%E6%AC%A1%E5%B0%8D%E8%A9%B1"><span class="nav-number">4.2.</span> <span class="nav-text">繼續上一次對話</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BC%B8%E5%87%BA%E6%8E%A7%E5%88%B6"><span class="nav-number">5.</span> <span class="nav-text">輸出控制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B4%94%E6%96%87%E5%AD%97"><span class="nav-number">5.1.</span> <span class="nav-text">純文字</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JSON"><span class="nav-number">5.2.</span> <span class="nav-text">JSON</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stream-JSON"><span class="nav-number">5.3.</span> <span class="nav-text">Stream JSON</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%A6%E9%9A%9B%E6%87%89%E7%94%A8%E5%A0%B4%E6%99%AF"><span class="nav-number">6.</span> <span class="nav-text">實際應用場景</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AI-%E5%8A%A9%E7%90%86-cursor-agent-%E5%81%9A-codebase-%E5%88%86%E6%9E%90"><span class="nav-number">6.1.</span> <span class="nav-text">AI 助理 + cursor-agent 做 codebase 分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%8B%95%E5%8C%96%E9%96%8B%E7%99%BC%E6%B5%81%E7%A8%8B"><span class="nav-number">6.2.</span> <span class="nav-text">自動化開發流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E9%87%8D%E6%A7%8B"><span class="nav-number">6.3.</span> <span class="nav-text">批量重構</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Prompt-%E5%B7%A5%E7%A8%8B%EF%BC%9A%E5%AF%AB%E5%A5%BD%E6%8C%87%E4%BB%A4%E5%BE%88%E9%87%8D%E8%A6%81"><span class="nav-number">7.</span> <span class="nav-text">Prompt 工程：寫好指令很重要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">8.</span> <span class="nav-text">注意事項</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">9.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

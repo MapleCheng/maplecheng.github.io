@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"maplecheng.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z57P265FLB');
+</script>
+  <meta name="description" content="分享 EmberBooks 記帳系統的開發過程，從技術選型到 AI 協作，以及 side project 能做出來的五個心法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Side Project 週末開發心法：EmberBooks 記帳系統的誕生">
+<meta property="og:url" content="https://maplecheng.com/page/2026020515/index.html">
+<meta property="og:site_name" content="MapleCheng">
+<meta property="og:description" content="分享 EmberBooks 記帳系統的開發過程，從技術選型到 AI 協作，以及 side project 能做出來的五個心法。">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://maplecheng.com/images/emberbooks/login.png">
+<meta property="og:image" content="https://maplecheng.com/images/emberbooks/dashboard.png">
+<meta property="og:image" content="https://maplecheng.com/images/emberbooks/monthly-report.png">
+<meta property="article:published_time" content="2026-02-05T05:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:48:02.340Z">
+<meta property="article:author" content="MapleCheng">
+<meta property="article:tag" content="EmberBooks">
+<meta property="article:tag" content="Side Project">
+<meta property="article:tag" content="TypeScript">
+<meta property="article:tag" content="全端開發">
+<meta property="article:tag" content="記帳">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://maplecheng.com/images/emberbooks/login.png">
+
+<link rel="canonical" href="https://maplecheng.com/page/2026020515/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+<!-- noindex for thin content posts -->
+
+
+  <title>Side Project 週末開發心法：EmberBooks 記帳系統的誕生 | MapleCheng</title>
+  
+
+<!-- Google adsense -->
+<meta name="google-adsense-account" content="ca-pub-2976738677816797">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2976738677816797" crossorigin="anonymous"></script>
+
+
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: 'ca-pub-2976738677816797',
+    enable_page_level_ads: true
+  });
+</script>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z57P265FLB"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Z57P265FLB');
+      }
+    </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="MapleCheng" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">MapleCheng</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">在浩瀚的網路世界中無限潛水欸少年郎！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-personal">
+
+    <a href="/categories/personal/" rel="section"><i class="fa fa-blog fa-fw"></i>就是個版</a>
+
+  </li>
+        <li class="menu-item menu-item-develop">
+
+    <a href="/categories/develop/" rel="section"><i class="fa fa-code fa-fw"></i>程式開發</a>
+
+  </li>
+        <li class="menu-item menu-item-ai">
+
+    <a href="/categories/ai/" rel="section"><i class="fa fa-brain fa-fw"></i>人工智慧</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://maplecheng.com/page/2026020515/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MapleCheng">
+      <meta itemprop="description" content="MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MapleCheng">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Side Project 週末開發心法：EmberBooks 記帳系統的誕生
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2026-02-05 13:00:00" itemprop="dateCreated datePublished" datetime="2026-02-05T13:00:00+08:00">2026-02-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/develop/" itemprop="url" rel="index"><span itemprop="name">
+                      程式開發
+                  </span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">分享 EmberBooks 記帳系統的開發過程，從技術選型到 AI 協作，以及 side project 能做出來的五個心法。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>每個工程師都有一堆「有一天要做」的 side project。手機備忘錄裡躺了十幾個 idea，每個都覺得「這個週末來做好了」，然後週末就在耍廢中度過。EmberBooks 是我少數真的做出來、而且每天在用的 side project，今天來聊聊它的誕生過程。</p>
+<span id="more"></span>
+
+<h2 id="動機：一切始於「沒有-API」"><a href="#動機：一切始於「沒有-API」" class="headerlink" title="動機：一切始於「沒有 API」"></a>動機：一切始於「沒有 API」</h2><p>我有記帳的習慣，已經持續好幾年了。用的是一個還不錯的記帳 App，介面漂亮、操作順手，但有一個致命的問題 — 它沒有 API。</p>
+<p>為什麼我需要 API？因為我有一個 AI 助理，它幫我處理很多日常事務。我希望它也能讀取我的帳務資料，每個月自動生成消費分析和月報。但沒有 API，AI 就像一個瞎了眼的財務顧問 — 什麼數據都看不到，只能嘴砲。</p>
+<p>我曾經想過用爬蟲去抓那個 App 的資料，但想想還是算了，太髒了。然後我想過等它開放 API，但看了看它的更新頻率… 算了，不等了。</p>
+<p>與其等別人，不如自己寫一個。</p>
+<p>這就是 EmberBooks 的誕生動機。不是要做一個打敗市面上所有記帳 App 的產品，只是要做一個「有 API、能讓 AI 讀的記帳系統」。目標非常明確，這也是它最終能完成的關鍵原因之一。</p>
+<p><img src="/images/emberbooks/login.png" alt="EmberBooks 登入畫面"></p>
+<h2 id="技術選型：選自己熟的，不要選最潮的"><a href="#技術選型：選自己熟的，不要選最潮的" class="headerlink" title="技術選型：選自己熟的，不要選最潮的"></a>技術選型：選自己熟的，不要選最潮的</h2><p>Side project 的技術選型和公司專案不一樣。公司專案要考慮團隊能力、長期維護、生態成熟度；side project 只要考慮一件事 — <strong>你能不能在週末把它做出來</strong>。</p>
+<h3 id="Monorepo（pnpm-workspace）"><a href="#Monorepo（pnpm-workspace）" class="headerlink" title="Monorepo（pnpm workspace）"></a>Monorepo（pnpm workspace）</h3><p>前後端加上共用型別，全部放在一個 repo 裡。用 pnpm workspace 管理。為什麼選 monorepo？因為一個人開發的時候，跳來跳去切 repo 超煩的。改一個型別，前後端都要同步更新，放在一起就不會忘記。</p>
+<h3 id="TypeScript-全套"><a href="#TypeScript-全套" class="headerlink" title="TypeScript 全套"></a>TypeScript 全套</h3><p>前端 TypeScript、後端 TypeScript、共用型別也是 TypeScript。同一個語言寫到底，型別定義一次就能前後端共用。</p>
+<p>有人可能會說「後端用 Go 或 Rust 效能比較好」。說得對，但這是記帳系統，不是高頻交易平台。我一個人用的東西，TypeScript 的效能綽綽有餘，而且開發速度快很多。</p>
+<h3 id="後端：Node-js-Express"><a href="#後端：Node-js-Express" class="headerlink" title="後端：Node.js + Express"></a>後端：Node.js + Express</h3><p>最無聊的選擇，但也是最實際的選擇。Express 生態豐富到什麼 middleware 都找得到，遇到問題 Google 一下一定有答案。我不需要在 side project 裡探索新框架，我只需要把功能做出來。</p>
+<h3 id="前端：React-Vite"><a href="#前端：React-Vite" class="headerlink" title="前端：React + Vite"></a>前端：React + Vite</h3><p>同樣是選了最保守的組合。React 我最熟，Vite 開發體驗好、build 速度快。有人可能會問「為什麼不用 Next.js」— 因為我不需要 SSR，記帳系統純粹是 SPA 就夠了。少一個框架，少一堆要學的概念。</p>
+<h3 id="資料庫：MongoDB"><a href="#資料庫：MongoDB" class="headerlink" title="資料庫：MongoDB"></a>資料庫：MongoDB</h3><p>記帳資料的結構其實蠻複雜的。支出、收入、轉帳、退款、分期、循環扣款… 每種類型的欄位都不太一樣。用關聯式資料庫的話，要嘛設計一大堆 table，要嘛搞一個很醜的 single table。MongoDB 的文檔型結構就很適合這種「基本上是同一類東西，但細節差很多」的場景。</p>
+<h3 id="認證：JWT-API-Key-雙模式"><a href="#認證：JWT-API-Key-雙模式" class="headerlink" title="認證：JWT + API Key 雙模式"></a>認證：JWT + API Key 雙模式</h3><p>人類用 JWT 登入前端介面，AI 助理用 API Key 打 API。兩種認證方式各走各的，互不干擾。API Key 可以設定權限範圍，例如只給讀取權限、或是只開放特定 endpoint。</p>
+<h2 id="開發過程：AI-是最好的-Pair-Programming-Partner"><a href="#開發過程：AI-是最好的-Pair-Programming-Partner" class="headerlink" title="開發過程：AI 是最好的 Pair Programming Partner"></a>開發過程：AI 是最好的 Pair Programming Partner</h2><p>EmberBooks 的開發過程中，AI Coding Agent 幫了大忙。</p>
+<h3 id="AI-負責的部分"><a href="#AI-負責的部分" class="headerlink" title="AI 負責的部分"></a>AI 負責的部分</h3><p>骨架搭建、CRUD endpoint、認證系統、錯誤處理… 這些幾乎全部由 AI 生成。我描述需求，它寫 code，我 review 後調整。一個完整的 CRUD API（包含 validation、error handling、TypeScript 型別）大概 10 分鐘就能產出，以前自己手寫至少要半小時到一小時。</p>
+<h3 id="人工負責的部分"><a href="#人工負責的部分" class="headerlink" title="人工負責的部分"></a>人工負責的部分</h3><p>UI 設計決策是 AI 做不好的。「這個按鈕放左邊還是右邊」「月報的圖表要用折線還是長條」— 這些需要審美和使用者體驗的判斷，還是要人來。</p>
+<p>業務邏輯也是。信用卡的帳單計算、分期付款的利息計算、轉帳時兩邊帳戶的配對邏輯… 這些東西有很多 edge case，AI 的初稿通常能涵蓋 70% 的情況，剩下 30% 要靠人腦補完。</p>
+<h3 id="資料遷移：最大的坑"><a href="#資料遷移：最大的坑" class="headerlink" title="資料遷移：最大的坑"></a>資料遷移：最大的坑</h3><p>從舊 App 匯出 CSV，然後寫 importer 自動匯入到 EmberBooks。聽起來很簡單，做起來想哭。</p>
+<p>首先是金額的正負號問題。舊 App 把支出存成正數（因為「花了 500 元」對使用者來說是正的），但我的系統把支出存成負數（因為帳戶餘額減少了）。一個轉換沒做好，整個報表數字就全部反了。</p>
+<p>然後是轉帳配對。從 A 帳戶轉到 B 帳戶，在舊 App 裡是兩筆獨立的紀錄（A 扣款、B 入帳）。在我的系統裡，轉帳是一筆紀錄，同時記錄來源和目標帳戶。怎麼把兩筆配對成一筆？金額相同、時間接近、一正一負 → 大概可以配。但如果同一天有兩筆一樣金額的轉帳呢？那就只能手動處理了。</p>
+<p>重複偵測也很頭痛。匯入過程中如果程式中斷重跑，怎麼確保不會產生重複資料？最後我的做法是用舊 App 的 ID + 交易時間做 unique key，匯入前先檢查有沒有重複。</p>
+<p>800 多筆交易，最後花了我一整個週末才搞定。其中大概 95% 是自動匯入的，剩下 5% 手動處理。</p>
+<h2 id="功能亮點"><a href="#功能亮點" class="headerlink" title="功能亮點"></a>功能亮點</h2><p>做完之後回頭看，EmberBooks 的功能還蠻完整的：</p>
+<p><strong>10 種記錄類型。</strong> 支出、收入、轉帳、退款、分期付款、循環扣款、信用卡帳單、預付款、調整、手續費。基本上日常會遇到的金流類型都有了。</p>
+<p><strong>信用卡帳單管理。</strong> 設定帳單日和繳款日，系統自動把期間內的刷卡記錄歸到對應帳單。每期帳單有獨立的對帳頁面，可以和銀行帳單核對。</p>
+<p><strong>分期付款用 Project + Tasks 的概念。</strong> 一筆分期付款就是一個 Project，每一期就是一個 Task。建立的時候自動產生所有期數，每期到期時自動提醒。這個設計讓分期的管理變得超直覺。</p>
+<p><strong>報表 API。</strong> 月報、年報、分類趨勢、預算追蹤 — 全部透過 API 提供。這就是為什麼我要自己寫的原因 — 有了 API，AI 助理就能自動拉數據、生成分析報告。</p>
+<p><strong>AI 助理整合。</strong> 這是最爽的部分。我跟 AI 說「午餐 120 元」，它就自動在 EmberBooks 建立一筆支出記錄，類別是「餐飲」，帳戶是我的預設付款帳戶。不用打開 App、不用選類別、不用輸入金額 — 說一句話就搞定。</p>
+<p><strong>現金流預測。</strong> 看未來三到六個月的預測：固定收入（薪水）扣掉固定支出（房租、帳單、分期）之後還剩多少。這個功能幫我做財務規劃的時候非常有用。</p>
+<p><img src="/images/emberbooks/dashboard.png" alt="EmberBooks Dashboard — 月概覽與支出分類"></p>
+<p><img src="/images/emberbooks/monthly-report.png" alt="EmberBooks 月報 — 圓餅圖與每日趨勢"></p>
+<h2 id="Side-Project-心法"><a href="#Side-Project-心法" class="headerlink" title="Side Project 心法"></a>Side Project 心法</h2><p>做了 EmberBooks 之後，我整理出五個 side project 能做出來的心法：</p>
+<h3 id="1-MVP-先行"><a href="#1-MVP-先行" class="headerlink" title="1. MVP 先行"></a>1. MVP 先行</h3><p>第一版的 EmberBooks 超陽春。沒有前端，只有 API。我用 Postman 測完所有 endpoint，確認能跑之後，才開始做前端。前端第一版也醜得要命，但能用就好。</p>
+<p>很多 side project 死在「我要先把架構設計完美」。不要。先做一個能用的最小版本，用了之後你才知道什麼功能重要、什麼功能根本不需要。</p>
+<h3 id="2-善用-AI"><a href="#2-善用-AI" class="headerlink" title="2. 善用 AI"></a>2. 善用 AI</h3><p>Boilerplate 讓 AI 寫就好了。把你的精力留給核心邏輯 — 那些 AI 搞不定、需要人腦思考的部分。一個 CRUD endpoint 讓 AI 寫 10 分鐘搞定，你省下來的時間可以去想「分期付款的利息怎麼算」這種真正有價值的問題。</p>
+<h3 id="3-自己當用戶"><a href="#3-自己當用戶" class="headerlink" title="3. 自己當用戶"></a>3. 自己當用戶</h3><p>EmberBooks 能做出來，最大的原因是我自己每天都在用。自己當用戶的好處是：你知道什麼功能真的需要、什麼 bug 真的很煩。而且因為自己用的東西，做起來有動力。</p>
+<p>那些「我覺得別人會需要」的 side project，通常活不過第三週。</p>
+<h3 id="4-不要怕技術債"><a href="#4-不要怕技術債" class="headerlink" title="4. 不要怕技術債"></a>4. 不要怕技術債</h3><p>Side project 不是公司產品，不需要寫得像教科書。有些地方我知道設計不好，但先這樣用著，等真的痛了再重構。Side project 的目的是解決問題，不是拿去面試。</p>
+<h3 id="5-記錄過程"><a href="#5-記錄過程" class="headerlink" title="5. 記錄過程"></a>5. 記錄過程</h3><p>這個很重要。我在 EmberBooks 的 repo 裡維護了一份詳細的專案文檔，記錄了架構設計、API 規格、資料模型、開發紀錄。這份文檔不只是給自己看的，更是給 AI Coding Agent 看的 — 它讀完文檔之後，就能理解整個 codebase，之後要加功能或修 bug 都很快。</p>
+<h2 id="和-AI-Coding-Agent-協作的心得"><a href="#和-AI-Coding-Agent-協作的心得" class="headerlink" title="和 AI Coding Agent 協作的心得"></a>和 AI Coding Agent 協作的心得</h2><p>最後分享幾個和 AI Coding Agent 協作的心得：</p>
+<p><strong>給 Agent 完整的專案文檔。</strong> 不要假設 Agent 知道你的專案結構。寫一份好的 README 或 CLAUDE.md，描述清楚架構、慣例、技術棧。Agent 讀完之後產出的 code 品質會好很多。</p>
+<p><strong>把需求寫成具體的 spec。</strong> 「幫我做一個記帳功能」和「新增 POST &#x2F;api&#x2F;transactions endpoint，接受以下欄位：amount (number, required), category (string, required), description (string, optional)，回傳 201 + 建立的記錄」— 後者的產出品質直接翻倍。</p>
+<p><strong>複雜的商業邏輯還是要人想。</strong> Agent 很擅長實作，但它不擅長「想」。信用卡帳單的計算邏輯、分期付款到期日遇到假日怎麼辦、同一張卡兩筆分期的帳單怎麼合併 — 這些問題你想清楚之後告訴 Agent，它就能完美實作。但如果你叫它自己想，它通常會漏掉一堆 edge case。</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>Side project 不需要改變世界。解決自己的問題就夠了。</p>
+<p>EmberBooks 讓我的記帳從「每天手動打開 App、選類別、輸入金額」變成「跟 AI 說一句話」。一年下來，我多記了好幾百筆以前懶得記的小額消費，對自己的財務狀況也掌握得更清楚了。</p>
+<p>如果你也有一個一直想做的 side project，我的建議是：不要再想了，這個週末就開始。第一版醜一點沒關係，能用就好。有 AI 幫忙的話，一個週末能做出來的東西比你想像的多很多。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Side-Project/" rel="tag"># Side Project</a>
+              <a href="/tags/EmberBooks/" rel="tag"># EmberBooks</a>
+              <a href="/tags/TypeScript/" rel="tag"># TypeScript</a>
+              <a href="/tags/%E5%85%A8%E7%AB%AF%E9%96%8B%E7%99%BC/" rel="tag"># 全端開發</a>
+              <a href="/tags/%E8%A8%98%E5%B8%B3/" rel="tag"># 記帳</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/page/2026020514/" rel="prev" title="小團隊 CTO 的 AI 工具箱：用 AI 補足十人團隊的人力缺口">
+      <i class="fa fa-chevron-left"></i> 小團隊 CTO 的 AI 工具箱：用 AI 補足十人團隊的人力缺口
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/page/2026020516/" rel="next" title="AI 助理的安全設計：從 Prompt Injection 到隱私邊界">
+      AI 助理的安全設計：從 Prompt Injection 到隱私邊界 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <script src="https://utteranc.es/client.js"
+      repo="MapleCheng/maplecheng.github.io"
+      issue-term="pathname"
+      theme="preferred-color-scheme"
+      crossorigin="anonymous"
+      async>
+    </script>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-inner-content">
+
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview">
+            本站概要
+          </li>
+        </ul>
+
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8B%95%E6%A9%9F%EF%BC%9A%E4%B8%80%E5%88%87%E5%A7%8B%E6%96%BC%E3%80%8C%E6%B2%92%E6%9C%89-API%E3%80%8D"><span class="nav-number">1.</span> <span class="nav-text">動機：一切始於「沒有 API」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E9%81%B8%E5%9E%8B%EF%BC%9A%E9%81%B8%E8%87%AA%E5%B7%B1%E7%86%9F%E7%9A%84%EF%BC%8C%E4%B8%8D%E8%A6%81%E9%81%B8%E6%9C%80%E6%BD%AE%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">技術選型：選自己熟的，不要選最潮的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Monorepo%EF%BC%88pnpm-workspace%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">Monorepo（pnpm workspace）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TypeScript-%E5%85%A8%E5%A5%97"><span class="nav-number">2.2.</span> <span class="nav-text">TypeScript 全套</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%8C%E7%AB%AF%EF%BC%9ANode-js-Express"><span class="nav-number">2.3.</span> <span class="nav-text">後端：Node.js + Express</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%AB%AF%EF%BC%9AReact-Vite"><span class="nav-number">2.4.</span> <span class="nav-text">前端：React + Vite</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B3%87%E6%96%99%E5%BA%AB%EF%BC%9AMongoDB"><span class="nav-number">2.5.</span> <span class="nav-text">資料庫：MongoDB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AA%8D%E8%AD%89%EF%BC%9AJWT-API-Key-%E9%9B%99%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.6.</span> <span class="nav-text">認證：JWT + API Key 雙模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%96%8B%E7%99%BC%E9%81%8E%E7%A8%8B%EF%BC%9AAI-%E6%98%AF%E6%9C%80%E5%A5%BD%E7%9A%84-Pair-Programming-Partner"><span class="nav-number">3.</span> <span class="nav-text">開發過程：AI 是最好的 Pair Programming Partner</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AI-%E8%B2%A0%E8%B2%AC%E7%9A%84%E9%83%A8%E5%88%86"><span class="nav-number">3.1.</span> <span class="nav-text">AI 負責的部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%BA%E5%B7%A5%E8%B2%A0%E8%B2%AC%E7%9A%84%E9%83%A8%E5%88%86"><span class="nav-number">3.2.</span> <span class="nav-text">人工負責的部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B3%87%E6%96%99%E9%81%B7%E7%A7%BB%EF%BC%9A%E6%9C%80%E5%A4%A7%E7%9A%84%E5%9D%91"><span class="nav-number">3.3.</span> <span class="nav-text">資料遷移：最大的坑</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E4%BA%AE%E9%BB%9E"><span class="nav-number">4.</span> <span class="nav-text">功能亮點</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Side-Project-%E5%BF%83%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">Side Project 心法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-MVP-%E5%85%88%E8%A1%8C"><span class="nav-number">5.1.</span> <span class="nav-text">1. MVP 先行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%96%84%E7%94%A8-AI"><span class="nav-number">5.2.</span> <span class="nav-text">2. 善用 AI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%87%AA%E5%B7%B1%E7%95%B6%E7%94%A8%E6%88%B6"><span class="nav-number">5.3.</span> <span class="nav-text">3. 自己當用戶</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%B8%8D%E8%A6%81%E6%80%95%E6%8A%80%E8%A1%93%E5%82%B5"><span class="nav-number">5.4.</span> <span class="nav-text">4. 不要怕技術債</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%A8%98%E9%8C%84%E9%81%8E%E7%A8%8B"><span class="nav-number">5.5.</span> <span class="nav-text">5. 記錄過程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%92%8C-AI-Coding-Agent-%E5%8D%94%E4%BD%9C%E7%9A%84%E5%BF%83%E5%BE%97"><span class="nav-number">6.</span> <span class="nav-text">和 AI Coding Agent 協作的心得</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B5%90%E8%AA%9E"><span class="nav-number">7.</span> <span class="nav-text">結語</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MapleCheng</p>
+  <div class="site-description" itemprop="description">MapleCheng 的技術部落格 — 分享軟體開發、AI 應用、.NET Core、React 與 ERP 系統客製化的實戰經驗與技術筆記</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">290</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="author" itemprop="copyrightHolder">MapleCheng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : '[object Object]',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
